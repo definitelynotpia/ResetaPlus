@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   gradient_borders: ^1.0.1
+  gradient_icon: ^2.0.9
 
 dev_dependencies:
   flutter_test:

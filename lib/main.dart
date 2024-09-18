@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
+import 'widgets/custom_checkbox.dart';
 
 void main() {
   runApp(const MainApp());
@@ -158,25 +159,17 @@ class _LandingPageState extends State<LandingPage> {
                                 padding:
                                     const EdgeInsets.only(top: 10, bottom: 20),
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  // crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Expanded(
-                                      child: TextFormField(
-                                        style: TextStyle(
-                                            decoration: _rememberUser
-                                                ? TextDecoration.lineThrough
-                                                : TextDecoration.none),
-                                        decoration: InputDecoration(
-                                            border: InputBorder.none,
-                                            contentPadding: const EdgeInsets.only(top: 13),
-                                            prefixIcon: Checkbox(
-                                                value: _rememberUser,
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    _rememberUser = value!;
-                                                  });
-                                                }),
-                                            hintText: 'Remember me'),
+                                      child: CustomCheckbox(
+                                        rememberUser: _rememberUser,
+                                        onChange: (value) {
+                                          _rememberUser = value;
+                                        },
+                                        icon: Icons.close,
+                                        size: 40,
+                                        iconSize: 30,
                                       ),
                                     ),
                                     const Flexible(
