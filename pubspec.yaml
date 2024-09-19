@@ -21,3 +21,13 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logo_ResetaPlus.png
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: fonts/Montserrat/static/Montserrat-Regular.ttf
+        - asset: fonts/Montserrat/static/Montserrat-Italic.ttf
+          # style: TextStyle(fontStyle: FontStyle.italic)
+          style: italic
+        - asset: fonts/Montserrat/static/Montserrat-Bold.ttf
+          # fontWeight: FontWeight.w700
+          weight: 700

@@ -14,6 +14,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: "Reseta+",
       theme: ThemeData(
+        fontFamily: "Montserrat",
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -245,28 +246,41 @@ class _LandingPageState extends State<LandingPage> {
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Center(
-                        child: Row(
-                          children: [
-                            Text(
-                              "DON'T HAVE AN ACCOUNT?",
-                              style: TextStyle(
-                                fontSize: 16,
+                    // Sign up section
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          // Sign up question prompt
+                          const Text(
+                            "DON'T HAVE AN ACCOUNT?",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          // Sign Up button (redirect to Sign Up form)
+                          Padding(
+                            // separate Text widgets with left padding
+                            padding: const EdgeInsets.only(left: 3),
+                            child: MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {},
+                                child: const Text(
+                                  "SIGN UP NOW",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
                               ),
                             ),
-                            Text(
-                              "SIGN UP NOW",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
