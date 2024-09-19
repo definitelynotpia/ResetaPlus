@@ -37,18 +37,16 @@ class _LandingPageState extends State<LandingPage> {
   final _formKey = GlobalKey<FormState>();
 
   // test login credentials
-  // final String _testEmail = "admin@google.com";
+  final String _testEmail = "admin@gmail.com";
   final String _testPassword = "qwerty";
 
   // store input field values
-  // ignore: unused_field
   String? _email;
-  // ignore: unused_field
   String? _password;
 
-  // Initially password is obscure
+  // Hide password?
   bool _obscureText = true;
-  // Remember user
+  // Remember user?
   bool _rememberUser = false;
 
   // Toggles the password show status
@@ -58,25 +56,22 @@ class _LandingPageState extends State<LandingPage> {
     });
   }
 
-  // ui here
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF8F6F5),
-      body: Form(
-        key: _formKey,
-        // add Column widget to have multiple Widgets
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // expands child of Row/Column/Flex to fill available space
-            Expanded(
+      // add Column widget to have multiple Widgets
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // expands child of Row/Column/Flex to fill available space
+          Expanded(
+            // Login Form start
+            child: Form(
+              key: _formKey,
               child: Padding(
-                padding: EdgeInsets.only(
-                    left: MediaQuery.sizeOf(context).width / 10,
-                    right: MediaQuery.sizeOf(context).width / 10),
-                // Login Form start
+                padding: const EdgeInsets.all(25),
                 child: Column(
                   children: [
                     Padding(
@@ -109,9 +104,11 @@ class _LandingPageState extends State<LandingPage> {
                           // email validation script
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return "Email cannot be empty.";
+                              return "Field cannot be empty.";
+                            } else if (value == _testEmail) {
+                              return null;
                             }
-                            return null;
+                            return "Email is incorrect";
                           },
                           onSaved: (value) => _email = value,
                         ),
@@ -153,7 +150,7 @@ class _LandingPageState extends State<LandingPage> {
                           // password validation script
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return "Password cannot be empty.";
+                              return "Field cannot be empty.";
                             } else if (value == _testPassword) {
                               return null;
                             }
@@ -165,47 +162,39 @@ class _LandingPageState extends State<LandingPage> {
                     ),
                     // row widget to display multiple widgets in the same line
                     Row(
-                      children: [
-                        Expanded(
-                          // Custom checkbox widget with gradient icon
-                          child: CustomCheckbox(
-                            rememberUser: _rememberUser,
-                            onChange: (value) {
-                              _rememberUser = value;
-                            },
-                            icon: Icons.close,
-                          ),
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        // Custom checkbox widget with gradient icon
+                        CustomCheckbox(
+                          rememberUser: _rememberUser,
+                          onChange: (value) {
+                            _rememberUser = value;
+                          },
                         ),
                         // Forgot password container
-                        Expanded(
+                        Padding(
                           // add padding above to align text with checkbox icon
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 18),
-                            // align text to right
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              // make Text widget clickable
-                              child: GestureDetector(
-                                  // forgot password script
-                                  onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              "This is your password: ****")),
-                                    );
-                                  },
-                                  // Forgot password text
-                                  child: const MouseRegion(
-                                    cursor: SystemMouseCursors.click,
-                                    child: Text(
-                                      "Forgot password?",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  )),
-                            ),
-                          ),
+                          padding: const EdgeInsets.only(top: 18),
+                          // align text to right
+                          child: GestureDetector(
+                              // forgot password script
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "Check your email for a link to reset your password.")),
+                                );
+                              },
+                              // Forgot password text
+                              child: const MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: Text(
+                                  "Forgot password?",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              )),
                         ),
                       ],
                     ),
@@ -249,27 +238,35 @@ class _LandingPageState extends State<LandingPage> {
                     // Sign up section
                     Padding(
                       padding: const EdgeInsets.only(top: 24),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
                         children: <Widget>[
                           // Sign up question prompt
                           const Text(
                             "DON'T HAVE AN ACCOUNT?",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 16,
                             ),
                           ),
-                          // Sign Up button (redirect to Sign Up form)
+                          // Sign Up button
                           Padding(
                             // separate Text widgets with left padding
-                            padding: const EdgeInsets.only(left: 3),
+                            padding: const EdgeInsets.only(left: 2),
                             child: MouseRegion(
                               cursor: SystemMouseCursors.click,
                               child: GestureDetector(
-                                onTap: () {},
+                                // go to Sign Up form script
+                                onTap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Redirecting to Sign Up form...")),
+                                  );
+                                },
                                 child: const Text(
                                   "SIGN UP NOW",
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -285,8 +282,8 @@ class _LandingPageState extends State<LandingPage> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
