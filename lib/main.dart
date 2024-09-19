@@ -79,6 +79,7 @@ class _LandingPageState extends State<LandingPage> {
                         padding: EdgeInsets.only(
                             left: MediaQuery.sizeOf(context).width / 10,
                             right: MediaQuery.sizeOf(context).width / 10),
+                        // Reseta+ logo
                         child: Column(
                           children: [
                             Padding(

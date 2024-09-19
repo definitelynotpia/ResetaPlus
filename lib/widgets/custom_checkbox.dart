@@ -33,28 +33,45 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _rememberUser = !_rememberUser;
-          widget.onChange(_rememberUser);
-        });
-      },
-      child: AnimatedContainer(
-        height: widget.size ?? 28,
-        width: widget.size ?? 28,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.fastLinearToSlowEaseIn,
-        child: GradientIcon(
-          icon: _rememberUser ? Icons.check_box : Icons.check_box_outline_blank,
-          gradient: const LinearGradient(
-            colors: [Color(0xffa16ae8), Color(0xff94b9ff)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          // size: 30,
-        ),
-      ),
-    );
+    return Container(
+        transform: Matrix4.translationValues(-9, 0, 0),
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _rememberUser = !_rememberUser;
+                  widget.onChange(_rememberUser);
+                });
+              },
+              child: AnimatedContainer(
+                height: widget.size ?? 28,
+                width: widget.size ?? 28,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.fastLinearToSlowEaseIn,
+                child: GradientIcon(
+                  icon: _rememberUser
+                      ? Icons.check_box
+                      : Icons.check_box_outline_blank,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xffa16ae8), Color(0xff94b9ff)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  size: 30,
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 18),
+              child: Text(
+                "Remember me",
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            )
+          ],
+        ));
   }
 }
