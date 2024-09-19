@@ -72,18 +72,25 @@ class _LandingPageState extends State<LandingPage> {
             // expands child of Row/Column/Flex to fill available space
             Expanded(
               child: Padding(
-                  padding: EdgeInsets.only(
-                      left: MediaQuery.sizeOf(context).width / 10,
-                      right: MediaQuery.sizeOf(context).width / 10),
-                  // Reseta+ logo
-                  child: Column(
-                    children: [
-                      Padding(
-                          padding: const EdgeInsets.only(top: 50, bottom: 50),
-                          child: Image.asset('assets/logo_ResetaPlus.png')),
-                      // Email input field
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
+                padding: EdgeInsets.only(
+                    left: MediaQuery.sizeOf(context).width / 10,
+                    right: MediaQuery.sizeOf(context).width / 10),
+                // Login Form start
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 50, bottom: 50),
+                      // display RESETA+ Logo
+                      child: Image.asset('assets/logo_ResetaPlus.png'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      // make corners of TextFormField rounded
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        // Email input field
                         child: TextFormField(
                           cursorColor: Theme.of(context).colorScheme.primary,
                           decoration: const InputDecoration(
@@ -98,6 +105,7 @@ class _LandingPageState extends State<LandingPage> {
                                 color: Color(0xFFa16ae8),
                               ),
                               label: Text("Email")),
+                          // email validation script
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Email cannot be empty.";
@@ -107,9 +115,14 @@ class _LandingPageState extends State<LandingPage> {
                           onSaved: (value) => _email = value,
                         ),
                       ),
-                      // Password input field
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10, bottom: 10),
+                    ),
+                    // Password input field
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 14),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
                         child: TextFormField(
                           cursorColor: Theme.of(context).colorScheme.primary,
                           decoration: InputDecoration(
@@ -136,6 +149,7 @@ class _LandingPageState extends State<LandingPage> {
                           obscureText: _obscureText,
                           enableSuggestions: false,
                           autocorrect: false,
+                          // password validation script
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Password cannot be empty.";
@@ -147,59 +161,115 @@ class _LandingPageState extends State<LandingPage> {
                           onSaved: (value) => _password = value,
                         ),
                       ),
-                      Padding(
-                          padding: const EdgeInsets.only(top: 10, bottom: 20),
-                          child: Row(
-                            // crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: CustomCheckbox(
-                                  rememberUser: _rememberUser,
-                                  onChange: (value) {
-                                    _rememberUser = value;
+                    ),
+                    // row widget to display multiple widgets in the same line
+                    Row(
+                      children: [
+                        Expanded(
+                          // Custom checkbox widget with gradient icon
+                          child: CustomCheckbox(
+                            rememberUser: _rememberUser,
+                            onChange: (value) {
+                              _rememberUser = value;
+                            },
+                            icon: Icons.close,
+                          ),
+                        ),
+                        // Forgot password container
+                        Expanded(
+                          // add padding above to align text with checkbox icon
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 18),
+                            // align text to right
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              // make Text widget clickable
+                              child: GestureDetector(
+                                  // forgot password script
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "This is your password: ****")),
+                                    );
                                   },
-                                  icon: Icons.close,
-                                  size: 40,
-                                  iconSize: 30,
-                                ),
-                              ),
-                              const Flexible(
-                                fit: FlexFit.tight,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '+100',
-                                      maxLines: 1,
-                                      softWrap: false,
-                                      overflow: TextOverflow.fade,
+                                  // Forgot password text
+                                  child: const MouseRegion(
+                                    cursor: SystemMouseCursors.click,
+                                    child: Text(
+                                      "Forgot password?",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
                                     ),
-                                    Text(
-                                      '18 Sept 2021',
-                                      maxLines: 1,
-                                      softWrap: false,
-                                      overflow: TextOverflow.fade,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text("Processing Data")));
-                          }
-                        },
-                        child: const Text("Login"),
+                                  )),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Login button
+                    Padding(
+                      padding: const EdgeInsets.only(top: 26),
+                      child: Container(
+                        height: 50,
+                        width: 200,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                              colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: ElevatedButton(
+                          // login form script
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text("Successfully logged in!")));
+                            }
+                          },
+                          // content
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent),
+                          child: const Text(
+                            "SIGN IN",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
                       ),
-                    ],
-                  )),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Center(
+                        child: Row(
+                          children: [
+                            Text(
+                              "DON'T HAVE AN ACCOUNT?",
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              "SIGN UP NOW",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

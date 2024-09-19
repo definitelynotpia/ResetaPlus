@@ -3,16 +3,12 @@ import 'package:gradient_icon/gradient_icon.dart';
 
 // ignore: must_be_immutable
 class CustomCheckbox extends StatefulWidget {
-  double? size;
-  double? iconSize;
   Function onChange;
   IconData? icon;
   bool rememberUser;
 
   CustomCheckbox({
     super.key,
-    this.size,
-    this.iconSize,
     required this.onChange,
     this.icon,
     required this.rememberUser,
@@ -34,7 +30,7 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        transform: Matrix4.translationValues(-9, 0, 0),
+        transform: Matrix4.translationValues(-5, 0, 0),
         child: Row(
           children: [
             GestureDetector(
@@ -44,11 +40,9 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
                   widget.onChange(_rememberUser);
                 });
               },
-              child: AnimatedContainer(
-                height: widget.size ?? 28,
-                width: widget.size ?? 28,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.fastLinearToSlowEaseIn,
+              // on checkbox hover, change cursor to click
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
                 child: GradientIcon(
                   icon: _rememberUser
                       ? Icons.check_box
@@ -63,7 +57,7 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
               ),
             ),
             const Padding(
-              padding: EdgeInsets.only(top: 18),
+              padding: EdgeInsets.only(top: 18, left: 3),
               child: Text(
                 "Remember me",
                 style: TextStyle(
