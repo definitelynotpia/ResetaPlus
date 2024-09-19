@@ -61,159 +61,149 @@ class _LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xffF8F6F5),
-        body: Form(
-          key: _formKey,
-          child: Center(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                      child: Container(
-                    constraints: BoxConstraints(
-                      minWidth: MediaQuery.sizeOf(context).width,
-                      maxWidth: MediaQuery.sizeOf(context).width,
-                    ),
-                    child: Padding(
-                        padding: EdgeInsets.only(
-                            left: MediaQuery.sizeOf(context).width / 10,
-                            right: MediaQuery.sizeOf(context).width / 10),
-                        // Reseta+ logo
-                        child: Column(
-                          children: [
-                            Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 50, bottom: 50),
-                                child:
-                                    Image.asset('assets/logo_ResetaPlus.png')),
-                            // Email input field
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: TextFormField(
-                                cursorColor:
-                                    Theme.of(context).colorScheme.primary,
-                                decoration: const InputDecoration(
-                                    border: GradientOutlineInputBorder(
-                                        gradient: LinearGradient(colors: [
-                                          Color(0xffa16ae8),
-                                          Color(0xff94b9ff)
-                                        ]),
-                                        width: 2.0),
-                                    prefixIcon: Icon(
-                                      Icons.person,
-                                      color: Color(0xFFa16ae8),
-                                    ),
-                                    label: Text("Email")),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "Email cannot be empty.";
-                                  }
-                                  return null;
-                                },
-                                onSaved: (value) => _email = value,
+      backgroundColor: const Color(0xffF8F6F5),
+      body: Form(
+        key: _formKey,
+        // add Column widget to have multiple Widgets
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // expands child of Row/Column/Flex to fill available space
+            Expanded(
+              child: Padding(
+                  padding: EdgeInsets.only(
+                      left: MediaQuery.sizeOf(context).width / 10,
+                      right: MediaQuery.sizeOf(context).width / 10),
+                  // Reseta+ logo
+                  child: Column(
+                    children: [
+                      Padding(
+                          padding: const EdgeInsets.only(top: 50, bottom: 50),
+                          child: Image.asset('assets/logo_ResetaPlus.png')),
+                      // Email input field
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: TextFormField(
+                          cursorColor: Theme.of(context).colorScheme.primary,
+                          decoration: const InputDecoration(
+                              border: GradientOutlineInputBorder(
+                                  gradient: LinearGradient(colors: [
+                                    Color(0xffa16ae8),
+                                    Color(0xff94b9ff)
+                                  ]),
+                                  width: 2.0),
+                              prefixIcon: Icon(
+                                Icons.person,
+                                color: Color(0xFFa16ae8),
                               ),
+                              label: Text("Email")),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Email cannot be empty.";
+                            }
+                            return null;
+                          },
+                          onSaved: (value) => _email = value,
+                        ),
+                      ),
+                      // Password input field
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 10),
+                        child: TextFormField(
+                          cursorColor: Theme.of(context).colorScheme.primary,
+                          decoration: InputDecoration(
+                            border: const GradientOutlineInputBorder(
+                                gradient: LinearGradient(colors: [
+                                  Color(0xffa16ae8),
+                                  Color(0xff94b9ff)
+                                ]),
+                                width: 2.0),
+                            label: const Text("Password"),
+                            prefixIcon: const Icon(
+                              Icons.lock,
+                              color: Color(0xFFa16ae8),
                             ),
-                            // Password input field
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 10, bottom: 10),
-                              child: TextFormField(
-                                cursorColor:
-                                    Theme.of(context).colorScheme.primary,
-                                decoration: InputDecoration(
-                                  border: const GradientOutlineInputBorder(
-                                      gradient: LinearGradient(colors: [
-                                        Color(0xffa16ae8),
-                                        Color(0xff94b9ff)
-                                      ]),
-                                      width: 2.0),
-                                  label: const Text("Password"),
-                                  prefixIcon: const Icon(
-                                    Icons.lock,
-                                    color: Color(0xFFa16ae8),
-                                  ),
-                                  suffixIcon: IconButton(
-                                      icon: Icon(
-                                        _obscureText
-                                            ? Icons.visibility
-                                            : Icons.visibility_off,
-                                        color: const Color(0xFFa16ae8),
-                                      ),
-                                      onPressed: _toggleObscuredText),
+                            suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureText
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: const Color(0xFFa16ae8),
                                 ),
-                                obscureText: _obscureText,
-                                enableSuggestions: false,
-                                autocorrect: false,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "Password cannot be empty.";
-                                  } else if (value == _testPassword) {
-                                    return null;
-                                  }
-                                  return "Password is incorrect.";
-                                },
-                                onSaved: (value) => _password = value,
+                                onPressed: _toggleObscuredText),
+                          ),
+                          obscureText: _obscureText,
+                          enableSuggestions: false,
+                          autocorrect: false,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Password cannot be empty.";
+                            } else if (value == _testPassword) {
+                              return null;
+                            }
+                            return "Password is incorrect.";
+                          },
+                          onSaved: (value) => _password = value,
+                        ),
+                      ),
+                      Padding(
+                          padding: const EdgeInsets.only(top: 10, bottom: 20),
+                          child: Row(
+                            // crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: CustomCheckbox(
+                                  rememberUser: _rememberUser,
+                                  onChange: (value) {
+                                    _rememberUser = value;
+                                  },
+                                  icon: Icons.close,
+                                  size: 40,
+                                  iconSize: 30,
+                                ),
                               ),
-                            ),
-                            Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 10, bottom: 20),
-                                child: Row(
-                                  // crossAxisAlignment: CrossAxisAlignment.center,
+                              const Flexible(
+                                fit: FlexFit.tight,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Expanded(
-                                      child: CustomCheckbox(
-                                        rememberUser: _rememberUser,
-                                        onChange: (value) {
-                                          _rememberUser = value;
-                                        },
-                                        icon: Icons.close,
-                                        size: 40,
-                                        iconSize: 30,
-                                      ),
+                                    Text(
+                                      '+100',
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      overflow: TextOverflow.fade,
                                     ),
-                                    const Flexible(
-                                      fit: FlexFit.tight,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            '+100',
-                                            maxLines: 1,
-                                            softWrap: false,
-                                            overflow: TextOverflow.fade,
-                                          ),
-                                          Text(
-                                            '18 Sept 2021',
-                                            maxLines: 1,
-                                            softWrap: false,
-                                            overflow: TextOverflow.fade,
-                                          ),
-                                        ],
-                                      ),
+                                    Text(
+                                      '18 Sept 2021',
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      overflow: TextOverflow.fade,
                                     ),
                                   ],
-                                )),
-                            ElevatedButton(
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text("Processing Data")));
-                                }
-                              },
-                              child: const Text("Login"),
-                            ),
-                          ],
-                        )),
-                  ))
-                ]),
-          ),
-        ));
+                                ),
+                              ),
+                            ],
+                          )),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Processing Data")));
+                          }
+                        },
+                        child: const Text("Login"),
+                      ),
+                    ],
+                  )),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
