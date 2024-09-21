@@ -1,0 +1,21 @@
+scaffold
+    form
+        padding
+            containedbox
+                center
+                    column
+                        sizedbox
+                            image.asset - logo
+                        padding
+                            textformfield - email
+                        padding
+                            textformfield - password
+                        wrap
+                            customcheckbox - remember me
+                            mouseregion
+                                gesturedetector
+                                    text - forgot password
+                        elevatedbutton - sign in
+                        wrap
+                            text
+                            text - sign up now
