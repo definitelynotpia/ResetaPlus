@@ -1,21 +1,20 @@
-scaffold
-    form
-        padding
-            containedbox
-                center
-                    column
-                        sizedbox
-                            image.asset - logo
-                        padding
-                            textformfield - email
-                        padding
-                            textformfield - password
-                        wrap
-                            customcheckbox - remember me
-                            mouseregion
-                                gesturedetector
-                                    text - forgot password
-                        elevatedbutton - sign in
-                        wrap
-                            text
-                            text - sign up now
+Scaffold
+    Safearea 
+        Center - center child element
+            Column
+                SizedBox - set height constraint to make responsive logo
+                    Image.asset
+                Form - sign in form
+                    Column - allows multiple widgets
+                        TextFormField - email input
+                        TextFormField - password input
+                        Wrap - responsive row with 2 columns
+                            CustomCheckbox - "Remember me"
+                            MouseRegion - on hover, change look of mouse pointer
+                                GestureDetector - make Text clickable
+                                    Text - "Forgot password?"
+                        Container - make gradient background
+                            ElevatedButton - call sign in function
+                Wrap - responsive row with 2 columns
+                    Text - "Don't have an account?"
+                    Text - "Sign up now", display register_page.dart
