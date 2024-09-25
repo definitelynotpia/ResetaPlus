@@ -7,6 +7,7 @@ import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
 import '../widgets/custom_checkbox.dart';
 import './register_page.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
 class LoginPage extends StatefulWidget {
@@ -54,10 +55,10 @@ Future<void> loginUser() async {
 
   try {
     // Create a connection to the database
-    final _conn = await createConnection(); 
+    final conn = await createConnection(); 
 
     // Fetch accounts and keys in one go using parameterized query
-    var _result = await _conn.execute('''
+    var result = await conn.execute('''
       SELECT a.*, k.encryption_key, k.initialization_vector 
       FROM reseta_plus.patient_accounts a
       JOIN reseta_plus.patient_account_keys k ON a.patient_id = k.patient_key_id
@@ -65,17 +66,17 @@ Future<void> loginUser() async {
     ''', {'email': _email}); 
 
     // Check if any account was found
-    if (_result.rows.isNotEmpty) {
+    if (result.rows.isNotEmpty) {
       // Get the first row of patient account data
-      Map _patientAccountData = _result.rows.first.assoc();
+      Map patientAccountData = result.rows.first.assoc();
 
       // Verify the provided password against the stored password details
       if (verifyPassword(
           _password!,
-          _patientAccountData['password'],
-          _patientAccountData['salt'],
-          encrypt.Key(base64.decode(_patientAccountData['encryption_key'])),
-          encrypt.IV(base64.decode(_patientAccountData['initialization_vector'])))) {
+          patientAccountData['password'],
+          patientAccountData['salt'],
+          encrypt.Key(base64.decode(patientAccountData['encryption_key'])),
+          encrypt.IV(base64.decode(patientAccountData['initialization_vector'])))) {
 
         // Show success message if login is successful
         ScaffoldMessenger.of(context).showSnackBar(
@@ -95,7 +96,7 @@ Future<void> loginUser() async {
     }
 
     // Close the database connection
-    await _conn.close();
+    await conn.close();
   } catch (e) {
     // Print error details to the console
     debugPrint("Error: $e");
@@ -152,10 +153,13 @@ Future<void> loginUser() async {
                               color: Color(0xFFa16ae8),
                             ),
                             label: Text("Email")),
+                            autofillHints: const [AutofillHints.email],
                         // Email validation script
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
+                          } else if (!EmailValidator.validate(value)){
+                            return "Please input a valid email address.";
                           }
                         },
                         onSaved: (value) => _email = value,

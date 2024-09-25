@@ -8,6 +8,7 @@ import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
 import 'package:resetaplus/pages/login_page.dart';
 import '../widgets/custom_checkbox.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
 final _encryptionKey = encrypt.Key.fromLength(32); // 32 bytes for AES-256
@@ -44,6 +45,40 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
+  Future<bool> emailExists(String email) async {
+    try{
+      // Create a connection to the database
+      final conn = await createConnection();
+
+      // Execute a query to count matching emails
+      var results = await conn.execute(
+        'SELECT COUNT(*) AS count FROM patient_accounts WHERE email = :email',
+        {'email': _email},
+      );
+
+      // Fetch the count from the result
+      Map count = results.rows.first.assoc();
+
+      // Close the database connection
+      await conn.close();
+
+      // Return true if count is greater than 0, otherwise false
+      return int.parse(count['count']) > 0;
+      
+    } catch (e) {
+      // Print error details to the console
+      debugPrint("Error: $e");
+
+      // Show error message if an exception occurs during the process
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email Validation failed. Please try again.")),
+      );
+
+      return false;
+    }
+  }
+
+
   Future<void> registerUser() async {
     // Check if the form is valid
     if (_formKey.currentState!.validate()) {
@@ -56,42 +91,51 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       // Create a connection to the database
-      final _conn = await createConnection();
+      final conn = await createConnection();
 
       // Generate a unique salt for hashing the password
-      String _salt = generateSalt();
+      String salt = generateSalt();
 
       // Hash the user's password with the generated salt
-      String _hashedPassword = hashPassword(_password!, _salt);
+      String hashedPassword = hashPassword(_password!, salt);
 
       // Encrypt the hashed password for secure storage
-      String _encryptedPassword = encryptPassword(_hashedPassword);
+      String encryptedPassword = encryptPassword(hashedPassword);
 
-      // Insert the new user into the patient_accounts table
-      await _conn.execute(
-        'INSERT INTO patient_accounts (username, email, password, salt) VALUES (:username, :email, :password, :salt)',
-        {'username' : _username, 'email' : _email, 'password' : _encryptedPassword, 'salt' : _salt},
-      );
+      // Check if the email exists
+      if (await emailExists(_email!)) {
+        debugPrint("Email already exists.");
+        // Handle the case where the email is already in use
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Email already in use. Please use another.")),
+        );
+      } else {
+        // Insert the new user into the patient_accounts table
+        await conn.execute(
+          'INSERT INTO patient_accounts (username, email, password, salt) VALUES (:username, :email, :password, :salt)',
+          {'username' : _username, 'email' : _email, 'password' : encryptedPassword, 'salt' : salt},
+        );
 
-      // Insert the encryption keys into the patient_account_keys table
-      await _conn.execute(
-        'INSERT INTO patient_account_keys (encryption_key, initialization_vector, username) VALUES (:encryption_key, :initialization_vector, :username)',
-        {'encryption_key' : base64.encode(_encryptionKey.bytes), 'initialization_vector' : base64.encode(_initializationVector.bytes), 'username' : _username},
-      );
+        // Insert the encryption keys into the patient_account_keys table
+        await conn.execute(
+          'INSERT INTO patient_account_keys (encryption_key, initialization_vector, username) VALUES (:encryption_key, :initialization_vector, :username)',
+          {'encryption_key' : base64.encode(_encryptionKey.bytes), 'initialization_vector' : base64.encode(_initializationVector.bytes), 'username' : _username},
+        );
 
-      // Show a success message to the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Successfully registered!")),
-      );
+        // Show a success message to the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Successfully registered!")),
+        );
 
-      // Navigate to the login page after successful registration
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage(title: "Login")),
-      );
+        // Navigate to the login page after successful registration
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage(title: "Login")),
+        );
+      }
 
       // Close the database connection
-      await _conn.close(); 
+      await conn.close(); 
     } catch (e) {
       // Print error details to the console
       debugPrint("Error: $e");
@@ -105,24 +149,24 @@ class _RegisterPageState extends State<RegisterPage> {
 
   String encryptPassword(String password) {
     // Create an encrypter instance using the AES algorithm and the specified key
-    final _encrypter = encrypt.Encrypter(encrypt.AES(_encryptionKey));
+    final encrypter = encrypt.Encrypter(encrypt.AES(_encryptionKey));
 
     // Encrypt the provided password using the encrypter and the specified initialization vector (IV)
-    final _encryptedPassword = _encrypter.encrypt(password, iv: _initializationVector);
+    final encryptedPassword = encrypter.encrypt(password, iv: _initializationVector);
 
     // Return the encrypted password as a base64-encoded string for storage
-    return _encryptedPassword.base64;
+    return encryptedPassword.base64;
   }
 
   String generateSalt([int length = 16]) {
     // Create a secure random number generator
-    final _random = Random.secure();
+    final random = Random.secure();
 
     // Define the characters that can be used in the salt
-    const _characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
     // Generate a random salt by selecting characters from the set
-    return List.generate(length, (index) => _characters[_random.nextInt(_characters.length)]).join();
+    return List.generate(length, (index) => characters[random.nextInt(characters.length)]).join();
   }
 
   @override
@@ -193,10 +237,13 @@ class _RegisterPageState extends State<RegisterPage> {
                               color: Color(0xFFa16ae8),
                             ),
                             label: Text("Email")),
+                            autofillHints: const [AutofillHints.email],
                         // Email validation script
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
+                          }else if (!EmailValidator.validate(value)){
+                            return "Please input a valid email address.";
                           }
                         },
                         onSaved: (value) => _email = value,
