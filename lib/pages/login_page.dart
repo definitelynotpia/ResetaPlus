@@ -1,9 +1,14 @@
 // ignore_for_file: unused_field
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
+import 'package:resetaplus/main.dart';
 import '../widgets/custom_checkbox.dart';
 import './register_page.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.title});
@@ -37,6 +42,72 @@ class _LoginPageState extends State<LoginPage> {
       _obscureText = !_obscureText;
     });
   }
+
+Future<void> loginUser() async {
+  // Check if the form is valid
+  if (_formKey.currentState!.validate()) {
+    // Save the form inputs
+    _formKey.currentState!.save(); 
+  } else {
+    // Exit early if the form is not valid
+    return; 
+  }
+
+  try {
+    // Create a connection to the database
+    final conn = await createConnection(); 
+
+    // Fetch accounts and keys in one go using parameterized query
+    var result = await conn.execute('''
+      SELECT a.*, k.encryption_key, k.initialization_vector 
+      FROM reseta_plus.patient_accounts a
+      JOIN reseta_plus.patient_account_keys k ON a.patient_id = k.patient_key_id
+      WHERE a.email = :email
+    ''', {'email': _email}); 
+
+    // Check if any account was found
+    if (result.rows.isNotEmpty) {
+      // Get the first row of patient account data
+      Map patientAccountData = result.rows.first.assoc();
+
+      // Verify the provided password against the stored password details
+      if (verifyPassword(
+          _password!,
+          patientAccountData['password'],
+          patientAccountData['salt'],
+          encrypt.Key(base64.decode(patientAccountData['encryption_key'])),
+          encrypt.IV(base64.decode(patientAccountData['initialization_vector'])))) {
+
+        // Show success message if login is successful
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Successfully logged in!")),
+        );
+      } else {
+        // Show failure message if password verification fails
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Login failed. Please try again.")),
+        );
+      }
+    } else {
+      // Show failure message if no account is found for the email
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login failed. Please try again.")),
+      );
+    }
+
+    // Close the database connection
+    await conn.close();
+  } catch (e) {
+    // Print error details to the console
+    debugPrint("Error: $e");
+
+    // Show error message if an exception occurs during the process
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Login error. Please try again.")),
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -82,14 +153,14 @@ class _LoginPageState extends State<LoginPage> {
                               color: Color(0xFFa16ae8),
                             ),
                             label: Text("Email")),
+                            autofillHints: const [AutofillHints.email],
                         // Email validation script
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
-                          } else if (value == _testEmail) {
-                            return null;
+                          } else if (!EmailValidator.validate(value)){
+                            return "Please input a valid email address.";
                           }
-                          return "Email is incorrect";
                         },
                         onSaved: (value) => _email = value,
                       ),
@@ -125,10 +196,7 @@ class _LoginPageState extends State<LoginPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
-                          } else if (value == _testPassword) {
-                            return null;
                           }
-                          return "Password is incorrect.";
                         },
                         onSaved: (value) => _password = value,
                       ),
@@ -187,14 +255,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         child: ElevatedButton(
                           // login form script
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text("Successfully logged in!")));
-                            }
-                          },
+                          onPressed: loginUser,
                           // content
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,

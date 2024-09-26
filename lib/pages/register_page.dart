@@ -1,9 +1,18 @@
 // ignore_for_file: unused_field
 
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
+import 'package:resetaplus/main.dart';
 import 'package:resetaplus/pages/login_page.dart';
 import '../widgets/custom_checkbox.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
+
+final _encryptionKey = encrypt.Key.fromLength(32); // 32 bytes for AES-256
+final _initializationVector = encrypt.IV.fromLength(16); // 16 bytes for AES
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key, required this.title});
@@ -17,11 +26,6 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   // generate global key, uniquely identify Form widget and allow form validation
   final _formKey = GlobalKey<FormState>();
-
-  // test login credentials
-  final String _testUsername = "Admin";
-  final String _testEmail = "admin@gmail.com";
-  final String _testPassword = "qwerty";
 
   // store input field values
   String? _username;
@@ -39,6 +43,130 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() {
       _obscureText = !_obscureText;
     });
+  }
+
+  Future<bool> emailExists(String email) async {
+    try{
+      // Create a connection to the database
+      final conn = await createConnection();
+
+      // Execute a query to count matching emails
+      var results = await conn.execute(
+        'SELECT COUNT(*) AS count FROM patient_accounts WHERE email = :email',
+        {'email': _email},
+      );
+
+      // Fetch the count from the result
+      Map count = results.rows.first.assoc();
+
+      // Close the database connection
+      await conn.close();
+
+      // Return true if count is greater than 0, otherwise false
+      return int.parse(count['count']) > 0;
+      
+    } catch (e) {
+      // Print error details to the console
+      debugPrint("Error: $e");
+
+      // Show error message if an exception occurs during the process
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email Validation failed. Please try again.")),
+      );
+
+      return false;
+    }
+  }
+
+
+  Future<void> registerUser() async {
+    // Check if the form is valid
+    if (_formKey.currentState!.validate()) {
+      // Save the form inputs
+      _formKey.currentState!.save(); 
+    } else {
+      // Exit early if the form is not valid
+      return; 
+    }
+
+    try {
+      // Create a connection to the database
+      final conn = await createConnection();
+
+      // Generate a unique salt for hashing the password
+      String salt = generateSalt();
+
+      // Hash the user's password with the generated salt
+      String hashedPassword = hashPassword(_password!, salt);
+
+      // Encrypt the hashed password for secure storage
+      String encryptedPassword = encryptPassword(hashedPassword);
+
+      // Check if the email exists
+      if (await emailExists(_email!)) {
+        debugPrint("Email already exists.");
+        // Handle the case where the email is already in use
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Email already in use. Please use another.")),
+        );
+      } else {
+        // Insert the new user into the patient_accounts table
+        await conn.execute(
+          'INSERT INTO patient_accounts (username, email, password, salt) VALUES (:username, :email, :password, :salt)',
+          {'username' : _username, 'email' : _email, 'password' : encryptedPassword, 'salt' : salt},
+        );
+
+        // Insert the encryption keys into the patient_account_keys table
+        await conn.execute(
+          'INSERT INTO patient_account_keys (encryption_key, initialization_vector, username) VALUES (:encryption_key, :initialization_vector, :username)',
+          {'encryption_key' : base64.encode(_encryptionKey.bytes), 'initialization_vector' : base64.encode(_initializationVector.bytes), 'username' : _username},
+        );
+
+        // Show a success message to the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Successfully registered!")),
+        );
+
+        // Navigate to the login page after successful registration
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage(title: "Login")),
+        );
+      }
+
+      // Close the database connection
+      await conn.close(); 
+    } catch (e) {
+      // Print error details to the console
+      debugPrint("Error: $e");
+
+      // Show error message if an exception occurs during the process
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Registration failed. Please try again.")),
+      );
+    }
+  }
+
+  String encryptPassword(String password) {
+    // Create an encrypter instance using the AES algorithm and the specified key
+    final encrypter = encrypt.Encrypter(encrypt.AES(_encryptionKey));
+
+    // Encrypt the provided password using the encrypter and the specified initialization vector (IV)
+    final encryptedPassword = encrypter.encrypt(password, iv: _initializationVector);
+
+    // Return the encrypted password as a base64-encoded string for storage
+    return encryptedPassword.base64;
+  }
+
+  String generateSalt([int length = 16]) {
+    // Create a secure random number generator
+    final random = Random.secure();
+
+    // Define the characters that can be used in the salt
+    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    // Generate a random salt by selecting characters from the set
+    return List.generate(length, (index) => characters[random.nextInt(characters.length)]).join();
   }
 
   @override
@@ -89,10 +217,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
-                          } else if (value == _testUsername) {
-                            return null;
                           }
-                          return "Email is incorrect";
                         },
                         onSaved: (value) => _username = value,
                       ),
@@ -112,14 +237,14 @@ class _RegisterPageState extends State<RegisterPage> {
                               color: Color(0xFFa16ae8),
                             ),
                             label: Text("Email")),
+                            autofillHints: const [AutofillHints.email],
                         // Email validation script
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
-                          } else if (value == _testEmail) {
-                            return null;
+                          }else if (!EmailValidator.validate(value)){
+                            return "Please input a valid email address.";
                           }
-                          return "Email is incorrect";
                         },
                         onSaved: (value) => _email = value,
                       ),
@@ -155,10 +280,10 @@ class _RegisterPageState extends State<RegisterPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
-                          } else if (value == _testPassword) {
+                          }else{
+                            _password = value;
                             return null;
                           }
-                          return "Password is incorrect.";
                         },
                         onSaved: (value) => _password = value,
                       ),
@@ -186,10 +311,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
-                          } else if (value == _testPassword) {
-                            return null;
+                          } 
+                          if (value != _password) { // Check if it matches the password
+                            return "Passwords do not match.";
                           }
-                          return "Password is incorrect.";
+                          return null;
                         },
                         onSaved: (value) => _confirmPassword = value,
                       ),
@@ -248,14 +374,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         child: ElevatedButton(
                           // login form script
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text("Successfully logged in!")));
-                            }
-                          },
+                          onPressed: registerUser,
                           // content
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
