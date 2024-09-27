@@ -84,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Successfully logged in!")),
             );
+            // Navigate to dashboard
           } else {
             // Show failure message if password verification fails
             ScaffoldMessenger.of(context).showSnackBar(
@@ -132,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: MediaQuery.of(context).size.height / 5,
                 child: Image.asset('assets/logo_ResetaPlus.png'),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height / 10),
+              SizedBox(height: MediaQuery.of(context).size.height / 6.5),
               // Sign in form
               ConstrainedBox(
                 constraints: BoxConstraints(
@@ -282,7 +283,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height / 10),
+              SizedBox(height: MediaQuery.of(context).size.height / 6.5),
               Wrap(
                 alignment: WrapAlignment.center,
                 spacing: 3,
