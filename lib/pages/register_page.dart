@@ -45,8 +45,8 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
-  Future<bool> emailExists(String email) async {
-    try{
+  Future<bool> emailExists(String email, BuildContext context) async {
+    try {
       // Create a connection to the database
       final conn = await createConnection();
 
@@ -64,29 +64,31 @@ class _RegisterPageState extends State<RegisterPage> {
 
       // Return true if count is greater than 0, otherwise false
       return int.parse(count['count']) > 0;
-      
     } catch (e) {
       // Print error details to the console
       debugPrint("Error: $e");
 
-      // Show error message if an exception occurs during the process
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email Validation failed. Please try again.")),
-      );
+      // Check if Widget is mounted in context
+      if (context.mounted) {
+        // Show error message if an exception occurs during the process
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Email Validation failed. Please try again.")),
+        );
+      }
 
       return false;
     }
   }
 
-
-  Future<void> registerUser() async {
+  Future<void> registerUser(BuildContext context) async {
     // Check if the form is valid
     if (_formKey.currentState!.validate()) {
       // Save the form inputs
-      _formKey.currentState!.save(); 
+      _formKey.currentState!.save();
     } else {
       // Exit early if the form is not valid
-      return; 
+      return;
     }
 
     try {
@@ -102,48 +104,74 @@ class _RegisterPageState extends State<RegisterPage> {
       // Encrypt the hashed password for secure storage
       String encryptedPassword = encryptPassword(hashedPassword);
 
-      // Check if the email exists
-      if (await emailExists(_email!)) {
-        debugPrint("Email already exists.");
-        // Handle the case where the email is already in use
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Email already in use. Please use another.")),
-        );
-      } else {
-        // Insert the new user into the patient_accounts table
-        await conn.execute(
-          'INSERT INTO patient_accounts (username, email, password, salt) VALUES (:username, :email, :password, :salt)',
-          {'username' : _username, 'email' : _email, 'password' : encryptedPassword, 'salt' : salt},
-        );
+      // Check if Widget is mounted in context
+      if (context.mounted) {
+        // Check if the email exists
+        if (await emailExists(_email!, context)) {
+          debugPrint("Email already exists.");
 
-        // Insert the encryption keys into the patient_account_keys table
-        await conn.execute(
-          'INSERT INTO patient_account_keys (encryption_key, initialization_vector, username) VALUES (:encryption_key, :initialization_vector, :username)',
-          {'encryption_key' : base64.encode(_encryptionKey.bytes), 'initialization_vector' : base64.encode(_initializationVector.bytes), 'username' : _username},
-        );
+          // Check if Widget is mounted in context
+          if (context.mounted) {
+            // Handle the case where the email is already in use
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text("Email already in use. Please use another.")),
+            );
+          }
+        } else {
+          // Insert the new user into the patient_accounts table
+          await conn.execute(
+            'INSERT INTO patient_accounts (username, email, password, salt) VALUES (:username, :email, :password, :salt)',
+            {
+              'username': _username,
+              'email': _email,
+              'password': encryptedPassword,
+              'salt': salt
+            },
+          );
 
-        // Show a success message to the user
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Successfully registered!")),
-        );
+          // Insert the encryption keys into the patient_account_keys table
+          await conn.execute(
+            'INSERT INTO patient_account_keys (encryption_key, initialization_vector, username) VALUES (:encryption_key, :initialization_vector, :username)',
+            {
+              'encryption_key': base64.encode(_encryptionKey.bytes),
+              'initialization_vector':
+                  base64.encode(_initializationVector.bytes),
+              'username': _username
+            },
+          );
 
-        // Navigate to the login page after successful registration
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage(title: "Login")),
-        );
+          // Check if Widget is mounted in context
+          if (context.mounted) {
+            // Show a success message to the user
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Successfully registered!")),
+            );
+
+            // Navigate to the login page after successful registration
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const LoginPage(title: "Login")),
+            );
+          }
+        }
       }
 
       // Close the database connection
-      await conn.close(); 
+      await conn.close();
     } catch (e) {
       // Print error details to the console
       debugPrint("Error: $e");
 
-      // Show error message if an exception occurs during the process
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Registration failed. Please try again.")),
-      );
+      // Check if Widget is mounted in context
+      if (context.mounted) {
+        // Show error message if an exception occurs during the process
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Registration failed. Please try again.")),
+        );
+      }
     }
   }
 
@@ -152,7 +180,8 @@ class _RegisterPageState extends State<RegisterPage> {
     final encrypter = encrypt.Encrypter(encrypt.AES(_encryptionKey));
 
     // Encrypt the provided password using the encrypter and the specified initialization vector (IV)
-    final encryptedPassword = encrypter.encrypt(password, iv: _initializationVector);
+    final encryptedPassword =
+        encrypter.encrypt(password, iv: _initializationVector);
 
     // Return the encrypted password as a base64-encoded string for storage
     return encryptedPassword.base64;
@@ -163,10 +192,13 @@ class _RegisterPageState extends State<RegisterPage> {
     final random = Random.secure();
 
     // Define the characters that can be used in the salt
-    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
     // Generate a random salt by selecting characters from the set
-    return List.generate(length, (index) => characters[random.nextInt(characters.length)]).join();
+    return List.generate(
+            length, (index) => characters[random.nextInt(characters.length)])
+        .join();
   }
 
   @override
@@ -238,12 +270,12 @@ class _RegisterPageState extends State<RegisterPage> {
                               color: Color(0xFFa16ae8),
                             ),
                             label: Text("Email")),
-                            autofillHints: const [AutofillHints.email],
+                        autofillHints: const [AutofillHints.email],
                         // Email validation script
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
-                          }else if (!EmailValidator.validate(value)){
+                          } else if (!EmailValidator.validate(value)) {
                             return "Please input a valid email address.";
                           }
                           return null;
@@ -282,7 +314,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
-                          }else{
+                          } else {
                             _password = value;
                             return null;
                           }
@@ -313,8 +345,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
-                          } 
-                          if (value != _password) { // Check if it matches the password
+                          }
+                          if (value != _password) {
+                            // Check if it matches the password
                             return "Passwords do not match.";
                           }
                           return null;
@@ -376,7 +409,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         child: ElevatedButton(
                           // login form script
-                          onPressed: registerUser,
+                          onPressed: () => registerUser(context),
                           // content
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
