@@ -161,6 +161,7 @@ Future<void> loginUser() async {
                           } else if (!EmailValidator.validate(value)){
                             return "Please input a valid email address.";
                           }
+                          return null;
                         },
                         onSaved: (value) => _email = value,
                       ),
@@ -197,6 +198,7 @@ Future<void> loginUser() async {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
                           }
+                          return null;
                         },
                         onSaved: (value) => _password = value,
                       ),

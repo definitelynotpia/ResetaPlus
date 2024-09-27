@@ -218,6 +218,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           if (value == null || value.isEmpty) {
                             return "Field cannot be empty.";
                           }
+                          return null;
                         },
                         onSaved: (value) => _username = value,
                       ),
@@ -245,6 +246,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           }else if (!EmailValidator.validate(value)){
                             return "Please input a valid email address.";
                           }
+                          return null;
                         },
                         onSaved: (value) => _email = value,
                       ),
