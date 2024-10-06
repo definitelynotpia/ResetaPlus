@@ -4,7 +4,9 @@ import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
 import 'package:mysql_client/mysql_client.dart';
-import 'pages/login_page.dart';
+//import 'pages/login_page.dart';
+import 'pages/dashboard_page.dart';
+
 
 void main() {
   runApp(const MainApp());
@@ -63,7 +65,7 @@ class MainApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // load Login page on startup
-      home: const LoginPage(title: "Login"),
+      home: const DashboardPage(title: "Login"),
     );
   }
 }
