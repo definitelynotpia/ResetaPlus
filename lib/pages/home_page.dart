@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../widgets/custom_iconbutton.dart';
 
 import './dashboard_page.dart';
 import './store_page.dart';
@@ -15,7 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  double iconSize = 30;
+  double iconSize = 40;
 
   int currentTab = 0;
 
@@ -71,8 +70,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF8F6F5),
-
-      // app bar (page name)
+      extendBody: true,
 
       // body
       body: PageStorage(
@@ -85,101 +83,90 @@ class _HomePageState extends State<HomePage> {
         children: [
           // bottom appbar gradient background
           Container(
-            height: 60,
+            height: MediaQuery.of(context).size.height / 9,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                   colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-              borderRadius: BorderRadius.circular(5),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
 
           // bottom navbar
-          BottomNavigationBar(
-            backgroundColor: Colors.transparent,
-            // navbar index
-            currentIndex: currentTab,
-            onTap: (int index) {
-              setState(() {
-                currentTab = index;
-                currentPage = pages[index];
-              });
-            },
-            // navbar buttons
-            items: const <BottomNavigationBarItem>[
-              // medicine search page
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.medication,
-                  color: Color(0xffF8F6F5),
+          SizedBox(
+            height: MediaQuery.of(context).size.height / 9,
+            child: BottomNavigationBar(
+              backgroundColor: Colors.transparent,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              type: BottomNavigationBarType.fixed,
+              elevation: 0,
+
+              // navbar index
+              currentIndex: currentTab,
+              onTap: (int index) {
+                setState(() {
+                  currentTab = index;
+                  currentPage = pages[index];
+                });
+              },
+
+              // navbar buttons
+              items: <BottomNavigationBarItem>[
+                // medicine search page
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.medication,
+                    color: const Color(0xffF8F6F5),
+                    size: MediaQuery.of(context).size.width / 15,
+                  ),
+                  label: "Medicine Lookup",
+                  tooltip: "Medicine Lookup",
                 ),
-                label: "Medicine Lookup",
-                tooltip: "Medicine Lookup",
-              ),
-              // pharmacy locator map page
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.store,
-                  color: Color(0xffF8F6F5),
+                // pharmacy locator map page
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.store,
+                    color: const Color(0xffF8F6F5),
+                    size: MediaQuery.of(context).size.width / 15,
+                  ),
+                  label: "Pharmacy Locator",
+                  tooltip: "Pharmacy Locator",
                 ),
-                label: "Pharmacy Locator",
-                tooltip: "Pharmacy Locator",
-              ),
-              // dashboard home page
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.home,
-                  color: Color(0xffF8F6F5),
+                // dashboard home page
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.home,
+                    color: const Color(0xffF8F6F5),
+                    size: MediaQuery.of(context).size.width / 15,
+                  ),
+                  label: "Home",
+                  tooltip: "Home",
                 ),
-                label: "Home",
-                tooltip: "Home",
-              ),
-              // medical history page (prescriptions)
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.history,
-                  color: Color(0xffF8F6F5),
+                // medical history page (prescriptions)
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.history,
+                    color: const Color(0xffF8F6F5),
+                    size: MediaQuery.of(context).size.width / 15,
+                  ),
+                  label: "Medical History",
+                  tooltip: "Medical History",
                 ),
-                label: "Medical History",
-                tooltip: "Medical History",
-              ),
-              // user profile page
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.person,
-                  color: Color(0xffF8F6F5),
+                // user profile page
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.person,
+                    color: const Color(0xffF8F6F5),
+                    size: MediaQuery.of(context).size.width / 15,
+                  ),
+                  label: "Profile",
+                  tooltip: "Profile",
                 ),
-                label: "Profile",
-                tooltip: "Profile",
-              ),
-            ],
-          )
+              ],
+            ),
+          ),
         ],
       ),
-
-      // QR button for current prescription
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: implement qrcode generator package
-        },
-        tooltip: "Home",
-        child: Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Icon(
-            Icons.qr_code_2,
-            // Icons.home,
-            size: iconSize + 20,
-          ),
-        ),
-      ),
-
-      // home page docking location
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
