@@ -75,6 +75,8 @@ class MainApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      scrollBehavior:
+          const MaterialScrollBehavior().copyWith(scrollbars: false),
       // if user is logged in, go to Home; else, go to Login
       home: loggedIn ? const HomePage() : const LoginPage(title: "Login"),
     );
@@ -212,9 +214,12 @@ class _HomePageState extends State<HomePage> {
       ),
 
       body: SafeArea(
-        child: PageStorage(
-          bucket: bucket,
-          child: currentPage,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: PageStorage(
+            bucket: bucket,
+            child: currentPage,
+          ),
         ),
       ),
 
