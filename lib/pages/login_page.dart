@@ -117,215 +117,204 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF8F6F5),
-      // add safe area padding based on device screen size
-      body: SafeArea(
-        // Center all nested elements
-        child: Center(
-          // add Column widget to have multiple Widgets
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // set size constraints to app logo
-              SizedBox(
-                height: MediaQuery.of(context).size.height / 5,
-                child: Image.asset('assets/logo_ResetaPlus.png'),
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height / 6.5),
-              // Sign in form
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width / 1.5,
-                  minWidth: MediaQuery.of(context).size.width / 2,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      // Email input field
-                      TextFormField(
-                        cursorColor: Theme.of(context).colorScheme.primary,
-                        decoration: const InputDecoration(
-                            border: GradientOutlineInputBorder(
-                                gradient: LinearGradient(colors: [
-                                  Color(0xffa16ae8),
-                                  Color(0xff94b9ff)
-                                ]),
-                                width: 2.0),
-                            prefixIcon: Icon(
-                              Icons.mail,
-                              color: Color(0xFFa16ae8),
-                            ),
-                            label: Text("Email")),
-                        autofillHints: const [AutofillHints.email],
-                        // Email validation script
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Field cannot be empty.";
-                          } else if (!EmailValidator.validate(value)) {
-                            return "Please input a valid email address.";
-                          }
-                          return null;
-                        },
-                        onSaved: (value) => _email = value,
-                      ),
-                      SizedBox(height: MediaQuery.of(context).size.height / 40),
-                      // Password input field
-                      TextFormField(
-                        cursorColor: Theme.of(context).colorScheme.primary,
-                        decoration: InputDecoration(
-                          border: const GradientOutlineInputBorder(
-                              gradient: LinearGradient(colors: [
-                                Color(0xffa16ae8),
-                                Color(0xff94b9ff)
-                              ]),
-                              width: 2.0),
-                          label: const Text("Password"),
-                          prefixIcon: const Icon(
-                            Icons.lock,
-                            color: Color(0xFFa16ae8),
-                          ),
-                          suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureText
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: const Color(0xFFa16ae8),
-                              ),
-                              onPressed: _toggleObscuredText),
+    return Center(
+      // add Column widget to have multiple Widgets
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // set size constraints to app logo
+          SizedBox(
+            height: MediaQuery.of(context).size.height / 5,
+            child: Image.asset('assets/logo_ResetaPlus.png'),
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height / 6.5),
+          // Sign in form
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width / 1.5,
+              minWidth: MediaQuery.of(context).size.width / 2,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  // Email input field
+                  TextFormField(
+                    cursorColor: Theme.of(context).colorScheme.primary,
+                    decoration: const InputDecoration(
+                        border: GradientOutlineInputBorder(
+                            gradient: LinearGradient(
+                                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                            width: 2.0),
+                        prefixIcon: Icon(
+                          Icons.mail,
+                          color: Color(0xFFa16ae8),
                         ),
-                        obscureText: _obscureText,
-                        enableSuggestions: false,
-                        autocorrect: false,
-                        // password validation script
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Field cannot be empty.";
-                          }
-                          return null;
-                        },
-                        onSaved: (value) => _password = value,
-                      ),
-                      SizedBox(height: MediaQuery.of(context).size.height / 75),
-                      // Remember me checkbox, Forgot password link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        // row widget to display multiple widgets in the same line
-                        children: <Widget>[
-                          // Custom widget with gradient checkbox icon
-                          CustomCheckbox(
-                            rememberUser: _rememberUser,
-                            onChange: (value) {
-                              _rememberUser = value;
-                            },
-                          ),
-                          // Forgot password container
-                          Padding(
-                            padding: const EdgeInsets.only(top: 18),
-                            child: GestureDetector(
-                              // forgot password script
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  // display message
-                                  const SnackBar(
-                                    content: Text(
-                                        "Check your email for a link to reset your password."),
-                                  ),
-                                );
-                              },
-                              // Forgot password text
-                              child: const MouseRegion(
-                                // on hover, set mouse cursor to click
-                                cursor: SystemMouseCursors.click,
-                                child: Text(
-                                  "Forgot password?",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      SizedBox(height: MediaQuery.of(context).size.height / 35),
-                      // Login button
-                      Container(
-                        height: 50,
-                        width: 200,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
+                        label: Text("Email")),
+                    autofillHints: const [AutofillHints.email],
+                    // Email validation script
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Field cannot be empty.";
+                      } else if (!EmailValidator.validate(value)) {
+                        return "Please input a valid email address.";
+                      }
+                      return null;
+                    },
+                    onSaved: (value) => _email = value,
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height / 40),
+                  // Password input field
+                  TextFormField(
+                    cursorColor: Theme.of(context).colorScheme.primary,
+                    decoration: InputDecoration(
+                      border: const GradientOutlineInputBorder(
+                          gradient: LinearGradient(
                               colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: ElevatedButton(
-                          // login form script
-                          onPressed: () => loginUser(context),
-                          // content
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent),
-                          child: const Text(
-                            "SIGN IN",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 18,
+                          width: 2.0),
+                      label: const Text("Password"),
+                      prefixIcon: const Icon(
+                        Icons.lock,
+                        color: Color(0xFFa16ae8),
+                      ),
+                      suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureText
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: const Color(0xFFa16ae8),
+                          ),
+                          onPressed: _toggleObscuredText),
+                    ),
+                    obscureText: _obscureText,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    // password validation script
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Field cannot be empty.";
+                      }
+                      return null;
+                    },
+                    onSaved: (value) => _password = value,
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height / 75),
+                  // Remember me checkbox, Forgot password link
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    // row widget to display multiple widgets in the same line
+                    children: <Widget>[
+                      // Custom widget with gradient checkbox icon
+                      CustomCheckbox(
+                        rememberUser: _rememberUser,
+                        onChange: (value) {
+                          _rememberUser = value;
+                        },
+                      ),
+                      // Forgot password container
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18),
+                        child: GestureDetector(
+                          // forgot password script
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              // display message
+                              const SnackBar(
+                                content: Text(
+                                    "Check your email for a link to reset your password."),
+                              ),
+                            );
+                          },
+                          // Forgot password text
+                          child: const MouseRegion(
+                            // on hover, set mouse cursor to click
+                            cursor: SystemMouseCursors.click,
+                            child: Text(
+                              "Forgot password?",
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      )
                     ],
                   ),
-                ),
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height / 6.5),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 3,
-                children: <Widget>[
-                  // Sign up question prompt
-                  const Text(
-                    "DON'T HAVE AN ACCOUNT?",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
+                  SizedBox(height: MediaQuery.of(context).size.height / 35),
+                  // Login button
+                  Container(
+                    height: 50,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                          colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                      borderRadius: BorderRadius.circular(5),
                     ),
-                  ),
-                  // Sign Up button
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      // go to Sign Up form script
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RegisterPage(
-                              title: "Register",
-                            ),
-                          ),
-                        );
-                      },
+                    child: ElevatedButton(
+                      // login form script
+                      onPressed: () => loginUser(context),
+                      // content
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent),
                       child: const Text(
-                        "SIGN UP NOW",
+                        "SIGN IN",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          color: Colors.white,
+                          fontSize: 18,
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
+            ),
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height / 6.5),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 3,
+            children: <Widget>[
+              // Sign up question prompt
+              const Text(
+                "DON'T HAVE AN ACCOUNT?",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              // Sign Up button
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  // go to Sign Up form script
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterPage(
+                          title: "Register",
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "SIGN UP NOW",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
