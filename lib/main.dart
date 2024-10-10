@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:mysql_client/mysql_client.dart';
 
 import './pages/login_page.dart';
@@ -60,6 +61,18 @@ Future<MySQLConnection> createConnection() async {
   return conn; // Return the connection object
 }
 
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  // Override behavior methods and getters like dragDevices
+  @override
+  // allow other devices to scroll
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.trackpad,
+      };
+}
+
 class MainApp extends StatelessWidget {
   // TODO: add user session
   final bool loggedIn = true;
@@ -75,8 +88,7 @@ class MainApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      scrollBehavior:
-          const MaterialScrollBehavior().copyWith(scrollbars: false),
+      scrollBehavior: MyCustomScrollBehavior().copyWith(scrollbars: false),
       // if user is logged in, go to Home; else, go to Login
       home: loggedIn ? const HomePage() : const LoginPage(title: "Login"),
     );
@@ -215,12 +227,18 @@ class _HomePageState extends State<HomePage> {
 
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: PageStorage(
-            bucket: bucket,
-            child: currentPage,
-          ),
-        ),
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
+              children: [
+                const SizedBox(height: 15),
+                Expanded(
+                  child: PageStorage(
+                    bucket: bucket,
+                    child: currentPage,
+                  ),
+                ),
+              ],
+            )),
       ),
 
       // Bottom navbar

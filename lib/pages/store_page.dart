@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gradient_borders/gradient_borders.dart';
+
+import 'package:resetaplus/widgets/custom_currentprescription.dart';
 
 class StorePage extends StatefulWidget {
   const StorePage({super.key, required this.title});
@@ -10,65 +13,83 @@ class StorePage extends StatefulWidget {
 }
 
 class _StorePageState extends State<StorePage> {
+  // generate global key, uniquely identify Form widget and allow form validation
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Center(
-      // add Column widget to have multiple Widgets
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // row = filter button, search bar, search button
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               //use expended if you are using textformfield in row
               Expanded(
                 child: Container(
-                  decoration: BoxDecoration(
+                    decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(50),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.grey.shade400,
-                            blurRadius: 10,
-                            spreadRadius: 3,
-                            offset: const Offset(5, 5))
-                      ]),
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Search here...',
-                        prefixIcon: Icon(Icons.search)),
+                    ),
+                    // search form
+                    child: Form(
+                      key: _formKey,
+                      // search box
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          border: GradientOutlineInputBorder(
+                            gradient: const LinearGradient(
+                                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                            width: 1.0,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.mail,
+                            color: Color(0xFFa16ae8),
+                          ),
+                          hintText: "Search",
+                        ),
+                      ),
+                    )),
+              ),
+
+              // spacer
+              const SizedBox(width: 10),
+
+              // filter button
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Icon(
+                    Icons.sort,
+                    size: 26,
                   ),
                 ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-
-              Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.grey.shade400,
-                            blurRadius: 10,
-                            spreadRadius: 3,
-                            offset: const Offset(5, 5))
-                      ]),
-                  child: const Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Icon(
-                      Icons.sort,
-                      size: 26,
-                    ),
-                  ))
+              )
             ],
-          )
+          ),
 
-          // container = otc
-          // scrollview = cards
+          // search results
+          Expanded(
+              child: ListView(
+            shrinkWrap: true,
+            children: const [
+              CurrentPrescription(),
+              CurrentPrescription(),
+              CurrentPrescription(),
+              CurrentPrescription(),
+              CurrentPrescription(),
+              CurrentPrescription(),
+            ],
+          ))
           // container = prescription
           // scrollview = cards
           // data from

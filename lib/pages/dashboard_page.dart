@@ -20,8 +20,6 @@ class _DashboardPageState extends State<DashboardPage> {
       // Wrap content with SingleChildScrollView for scrolling
       child: Column(
         children: [
-          SizedBox(height: 30),
-
           // CARD - MEDICATION PROGRESS
           Container(
             // Outer container with gradient border
@@ -36,7 +34,7 @@ class _DashboardPageState extends State<DashboardPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Container(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
@@ -45,27 +43,86 @@ class _DashboardPageState extends State<DashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // TITLE - MEDICATION PROGRESS
-                  Text(
-                    'Medication Progress',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Color(0xFF602E9E),
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      // Sign up question prompt
+                      const Text(
+                        "MEDICATION PROGRESS",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF602E9E),
+                        ),
+                      ),
+                      // Sign Up button
+                      MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          // go to Sign Up form script
+                          onTap: () {
+                            // TODO: choose month from history
+                          },
+                          child: const Text(
+                            "January",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF602E9E),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+
+                  // spacer
                   SizedBox(height: 10),
+
+                  // Prescription progress bar
                   CustomProgressBar(
                     value: 0.6,
                     backgroundColor: Color(0xFFD9D9FF),
                     gradientColors: [Color(0xffa16ae8), Color(0xff94b9ff)],
-                    height: 25.0,
+                    height: 40,
                     borderRadius: BorderRadius.circular(15),
                     text: '2 Weeks Left',
                   ),
+
+                  // spacer
                   SizedBox(height: 10),
+
+                  // weekday carousel
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 75),
+                    child: CarouselView(
+                      itemExtent: 100,
+                      shrinkExtent: 50,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      children: List<Widget>.generate(31, (int index) {
+                        return ColoredBox(
+                          color: Colors
+                              .primaries[index % Colors.primaries.length]
+                              .withOpacity(0.8),
+                          child: const SizedBox.expand(),
+                        );
+                      }),
+                    ),
+                  ),
+
+                  // spacer
+                  SizedBox(height: 5),
+
+                  // next intake alarm
                   Text(
                     'Your next medicine intake is at: ',
-                    style: TextStyle(fontSize: 14),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   Text(
                     '13:00',
@@ -75,6 +132,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       color: Color(0xFFA16AE8),
                     ),
                   ),
+
                   // BUTTONS - INTAKE HISTORY AND INTAKE INSTRUCTIONS
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
