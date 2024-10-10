@@ -6,6 +6,8 @@ import 'package:gradient_borders/gradient_borders.dart';
 class CurrentPrescription extends StatelessWidget {
   const CurrentPrescription({Key? key}) : super(key: key);
 
+  final double borderRadiussSize = 10;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -13,33 +15,38 @@ class CurrentPrescription extends StatelessWidget {
       children: [
         // First Card
         Expanded(
-          child: buildPrescriptionCard('Drug Name 1', 'Type: Tablet, Dosage: 500mg', 'A short description of Drug 1.'),
+          child: buildPrescriptionCard('Drug Name 1',
+              'Type: Tablet, Dosage: 500mg', 'A short description of Drug 1.'),
         ),
         SizedBox(width: 10), // Space between cards
         // Second Card
         Expanded(
-          child: buildPrescriptionCard('Drug Name 2', 'Type: Injection, Dosage: 250ml', 'A short description of Drug 2.'),
+          child: buildPrescriptionCard(
+              'Drug Name 2',
+              'Type: Injection, Dosage: 250ml',
+              'A short description of Drug 2.'),
         ),
       ],
     );
   }
 
-  Widget buildPrescriptionCard(String drugName, String drugInfo, String description) {
+  Widget buildPrescriptionCard(
+      String drugName, String drugInfo, String description) {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
         border: GradientBoxBorder(
-          width: 2,
+          width: 1,
           gradient: LinearGradient(colors: [
-            Color(0xffa16ae8),
-            Color(0xff94b9ff),
+            Color.fromRGBO(195, 150, 255, 1),
+            Color(0xFF86B0FF),
           ]),
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(borderRadiussSize),
         color: Colors.white,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -49,7 +56,8 @@ class CurrentPrescription extends StatelessWidget {
               height: 80,
               decoration: BoxDecoration(
                 color: Color(0xFFE0BBE4), // Background color
-                borderRadius: BorderRadius.circular(12), // Rounded edges
+                borderRadius:
+                    BorderRadius.circular(borderRadiussSize), // Rounded edges
               ),
               child: Center(
                 child: Icon(
@@ -91,7 +99,7 @@ class CurrentPrescription extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFA16AE8),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(borderRadiussSize),
                   ),
                 ),
                 child: Text(
