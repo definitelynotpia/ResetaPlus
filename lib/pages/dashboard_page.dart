@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+
 import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/custom_store_product.dart';
 import 'package:resetaplus/widgets/custom_prescription.dart';
@@ -15,6 +17,9 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  // current day
+  final int _currentDay = 15;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -64,7 +69,9 @@ class _DashboardPageState extends State<DashboardPage> {
                         child: GestureDetector(
                           // go to Sign Up form script
                           onTap: () {
-                            // TODO: choose month from history
+                            // TODO: opens a Calendar widget that allows user to view
+                            // their previous and upcoming medication schedule
+                            // this will change the Weekday Carousel
                           },
                           child: const Text(
                             "January",
@@ -92,37 +99,80 @@ class _DashboardPageState extends State<DashboardPage> {
                     text: '2 Weeks Left',
                   ),
 
-                  // spacer
-                  SizedBox(height: 10),
+                  // date pointer
+                  Container(
+                    transform: Matrix4.translationValues(0, 10, 0),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.arrow_drop_down,
+                      size: 30,
+                    ),
+                  ),
 
                   // weekday carousel
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 75),
-                    child: CarouselView(
-                      itemExtent: 100,
-                      shrinkExtent: 50,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      children: List<Widget>.generate(31, (int index) {
-                        return ColoredBox(
-                          color: Colors
-                              .primaries[index % Colors.primaries.length]
-                              .withOpacity(0.8),
-                          child: const SizedBox.expand(),
-                        );
-                      }),
+                  CarouselSlider(
+                    // displays the days in a month
+                    items: List<Widget>.generate(31, (int index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 1),
+                        child: Container(
+                          // card is filled if day has passed
+                          // (indicating medications have been taken successfully)
+                          decoration: (index >= _currentDay)
+                              // if date is not yet finished
+                              ? BoxDecoration(
+                                  border: GradientBoxBorder(
+                                    width: 1,
+                                    gradient: LinearGradient(colors: [
+                                      Color.fromRGBO(195, 150, 255, 1),
+                                      Color(0xFF86B0FF),
+                                    ]),
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                )
+                              // if date has passed
+                              : BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color.fromRGBO(195, 150, 255, 1),
+                                      Color(0xFF86B0FF),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                          child: Center(
+                            child: Text("$index"),
+                          ),
+                        ),
+                      );
+                    }),
+                    options: CarouselOptions(
+                      height: 60,
+                      aspectRatio: 1 / 1,
+                      // TODO: set minimum width (so it's not too small)
+                      viewportFraction: 0.2,
+                      // TODO: initialPage must be set to current date (ex. 5 if December 5)
+                      initialPage: 15,
+                      enableInfiniteScroll: false,
+                      reverse: false,
+                      autoPlay: false,
+                      enlargeCenterPage: true,
+                      enlargeFactor: 0.25,
+                      // onPageChanged: callbackFunction,
+                      scrollDirection: Axis.horizontal,
                     ),
                   ),
 
                   // spacer
-                  SizedBox(height: 5),
+                  SizedBox(height: 15),
 
                   // next intake alarm
                   Text(
                     'Your next medicine intake is at: ',
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
