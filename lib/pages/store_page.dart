@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 
-import 'package:resetaplus/widgets/custom_currentprescription.dart';
+import 'package:resetaplus/widgets/custom_store_product.dart';
 
 class StorePage extends StatefulWidget {
   const StorePage({super.key, required this.title});
@@ -82,12 +82,12 @@ class _StorePageState extends State<StorePage> {
               child: ListView(
             shrinkWrap: true,
             children: const [
-              CurrentPrescription(),
-              CurrentPrescription(),
-              CurrentPrescription(),
-              CurrentPrescription(),
-              CurrentPrescription(),
-              CurrentPrescription(),
+              StoreProduct(),
+              StoreProduct(),
+              StoreProduct(),
+              StoreProduct(),
+              StoreProduct(),
+              StoreProduct(),
             ],
           ))
           // container = prescription

@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/widgets/custom_progressbar.dart';
-import 'package:resetaplus/widgets/custom_currentprescription.dart';
+import 'package:resetaplus/widgets/custom_store_product.dart';
+import 'package:resetaplus/widgets/custom_prescription.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -212,9 +213,22 @@ class _DashboardPageState extends State<DashboardPage> {
           // ROW FOR CURRENT PRESCRIPTIONS - USING WIDGET
           Column(
             children: [
-              CurrentPrescription(),
-              CurrentPrescription(),
-              CurrentPrescription(),
+              PrescriptionCard(
+                  drugName: "drugName",
+                  drugInfo: "drugInfo",
+                  description: "description"),
+              PrescriptionCard(
+                  drugName: "drugName",
+                  drugInfo: "drugInfo",
+                  description: "description"),
+              PrescriptionCard(
+                  drugName: "drugName",
+                  drugInfo: "drugInfo",
+                  description: "description"),
+              PrescriptionCard(
+                  drugName: "drugName",
+                  drugInfo: "drugInfo",
+                  description: "description"),
             ],
           ),
         ],
