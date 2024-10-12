@@ -3,8 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 
-class CurrentPrescription extends StatelessWidget {
-  const CurrentPrescription({Key? key}) : super(key: key);
+// rennamed from custom_currentprescription.dart
+class StoreProduct extends StatelessWidget {
+  const StoreProduct({Key? key}) : super(key: key);
 
   final double borderRadiussSize = 10;
 
