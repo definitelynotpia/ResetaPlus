@@ -5,6 +5,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:mysql_client/mysql_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import './pages/login_page.dart';
 import './pages/dashboard_page.dart';
@@ -50,7 +51,7 @@ bool verifyPassword(String enteredPassword, String storedPasswordHash,
 Future<MySQLConnection> createConnection() async {
   final conn = await MySQLConnection.createConnection(
     host:
-        "192.168.1.3", // !!NOTICE!! Please change this to your local MySQL server IP address
+        "10.0.2.2", // !!NOTICE!! Please change this to your local MySQL server IP address
     port: 3306,
     userName: "root",
     password: "root",
@@ -74,24 +75,51 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 }
 
 class MainApp extends StatelessWidget {
-  // TODO: add user session
-  final bool loggedIn = true;
-
   const MainApp({super.key});
+  // TODO: add user session
+  Future<bool> _getLoggedInStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Checks if 'loggedIn' key exists; if not, it sets a default value of false
+    if (!prefs.containsKey('loggedIn')) {
+      await prefs.setBool('loggedIn', false);
+    }
+
+    return prefs.getBool('loggedIn') ?? false;
+  }
+
+  //final bool loggedIn = false;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Reseta+", // app title
-      theme: ThemeData(
-        fontFamily: "Montserrat", // set custom font as default
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      scrollBehavior: MyCustomScrollBehavior().copyWith(scrollbars: false),
-      // if user is logged in, go to Home; else, go to Login
-      home: loggedIn ? const HomePage() : const LoginPage(title: "Login"),
-    );
+    return FutureBuilder<bool>(
+        future: _getLoggedInStatus(),
+        builder: (context, snapshot) {
+          // Display a loading spinner while the future is being resolved
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // If there's an error, display an error message
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error loading preferences'));
+          }
+
+          // Get the loggedIn status from the snapshot data
+          final bool loggedIn = snapshot.data ?? false;
+          return MaterialApp(
+            title: "Reseta+", // app title
+            theme: ThemeData(
+              fontFamily: "Montserrat", // set custom font as default
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+            ),
+            scrollBehavior:
+                MyCustomScrollBehavior().copyWith(scrollbars: false),
+            // if user is logged in, go to Home; else, go to Login
+            home: loggedIn ? const HomePage() : const LoginPage(title: "Login"),
+          );
+        });
   }
 }
 
