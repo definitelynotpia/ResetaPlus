@@ -203,261 +203,263 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      // add Column widget to have multiple Widgets
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // set size constraints to app logo
-          SizedBox(
-            height: MediaQuery.of(context).size.height / 5,
-            child: Image.asset('assets/logo_ResetaPlus.png'),
-          ),
-          SizedBox(height: MediaQuery.of(context).size.height / 20),
-          // Sign in form
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width / 1.5,
-              minWidth: MediaQuery.of(context).size.width / 2,
+    return Scaffold(
+      body: Center(
+        // add Column widget to have multiple Widgets
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // set size constraints to app logo
+            SizedBox(
+              height: MediaQuery.of(context).size.height / 5,
+              child: Image.asset('assets/logo_ResetaPlus.png'),
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // Username input field
-                  TextFormField(
-                    cursorColor: Theme.of(context).colorScheme.primary,
-                    decoration: const InputDecoration(
-                        border: GradientOutlineInputBorder(
-                            gradient: LinearGradient(
-                                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                            width: 2.0),
-                        prefixIcon: Icon(
-                          Icons.person,
-                          color: Color(0xFFa16ae8),
-                        ),
-                        label: Text("Username")),
-                    // Username validation script
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Field cannot be empty.";
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _username = value,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 40),
-                  // Email input field
-                  TextFormField(
-                    cursorColor: Theme.of(context).colorScheme.primary,
-                    decoration: const InputDecoration(
-                        border: GradientOutlineInputBorder(
-                            gradient: LinearGradient(
-                                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                            width: 2.0),
-                        prefixIcon: Icon(
-                          Icons.mail,
-                          color: Color(0xFFa16ae8),
-                        ),
-                        label: Text("Email")),
-                    autofillHints: const [AutofillHints.email],
-                    // Email validation script
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Field cannot be empty.";
-                      } else if (!EmailValidator.validate(value)) {
-                        return "Please input a valid email address.";
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _email = value,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 40),
-                  // Password input field
-                  TextFormField(
-                    cursorColor: Theme.of(context).colorScheme.primary,
-                    decoration: InputDecoration(
-                      border: const GradientOutlineInputBorder(
-                          gradient: LinearGradient(
-                              colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                          width: 2.0),
-                      label: const Text("Password"),
-                      prefixIcon: const Icon(
-                        Icons.lock,
-                        color: Color(0xFFa16ae8),
-                      ),
-                      suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureText
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: const Color(0xFFa16ae8),
+            SizedBox(height: MediaQuery.of(context).size.height / 20),
+            // Sign in form
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width / 1.5,
+                minWidth: MediaQuery.of(context).size.width / 2,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    // Username input field
+                    TextFormField(
+                      cursorColor: Theme.of(context).colorScheme.primary,
+                      decoration: const InputDecoration(
+                          border: GradientOutlineInputBorder(
+                              gradient: LinearGradient(
+                                  colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                              width: 2.0),
+                          prefixIcon: Icon(
+                            Icons.person,
+                            color: Color(0xFFa16ae8),
                           ),
-                          onPressed: _toggleObscuredText),
-                    ),
-                    obscureText: _obscureText,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    // password validation script
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Field cannot be empty.";
-                      } else {
-                        _password = value;
+                          label: Text("Username")),
+                      // Username validation script
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Field cannot be empty.";
+                        }
                         return null;
-                      }
-                    },
-                    onSaved: (value) => _password = value,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 40),
-                  // Confirm password input field
-                  TextFormField(
-                    cursorColor: Theme.of(context).colorScheme.primary,
-                    decoration: const InputDecoration(
-                      border: GradientOutlineInputBorder(
-                          gradient: LinearGradient(
-                              colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                          width: 2.0),
-                      label: Text("Password"),
-                      prefixIcon: Icon(
-                        Icons.lock,
-                        color: Color(0xFFa16ae8),
-                      ),
+                      },
+                      onSaved: (value) => _username = value,
                     ),
-                    obscureText: true,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    // Confirm password validation script
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Field cannot be empty.";
-                      }
-                      if (value != _password) {
-                        // Check if it matches the password
-                        return "Passwords do not match.";
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _confirmPassword = value,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 75),
-                  // Remember me checkbox, Forgot password link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    // row widget to display multiple widgets in the same line
-                    children: <Widget>[
-                      // Custom widget with gradient checkbox icon
-                      CustomCheckbox(
-                        rememberUser: _rememberUser,
-                        onChange: (value) {
-                          _rememberUser = value;
-                        },
+                    SizedBox(height: MediaQuery.of(context).size.height / 40),
+                    // Email input field
+                    TextFormField(
+                      cursorColor: Theme.of(context).colorScheme.primary,
+                      decoration: const InputDecoration(
+                          border: GradientOutlineInputBorder(
+                              gradient: LinearGradient(
+                                  colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                              width: 2.0),
+                          prefixIcon: Icon(
+                            Icons.mail,
+                            color: Color(0xFFa16ae8),
+                          ),
+                          label: Text("Email")),
+                      autofillHints: const [AutofillHints.email],
+                      // Email validation script
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Field cannot be empty.";
+                        } else if (!EmailValidator.validate(value)) {
+                          return "Please input a valid email address.";
+                        }
+                        return null;
+                      },
+                      onSaved: (value) => _email = value,
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height / 40),
+                    // Password input field
+                    TextFormField(
+                      cursorColor: Theme.of(context).colorScheme.primary,
+                      decoration: InputDecoration(
+                        border: const GradientOutlineInputBorder(
+                            gradient: LinearGradient(
+                                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                            width: 2.0),
+                        label: const Text("Password"),
+                        prefixIcon: const Icon(
+                          Icons.lock,
+                          color: Color(0xFFa16ae8),
+                        ),
+                        suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureText
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: const Color(0xFFa16ae8),
+                            ),
+                            onPressed: _toggleObscuredText),
                       ),
-                      // Forgot password container
-                      Padding(
-                        padding: const EdgeInsets.only(top: 18),
-                        child: GestureDetector(
-                          // forgot password script
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              // display message
-                              const SnackBar(
-                                content: Text(
-                                    "Check your email for a link to reset your password."),
-                              ),
-                            );
+                      obscureText: _obscureText,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      // password validation script
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Field cannot be empty.";
+                        } else {
+                          _password = value;
+                          return null;
+                        }
+                      },
+                      onSaved: (value) => _password = value,
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height / 40),
+                    // Confirm password input field
+                    TextFormField(
+                      cursorColor: Theme.of(context).colorScheme.primary,
+                      decoration: const InputDecoration(
+                        border: GradientOutlineInputBorder(
+                            gradient: LinearGradient(
+                                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                            width: 2.0),
+                        label: Text("Password"),
+                        prefixIcon: Icon(
+                          Icons.lock,
+                          color: Color(0xFFa16ae8),
+                        ),
+                      ),
+                      obscureText: true,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      // Confirm password validation script
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Field cannot be empty.";
+                        }
+                        if (value != _password) {
+                          // Check if it matches the password
+                          return "Passwords do not match.";
+                        }
+                        return null;
+                      },
+                      onSaved: (value) => _confirmPassword = value,
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height / 75),
+                    // Remember me checkbox, Forgot password link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      // row widget to display multiple widgets in the same line
+                      children: <Widget>[
+                        // Custom widget with gradient checkbox icon
+                        CustomCheckbox(
+                          rememberUser: _rememberUser,
+                          onChange: (value) {
+                            _rememberUser = value;
                           },
-                          // Forgot password text
-                          child: const MouseRegion(
-                            // on hover, set mouse cursor to click
-                            cursor: SystemMouseCursors.click,
-                            child: Text(
-                              "Forgot password?",
-                              style: TextStyle(
-                                fontSize: 16,
+                        ),
+                        // Forgot password container
+                        Padding(
+                          padding: const EdgeInsets.only(top: 18),
+                          child: GestureDetector(
+                            // forgot password script
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                // display message
+                                const SnackBar(
+                                  content: Text(
+                                      "Check your email for a link to reset your password."),
+                                ),
+                              );
+                            },
+                            // Forgot password text
+                            child: const MouseRegion(
+                              // on hover, set mouse cursor to click
+                              cursor: SystemMouseCursors.click,
+                              child: Text(
+                                "Forgot password?",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      )
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 35),
-                  // Login button
-                  Container(
-                    height: 50,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                          colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                      borderRadius: BorderRadius.circular(5),
+                        )
+                      ],
                     ),
-                    child: ElevatedButton(
-                      // login form script
-                      onPressed: () => registerUser(context),
-                      // content
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent),
-                      child: const Text(
-                        "SIGN UP",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 18,
+                    SizedBox(height: MediaQuery.of(context).size.height / 35),
+                    // Login button
+                    Container(
+                      height: 50,
+                      width: 200,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                            colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: ElevatedButton(
+                        // login form script
+                        onPressed: () => registerUser(context),
+                        // content
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent),
+                        child: const Text(
+                          "SIGN UP",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          SizedBox(height: MediaQuery.of(context).size.height / 20),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 3,
-            children: <Widget>[
-              // Sign up question prompt
-              const Text(
-                "ALREADY HAVE AN ACCOUNT?",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
+            SizedBox(height: MediaQuery.of(context).size.height / 20),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 3,
+              children: <Widget>[
+                // Sign up question prompt
+                const Text(
+                  "ALREADY HAVE AN ACCOUNT?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
                 ),
-              ),
-              // Sign Up button
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  // go to Sign Up form script
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(
-                          title: "Login",
+                // Sign Up button
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    // go to Sign Up form script
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(
+                            title: "Login",
+                          ),
                         ),
+                      );
+                    },
+                    child: const Text(
+                      "SIGN IN",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
-                    );
-                  },
-                  child: const Text(
-                    "SIGN IN",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+              ],
+            ),
+          ],
+        ),
+      )
     );
   }
 }
