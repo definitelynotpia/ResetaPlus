@@ -52,6 +52,13 @@ class _LoginPageState extends State<LoginPage> {
     await prefs.setBool('loggedIn', status);
   }
 
+  void _setusernameSession(String? username) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (username != null) {
+      await prefs.setString('username', username);
+    }
+  }
+
   Future<void> loginUser(BuildContext context) async {
     // Check if the form is valid
     if (_formKey.currentState!.validate()) {
@@ -89,12 +96,13 @@ class _LoginPageState extends State<LoginPage> {
               encrypt.Key(base64.decode(patientAccountData['encryption_key'])),
               encrypt.IV(base64
                   .decode(patientAccountData['initialization_vector'])))) {
-            // Show success message if login is successful
+            _setusernameSession(patientAccountData['username']);
             _setLoggedInStatus(true);
             Navigator.pop(context); // Closes current window
             Navigator.push(
                 context, // Opens another instance of MainApp
                 MaterialPageRoute(builder: (context) => const MainApp()));
+            // Show success message if login is successful
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Successfully logged in!")),
             );

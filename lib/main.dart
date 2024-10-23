@@ -153,6 +153,8 @@ class _HomePageState extends State<HomePage> {
 
   final PageStorageBucket bucket = PageStorageBucket();
 
+  String _usernameSession = "admin";
+
   @override
   void initState() {
     one = StorePage(
@@ -179,8 +181,22 @@ class _HomePageState extends State<HomePage> {
     pages = [one, two, three, four, five];
 
     currentPage = three;
-
+    _getusernameSession();
     super.initState();
+  }
+
+  // Currently used for testing out the logout button
+  void _setLoggedInStatus(bool status) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedIn', status);
+  }
+
+  // Function for getting the email session. Currently used upon initialization
+  void _getusernameSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _usernameSession = prefs.getString('username') ?? "admin";
+    });
   }
 
   @override
@@ -197,13 +213,13 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // title and subtitle
-            const Column(
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Username
                 Text(
-                  "John Doe",
+                  _usernameSession ?? "John Doe",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -211,7 +227,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 // User type = patient, health professional
-                Text(
+                const Text(
                   "Patient",
                   style: TextStyle(
                     color: Colors.white,
@@ -220,6 +236,26 @@ class _HomePageState extends State<HomePage> {
                 )
               ],
             ),
+            // Only for Test purposes
+            ElevatedButton(
+                onPressed: () {
+                  // Action to perform when the button is pressed
+                  _setLoggedInStatus(false);
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context, // Opens another instance of MainApp
+                      MaterialPageRoute(builder: (context) => const MainApp()));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffa16ae8), // Background color
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                  ),
+                ),
+                child: const Text(
+                  "Test Logout", // Button text
+                  style: TextStyle(color: Colors.white),
+                )),
             // profile picture
             Container(
               padding: const EdgeInsets.all(16),
