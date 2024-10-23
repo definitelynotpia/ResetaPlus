@@ -57,8 +57,6 @@ Future<MySQLConnection> createConnection() async {
       .expand((interface) => interface.addresses)
       .firstWhere((addr) => addr.type == InternetAddressType.IPv4 && !addr.isLoopback);
 
-debugPrint(localIP.address);
-
   final conn = await MySQLConnection.createConnection(
     host: dotenv.env['DB_ADDRESS'] ?? localIP.address,
     port: int.parse(dotenv.env['DB_PORT'] ?? '3306'),
@@ -85,7 +83,7 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
 class MainApp extends StatelessWidget {
   // TODO: add user session
-  final bool loggedIn = false;
+  final bool loggedIn = true;
 
   const MainApp({super.key});
 

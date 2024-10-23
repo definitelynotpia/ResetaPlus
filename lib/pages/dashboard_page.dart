@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:intl/intl.dart';
+import 'package:mysql_client/mysql_client.dart';
+import 'package:resetaplus/main.dart';
 
 import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/custom_store_product.dart';
@@ -18,8 +21,105 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   // current day
+  final DateTime _currentDate = DateTime.now();
   final int _currentDay = 15;
+  final int _patientIDTest = 1;
+  late IResultSet patientPrescriptionData;
+  late IResultSet patientPrescriptionIntakeData;
+  String? nextIntakeTime;
 
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the prescription data when the widget is initialized
+    getNextMedicineIntake();
+  }
+
+Future<void> getNextMedicineIntake() async {
+    try {
+      final conn = await createConnection();
+
+      var patientPrescriptionData = await conn.execute('''
+      SELECT *
+      FROM reseta_plus.patient_prescriptions
+      WHERE patient_id = :patient_id
+      AND status = 'active';
+      ''', {'patient_id': _patientIDTest});
+
+      var prescriptionIds = patientPrescriptionData.rows.map((row) => row.assoc()['prescription_id']).toList().join(', ');
+
+      var patientPrescriptionIntakeData = await conn.execute('''
+      SELECT *
+      FROM reseta_plus.patient_prescription_intakes AS it
+      WHERE (prescription_id, intake_date, intake_time) IN (
+          SELECT prescription_id, MAX(intake_date), MAX(intake_time)
+          FROM reseta_plus.patient_prescription_intakes
+          WHERE prescription_id IN ($prescriptionIds) AND patient_id = :patient_id
+          GROUP BY prescription_id
+      );
+      ''',{'patient_id': _patientIDTest});
+
+      DateTime? nextIntakeDateTime;
+
+      if (patientPrescriptionData.rows.isNotEmpty && patientPrescriptionIntakeData.rows.isNotEmpty) {
+        for (var intakeRow in patientPrescriptionIntakeData.rows) {
+          String? intakeTimeStr = intakeRow.assoc()['intake_time'];
+          DateTime intakeTime = _parseTime(intakeTimeStr!);
+
+          for (var prescriptionRow in patientPrescriptionData.rows) {
+            String? frequencyStr = prescriptionRow.assoc()['frequency'];
+            DateTime nextTime = _calculateNextIntake(intakeTime, frequencyStr!);
+
+            if (nextIntakeDateTime == null || nextTime.isBefore(nextIntakeDateTime)) {
+              nextIntakeDateTime = nextTime;
+            }
+          }
+        }
+      }
+
+      await conn.close();
+      // Format the next intake time
+      if (nextIntakeDateTime != null) {
+        String formattedTime = DateFormat('hh:mm a').format(nextIntakeDateTime);
+        setState(() {
+          nextIntakeTime = formattedTime;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error: $e");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error fetching data. Please try again.")),
+        );
+      }
+    }
+  }
+
+  DateTime _parseTime(String timeStr) {
+    // Parse the time string (e.g., "5:09 PM") into a DateTime object
+    DateFormat format = DateFormat("HH:mm:ss");
+    DateTime time = format.parse(timeStr);
+    return DateTime.now().copyWith(hour: time.hour, minute: time.minute, second: 0);
+  }
+
+  DateTime _calculateNextIntake(DateTime lastIntake, String frequencyStr) {
+    // Extract frequency (e.g., "8 hours")
+    final parts = frequencyStr.split(' ');
+    int frequencyValue = int.parse(parts[0]);
+    String frequencyUnit = parts[1];
+
+    Duration duration;
+    if (frequencyUnit.contains("hour")) {
+      duration = Duration(hours: frequencyValue);
+    } else if (frequencyUnit.contains("minute")) {
+      duration = Duration(minutes: frequencyValue);
+    } else {
+      duration = Duration(hours: 1); // Default to 1 hour if not recognized
+    }
+
+    return lastIntake.add(duration);
+  }
+  
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -73,10 +173,10 @@ class _DashboardPageState extends State<DashboardPage> {
                             // their previous and upcoming medication schedule
                             // this will change the Weekday Carousel
                           },
-                          child: const Text(
-                            "January",
+                          child: Text(
+                            DateFormat('MMMM').format(_currentDate),
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               color: Color(0xFF602E9E),
                             ),
@@ -176,7 +276,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
                   Text(
-                    '13:00',
+                    nextIntakeTime ?? 'Loading...',
                     style: TextStyle(
                       fontSize: 54,
                       fontWeight: FontWeight.bold,
