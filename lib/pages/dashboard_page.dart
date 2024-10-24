@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart';
-import 'package:mysql_client/mysql_client.dart';
 import 'package:resetaplus/main.dart';
 
 import 'package:resetaplus/widgets/custom_progressbar.dart';
-import 'package:resetaplus/widgets/custom_store_product.dart';
 import 'package:resetaplus/widgets/custom_prescription.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
@@ -24,9 +22,7 @@ class _DashboardPageState extends State<DashboardPage> {
   final DateTime _currentDate = DateTime.now();
   final int _currentDay = 15;
   final int _patientIDTest = 1;
-  late IResultSet patientPrescriptionData;
-  late IResultSet patientPrescriptionIntakeData;
-  String? nextIntakeTime;
+  String? _nextIntakeTime;
 
   @override
   void initState() {
@@ -35,44 +31,42 @@ class _DashboardPageState extends State<DashboardPage> {
     getNextMedicineIntake();
   }
 
-Future<void> getNextMedicineIntake() async {
+  Future<void> getMedicationProgress() async {
+    
+  }
+
+  Future<void> getNextMedicineIntake() async {
     try {
       final conn = await createConnection();
 
-      var patientPrescriptionData = await conn.execute('''
-      SELECT *
-      FROM reseta_plus.patient_prescriptions
-      WHERE patient_id = :patient_id
-      AND status = 'active';
-      ''', {'patient_id': _patientIDTest});
-
-      var prescriptionIds = patientPrescriptionData.rows.map((row) => row.assoc()['prescription_id']).toList().join(', ');
-
       var patientPrescriptionIntakeData = await conn.execute('''
-      SELECT *
-      FROM reseta_plus.patient_prescription_intakes AS it
-      WHERE (prescription_id, intake_date, intake_time) IN (
-          SELECT prescription_id, MAX(intake_date), MAX(intake_time)
-          FROM reseta_plus.patient_prescription_intakes
-          WHERE prescription_id IN ($prescriptionIds) AND patient_id = :patient_id
-          GROUP BY prescription_id
-      );
+      SELECT 
+          p.prescription_id,
+          pi.prescription_intake_id,
+          p.frequency,
+          pi.intake_date,
+          pi.intake_time,
+          pi.status
+      FROM 
+          reseta_plus.patient_prescriptions p
+      JOIN 
+          reseta_plus.patient_prescription_intakes pi ON p.prescription_id = pi.prescription_id
+      WHERE 
+          p.patient_id = :patient_id
+          AND p.status = 'active';
       ''',{'patient_id': _patientIDTest});
 
       DateTime? nextIntakeDateTime;
 
-      if (patientPrescriptionData.rows.isNotEmpty && patientPrescriptionIntakeData.rows.isNotEmpty) {
+      if (patientPrescriptionIntakeData.rows.isNotEmpty) {
         for (var intakeRow in patientPrescriptionIntakeData.rows) {
           String? intakeTimeStr = intakeRow.assoc()['intake_time'];
           DateTime intakeTime = _parseTime(intakeTimeStr!);
+          String? frequencyStr = intakeRow.assoc()['frequency'];
+          DateTime nextTime = _calculateNextIntake(intakeTime, frequencyStr!);
 
-          for (var prescriptionRow in patientPrescriptionData.rows) {
-            String? frequencyStr = prescriptionRow.assoc()['frequency'];
-            DateTime nextTime = _calculateNextIntake(intakeTime, frequencyStr!);
-
-            if (nextIntakeDateTime == null || nextTime.isBefore(nextIntakeDateTime)) {
-              nextIntakeDateTime = nextTime;
-            }
+          if (nextIntakeDateTime == null || nextTime.isBefore(nextIntakeDateTime)) {
+            nextIntakeDateTime = nextTime;
           }
         }
       }
@@ -82,7 +76,7 @@ Future<void> getNextMedicineIntake() async {
       if (nextIntakeDateTime != null) {
         String formattedTime = DateFormat('hh:mm a').format(nextIntakeDateTime);
         setState(() {
-          nextIntakeTime = formattedTime;
+          _nextIntakeTime = formattedTime;
         });
       }
     } catch (e) {
@@ -276,7 +270,7 @@ Future<void> getNextMedicineIntake() async {
                     ),
                   ),
                   Text(
-                    nextIntakeTime ?? 'Loading...',
+                    _nextIntakeTime ?? 'Loading...',
                     style: TextStyle(
                       fontSize: 54,
                       fontWeight: FontWeight.bold,
