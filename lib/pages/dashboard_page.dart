@@ -30,6 +30,7 @@ class _DashboardPageState extends State<DashboardPage> {
   num? _medicationDuration; // Duration of medication
   String? _nextIntakeTime; // Next intake time formatted as a string
   double? _currentProgress; // Current overall progress of medication
+  List<Map<String, String>>? _currentPrescriptions; // Medicine information in the prescription 
 
   @override
   void initState() {
@@ -38,6 +39,55 @@ class _DashboardPageState extends State<DashboardPage> {
     getNextMedicineIntake();
     getMedicationDayProgress();
     getMedicationOverallProgress();
+    getCurrentPrescriptions();
+  }
+
+   // Function to get the information of the medication in the prescription
+  Future<void> getCurrentPrescriptions() async {
+    try{
+      final conn = await createConnection();
+
+      // SQL query to fetch the information of the medication in the prescription
+      var activePrescriptionMedicationInfo = await conn.execute('''
+      SELECT 
+          m.medication_name,
+          m.medication_info,
+          m.medication_description
+      FROM 
+          reseta_plus.patient_prescriptions p
+      JOIN 
+          reseta_plus.medications m ON p.medication_id = m.medication_id
+      WHERE 
+          p.patient_id = :patient_id
+          AND p.status = 'active';
+      ''',{'patient_id': _patientIDTest});
+
+      // Initialize the list to hold prescription data
+     List<Map<String, String>> activePrescriptionDetails  = [];
+
+      // Iterate through the result rows and map them to the desired structure
+      for (var row in activePrescriptionMedicationInfo.rows) {
+        var assoc = row.assoc();
+        activePrescriptionDetails.add({
+          'drugName': assoc['medication_name'] ?? '',
+          'drugInfo': assoc['medication_info'] ?? '',
+          'description': assoc['medication_description'] ?? '',
+        });
+      }
+
+      // Update the state with the prescription information
+      setState(() {
+        _currentPrescriptions = activePrescriptionDetails;
+      });
+    } catch (e) {
+      // Handle errors during data fetching
+      debugPrint("Error: $e");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error fetching data. Please try again.")),
+        );
+      }
+    }
   }
 
   // Function to get the overall progress of medication
@@ -46,7 +96,7 @@ class _DashboardPageState extends State<DashboardPage> {
       final conn = await createConnection();
 
       // SQL query to fetch the duration of active prescriptions
-      var totalActivePrescriptionIntakes = await conn.execute('''
+      var activePrescriptionDuration = await conn.execute('''
       SELECT 
           duration 
       FROM 
@@ -57,7 +107,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ''',{'patient_id': _patientIDTest});
 
       // Extract the prescription duration from the result
-      String? prescriptionDuration = totalActivePrescriptionIntakes.rows.first.assoc()['duration'];
+      String? prescriptionDuration = activePrescriptionDuration.rows.first.assoc()['duration'];
 
       // Update the state with the calculated progress
       setState(() {
@@ -489,24 +539,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
           // ROW FOR CURRENT PRESCRIPTIONS - USING WIDGET
           Column(
-            children: [
-              PrescriptionCard(
-                  drugName: "drugName",
-                  drugInfo: "drugInfo",
-                  description: "description"),
-              PrescriptionCard(
-                  drugName: "drugName",
-                  drugInfo: "drugInfo",
-                  description: "description"),
-              PrescriptionCard(
-                  drugName: "drugName",
-                  drugInfo: "drugInfo",
-                  description: "description"),
-              PrescriptionCard(
-                  drugName: "drugName",
-                  drugInfo: "drugInfo",
-                  description: "description"),
-            ],
+            children: (_currentPrescriptions?.map((prescription) {
+              return PrescriptionCard(
+                drugName: prescription['drugName'] ?? "Unknown Drug", // Provide a default value if null
+                drugInfo: prescription['drugInfo'] ?? "No Info Available", // Provide a default value if null
+                description: prescription['description'] ?? "No Description Available", // Provide a default value if null
+              );
+            }).toList() ?? []), // Fallback to an empty list if _currentPrescriptions is null
           ),
         ],
       ),
