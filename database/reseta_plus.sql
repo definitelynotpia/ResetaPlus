@@ -28,6 +28,8 @@ CREATE TABLE `medications` (
   `medication_dosage` varchar(255) NOT NULL,
   `medication_form` varchar(255) NOT NULL,
   `manufacturer` varchar(255) NOT NULL,
+  `medication_info` varchar(255) NOT NULL,
+  `medication_description` varchar(255) NOT NULL,
   PRIMARY KEY (`medication_id`),
   UNIQUE KEY `medication_id_UNIQUE` (`medication_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -105,6 +107,7 @@ CREATE TABLE `patient_prescriptions` (
   `duration` varchar(255) NOT NULL,
   `refills` varchar(255) NOT NULL,
   `status` varchar(255) NOT NULL,
+  `intake_instructions` varchar(255) NOT NULL,
   PRIMARY KEY (`prescription_id`),
   UNIQUE KEY `prescription_id_UNIQUE` (`prescription_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -119,4 +122,4 @@ CREATE TABLE `patient_prescriptions` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-23 22:44:50
+-- Dump completed on 2024-10-24 14:40:00
