@@ -9,6 +9,9 @@ import '../widgets/custom_checkbox.dart';
 import './register_page.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.title});
@@ -78,13 +81,14 @@ class _LoginPageState extends State<LoginPage> {
               patientAccountData['password'],
               patientAccountData['salt'],
               encrypt.Key(base64.decode(patientAccountData['encryption_key'])),
-              encrypt.IV(base64
-                  .decode(patientAccountData['initialization_vector'])))) {
+              encrypt.IV(base64.decode(patientAccountData['initialization_vector']))
+              )
+              ) {
             // Show success message if login is successful
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Successfully logged in!")),
-            );
+              _showLoginSuccessDialog();
             // Navigate to dashboard
+
+
           } else {
             // Show failure message if password verification fails
             ScaffoldMessenger.of(context).showSnackBar(
@@ -113,6 +117,33 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     }
+  }
+
+    // Function for showing success dialog
+  void _showLoginSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Login Successful'),
+          content: const Text('You have successfully logged in!'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                Navigator.pop(context); // Close the main screen
+                // Navigate to the next screen (HomePage)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                );
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

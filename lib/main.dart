@@ -151,7 +151,7 @@ class _HomePageState extends State<HomePage> {
   bool isLoggedIn = false;
 
   String _usernameSession = "admin";
-  
+
   // navigation page keys
   final Key storePage = const PageStorageKey("storePage");
   final Key mapPage = const PageStorageKey("mapPage");
@@ -208,7 +208,9 @@ class _HomePageState extends State<HomePage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('loggedIn', status);
   }
+
   // Function for getting the email session. Currently used upon initialization
+  // Used to display the username in the dashboard
   void _getusernameSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
