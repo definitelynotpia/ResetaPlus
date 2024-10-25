@@ -220,6 +220,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  //Destroys the session and ensures that the user needs to login everytime
   void _destroySession() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();  
