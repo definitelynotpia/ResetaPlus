@@ -3,10 +3,12 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import './pages/login_page.dart';
 import './pages/dashboard_page.dart';
@@ -82,26 +84,57 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 }
 
 class MainApp extends StatelessWidget {
-  // TODO: add user session
-  final bool loggedIn = true;
-
   const MainApp({super.key});
+
+  Future<bool> _getLoggedInStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Checks if 'loggedIn' key exists; if not, it sets a default value of false
+    if (!prefs.containsKey('loggedIn')) {
+      await prefs.setBool('loggedIn', false);
+    }
+
+    return prefs.getBool('loggedIn') ?? false;
+  }
+
+  //final bool loggedIn = false;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Reseta+", // app title
-      theme: ThemeData(
-        fontFamily: "Montserrat", // set custom font as default
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      scrollBehavior: MyCustomScrollBehavior().copyWith(scrollbars: false),
-      // if user is logged in, go to Home; else, go to Login
-      home: loggedIn ? const HomePage() : const LoginPage(title: "Login"),
-    );
+    return FutureBuilder<bool>(
+        future: _getLoggedInStatus(),
+        builder: (context, snapshot) {
+          // Display a loading spinner while the future is being resolved
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // If there's an error, display an error message
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error loading preferences'));
+          }
+
+          // Get the loggedIn status from the snapshot data
+          final bool loggedIn = snapshot.data ?? false;
+          return MaterialApp(
+            title: "Reseta+", // app title
+            theme: ThemeData(
+              fontFamily: "Montserrat", // set custom font as default
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+            ),
+            scrollBehavior:
+                MyCustomScrollBehavior().copyWith(scrollbars: false),
+            // if user is logged in, go to Home; else, go to Login
+            home: loggedIn ? const HomePage() : const LoginPage(title: "Login"),
+          );
+        });
   }
+
+
 }
+
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -115,6 +148,10 @@ class _HomePageState extends State<HomePage> {
 
   int currentTab = 0;
 
+  bool isLoggedIn = false;
+
+  String _usernameSession = "admin";
+  
   // navigation page keys
   final Key storePage = const PageStorageKey("storePage");
   final Key mapPage = const PageStorageKey("mapPage");
@@ -160,7 +197,23 @@ class _HomePageState extends State<HomePage> {
 
     currentPage = three;
 
+    _getusernameSession();
     super.initState();
+  }
+
+  //Takes in a bool parameter
+  // When calling this function, use the isLoggedIn variable
+  // Currently used for testing out the logout button
+  void _setLoggedInStatus(bool status) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedIn', status);
+  }
+  // Function for getting the email session. Currently used upon initialization
+  void _getusernameSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _usernameSession = prefs.getString('username') ?? "admin";
+    });
   }
 
   @override
