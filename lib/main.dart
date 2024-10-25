@@ -99,6 +99,7 @@ class MainApp extends StatelessWidget {
 
   //final bool loggedIn = false;
 
+  
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
@@ -150,7 +151,7 @@ class _HomePageState extends State<HomePage> {
 
   bool isLoggedIn = false;
 
-  String _usernameSession = "admin";
+  String? _usernameSession;
 
   // navigation page keys
   final Key storePage = const PageStorageKey("storePage");
@@ -199,6 +200,7 @@ class _HomePageState extends State<HomePage> {
 
     _getusernameSession();
     super.initState();
+    _destroySession();
   }
 
   //Takes in a bool parameter
@@ -218,6 +220,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _destroySession() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();  
+  }
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -232,21 +240,21 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // title and subtitle
-            const Column(
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Username
                 Text(
-                  "John Doe",
-                  style: TextStyle(
+                   _usernameSession ?? "John Doe",
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                     fontSize: 26,
                   ),
                 ),
                 // User type = patient, health professional
-                Text(
+                const Text(
                   "Patient",
                   style: TextStyle(
                     color: Colors.white,

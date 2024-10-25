@@ -12,6 +12,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
+import './register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.title});
@@ -46,6 +47,20 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  // Sets value for loggedIn in shared_preference
+  void _setLoggedInStatus(bool status) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedIn', status);
+  }
+
+  void _setusernameSession(String? username) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (username != null) {
+      await prefs.setString('username', username);
+    }
+  }
+
+
   Future<void> loginUser(BuildContext context) async {
     // Check if the form is valid
     if (_formKey.currentState!.validate()) {
@@ -65,8 +80,7 @@ class _LoginPageState extends State<LoginPage> {
       SELECT a.*, k.encryption_key, k.initialization_vector 
       FROM reseta_plus.patient_accounts a
       JOIN reseta_plus.patient_account_keys k ON a.patient_id = k.patient_key_id
-      WHERE a.email = :email
-    ''', {'email': _email});
+      WHERE a.email = :email''', {'email': _email});
 
       // Check if Widget is mounted in context
       if (context.mounted) {
@@ -81,13 +95,15 @@ class _LoginPageState extends State<LoginPage> {
               patientAccountData['password'],
               patientAccountData['salt'],
               encrypt.Key(base64.decode(patientAccountData['encryption_key'])),
-              encrypt.IV(base64.decode(patientAccountData['initialization_vector']))
-              )
-              ) {
-            // Show success message if login is successful
-              _showLoginSuccessDialog();
-            // Navigate to dashboard
+              encrypt.IV(base64.decode(patientAccountData['initialization_vector'])))) {
+                //Set session username and login status
+                _setusernameSession(patientAccountData['username']);
+                _setLoggedInStatus(true);
 
+                // Closes current window
+                Navigator.pop(context); 
+                // Opens Home page
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage())); 
 
           } else {
             // Show failure message if password verification fails
@@ -95,6 +111,7 @@ class _LoginPageState extends State<LoginPage> {
               const SnackBar(content: Text("Login failed. Please try again.")),
             );
           }
+
         } else {
           // Show failure message if no account is found for the email
           ScaffoldMessenger.of(context).showSnackBar(
@@ -119,32 +136,21 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-    // Function for showing success dialog
-  void _showLoginSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Login Successful'),
-          content: const Text('You have successfully logged in!'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                Navigator.pop(context); // Close the main screen
-                // Navigate to the next screen (HomePage)
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                );
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // // Function for showing success dialog
+  // void _showLoginSuccessSnackBar() {
+  //   Navigator.pop(context); // Closes current window
+  //   Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+  //   // Show success message if login is successful
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     const SnackBar(content: Text("Successfully logged in!"))
+  //   );
+  // }
+
+  // // Opens Homepage
+  // void _openHomePage() {
+  //   Navigator.pop(context); // Closes current window
+  //   Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+  // }
 
   @override
   Widget build(BuildContext context) {
