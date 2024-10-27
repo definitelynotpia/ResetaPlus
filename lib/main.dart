@@ -161,7 +161,7 @@ class _HomePageState extends State<HomePage> {
 
   final PageStorageBucket bucket = PageStorageBucket();
 
-  String _usernameSession = "admin";
+  String _usernameSession = "John Doe";
 
   @override
   void initState() {
@@ -227,8 +227,8 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Username
                 Text(
-                  _usernameSession ?? "John Doe",
-                  style: TextStyle(
+                  _usernameSession,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                     fontSize: 26,
