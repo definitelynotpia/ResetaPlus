@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:mysql_client/mysql_client.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import './pages/login_page.dart';
@@ -14,7 +16,8 @@ import './pages/history_page.dart';
 import './pages/profile_page.dart';
 import './pages/map_page.dart';
 
-void main() {
+void main() async{
+  await dotenv.load(fileName: "assets/.env");
   runApp(const MainApp());
 }
 
@@ -49,13 +52,20 @@ bool verifyPassword(String enteredPassword, String storedPasswordHash,
 }
 
 Future<MySQLConnection> createConnection() async {
+  // Get the local IP address
+  final interfaces = await NetworkInterface.list();
+  final localIP = interfaces
+      .expand((interface) => interface.addresses)
+      .firstWhere((addr) => addr.type == InternetAddressType.IPv4 && !addr.isLoopback);
+
+debugPrint(localIP.address);
+
   final conn = await MySQLConnection.createConnection(
-    host:
-        "10.0.2.2", // !!NOTICE!! Please change this to your local MySQL server IP address
-    port: 3306,
-    userName: "root",
-    password: "root",
-    databaseName: "reseta_plus",
+    host: dotenv.env['DB_ADDRESS'] ?? localIP.address,
+    port: int.parse(dotenv.env['DB_PORT'] ?? '3306'),
+    userName: dotenv.env['DB_USER'] ?? 'root',
+    password: dotenv.env['DB_PASSWORD'] ?? 'root',
+    databaseName: dotenv.env['DB_NAME'] ?? 'reseta_plus',
   );
 
   await conn.connect(); // Ensure you await the connection
