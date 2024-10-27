@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import './pages/login_page.dart';
 import './pages/dashboard_page.dart';
@@ -84,24 +85,51 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 }
 
 class MainApp extends StatelessWidget {
-  // TODO: add user session
-  final bool loggedIn = false;
-
   const MainApp({super.key});
+  // TODO: add user session
+  Future<bool> _getLoggedInStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Checks if 'loggedIn' key exists; if not, it sets a default value of false
+    if (!prefs.containsKey('loggedIn')) {
+      await prefs.setBool('loggedIn', false);
+    }
+
+    return prefs.getBool('loggedIn') ?? false;
+  }
+
+  //final bool loggedIn = false;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Reseta+", // app title
-      theme: ThemeData(
-        fontFamily: "Montserrat", // set custom font as default
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      scrollBehavior: MyCustomScrollBehavior().copyWith(scrollbars: false),
-      // if user is logged in, go to Home; else, go to Login
-      home: loggedIn ? const HomePage() : const LoginPage(title: "Login"),
-    );
+    return FutureBuilder<bool>(
+        future: _getLoggedInStatus(),
+        builder: (context, snapshot) {
+          // Display a loading spinner while the future is being resolved
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // If there's an error, display an error message
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error loading preferences'));
+          }
+
+          // Get the loggedIn status from the snapshot data
+          final bool loggedIn = snapshot.data ?? false;
+          return MaterialApp(
+            title: "Reseta+", // app title
+            theme: ThemeData(
+              fontFamily: "Montserrat", // set custom font as default
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+            ),
+            scrollBehavior:
+                MyCustomScrollBehavior().copyWith(scrollbars: false),
+            // if user is logged in, go to Home; else, go to Login
+            home: loggedIn ? const HomePage() : const LoginPage(title: "Login"),
+          );
+        });
   }
 }
 
@@ -135,6 +163,8 @@ class _HomePageState extends State<HomePage> {
 
   final PageStorageBucket bucket = PageStorageBucket();
 
+  String _usernameSession = "admin";
+
   @override
   void initState() {
     one = StorePage(
@@ -161,8 +191,22 @@ class _HomePageState extends State<HomePage> {
     pages = [one, two, three, four, five];
 
     currentPage = three;
-
+    _getusernameSession();
     super.initState();
+  }
+
+  // Currently used for testing out the logout button
+  void _setLoggedInStatus(bool status) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedIn', status);
+  }
+
+  // Function for getting the email session. Currently used upon initialization
+  void _getusernameSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _usernameSession = prefs.getString('username') ?? "admin";
+    });
   }
 
   @override
@@ -179,13 +223,13 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // title and subtitle
-            const Column(
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Username
                 Text(
-                  "John Doe",
+                  _usernameSession ?? "John Doe",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -193,7 +237,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 // User type = patient, health professional
-                Text(
+                const Text(
                   "Patient",
                   style: TextStyle(
                     color: Colors.white,
@@ -202,6 +246,26 @@ class _HomePageState extends State<HomePage> {
                 )
               ],
             ),
+            // Only for Test purposes
+            ElevatedButton(
+                onPressed: () {
+                  // Action to perform when the button is pressed
+                  _setLoggedInStatus(false);
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context, // Opens another instance of MainApp
+                      MaterialPageRoute(builder: (context) => const MainApp()));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffa16ae8), // Background color
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                  ),
+                ),
+                child: const Text(
+                  "Test Logout", // Button text
+                  style: TextStyle(color: Colors.white),
+                )),
             // profile picture
             Container(
               padding: const EdgeInsets.all(16),

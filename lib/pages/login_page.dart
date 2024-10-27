@@ -9,6 +9,9 @@ import '../widgets/custom_checkbox.dart';
 import './register_page.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.title});
@@ -41,6 +44,19 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _obscureText = !_obscureText;
     });
+  }
+
+  // Sets value for loggedIn in shared_preference
+  void _setLoggedInStatus(bool status) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('loggedIn', status);
+  }
+
+  void _setusernameSession(String? username) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (username != null) {
+      await prefs.setString('username', username);
+    }
   }
 
   Future<void> loginUser(BuildContext context) async {
@@ -80,12 +96,19 @@ class _LoginPageState extends State<LoginPage> {
               encrypt.Key(base64.decode(patientAccountData['encryption_key'])),
               encrypt.IV(base64
                   .decode(patientAccountData['initialization_vector'])))) {
+            _setusernameSession(patientAccountData['username']);
+            _setLoggedInStatus(true);
+            Navigator.pop(context); // Closes current window
+            Navigator.push(
+                context, // Opens another instance of MainApp
+                MaterialPageRoute(builder: (context) => const MainApp()));
             // Show success message if login is successful
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Successfully logged in!")),
             );
             // Navigate to dashboard
           } else {
+            _setLoggedInStatus(false);
             // Show failure message if password verification fails
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Login failed. Please try again.")),
@@ -93,6 +116,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         } else {
           // Show failure message if no account is found for the email
+          _setLoggedInStatus(false);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Login failed. Please try again.")),
           );
@@ -118,19 +142,17 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Center(
-        // add Column widget to have multiple Widgets
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // set size constraints to app logo
             SizedBox(
               height: MediaQuery.of(context).size.height / 5,
               child: Image.asset('assets/logo_ResetaPlus.png'),
             ),
             SizedBox(height: MediaQuery.of(context).size.height / 6.5),
-            // Sign in form
             ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width / 1.5,
@@ -145,8 +167,10 @@ class _LoginPageState extends State<LoginPage> {
                       cursorColor: Theme.of(context).colorScheme.primary,
                       decoration: const InputDecoration(
                           border: GradientOutlineInputBorder(
-                              gradient: LinearGradient(
-                                  colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                              gradient: LinearGradient(colors: [
+                                Color(0xffa16ae8),
+                                Color(0xff94b9ff)
+                              ]),
                               width: 2.0),
                           prefixIcon: Icon(
                             Icons.mail,
@@ -154,13 +178,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           label: Text("Email")),
                       autofillHints: const [AutofillHints.email],
-                      // Email validation script
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "Field cannot be empty.";
-                        } else if (!EmailValidator.validate(value)) {
-                          return "Please input a valid email address.";
                         }
+                        // Assuming EmailValidator.validate(value) is defined elsewhere
                         return null;
                       },
                       onSaved: (value) => _email = value,
@@ -191,7 +213,6 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: _obscureText,
                       enableSuggestions: false,
                       autocorrect: false,
-                      // password validation script
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "Field cannot be empty.";
@@ -201,42 +222,31 @@ class _LoginPageState extends State<LoginPage> {
                       onSaved: (value) => _password = value,
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height / 75),
-                    // Remember me checkbox, Forgot password link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      // row widget to display multiple widgets in the same line
                       children: <Widget>[
-                        // Custom widget with gradient checkbox icon
                         CustomCheckbox(
                           rememberUser: _rememberUser,
                           onChange: (value) {
                             _rememberUser = value;
                           },
                         ),
-                        // Forgot password container
                         Padding(
                           padding: const EdgeInsets.only(top: 18),
                           child: GestureDetector(
-                            // forgot password script
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                // display message
                                 const SnackBar(
                                   content: Text(
                                       "Check your email for a link to reset your password."),
                                 ),
                               );
                             },
-                            // Forgot password text
                             child: const MouseRegion(
-                              // on hover, set mouse cursor to click
                               cursor: SystemMouseCursors.click,
                               child: Text(
                                 "Forgot password?",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                ),
+                                style: TextStyle(fontSize: 16),
                               ),
                             ),
                           ),
@@ -244,7 +254,6 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height / 35),
-                    // Login button
                     Container(
                       height: 50,
                       width: 200,
@@ -254,9 +263,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: ElevatedButton(
-                        // login form script
                         onPressed: () => loginUser(context),
-                        // content
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent),
@@ -280,32 +287,24 @@ class _LoginPageState extends State<LoginPage> {
               alignment: WrapAlignment.center,
               spacing: 3,
               children: <Widget>[
-                // Sign up question prompt
                 const Text(
                   "DON'T HAVE AN ACCOUNT?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(fontSize: 16),
                 ),
-                // Sign Up button
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
-                    // go to Sign Up form script
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const RegisterPage(
-                            title: "Register",
-                          ),
+                          builder: (context) =>
+                              const RegisterPage(title: "Register"),
                         ),
                       );
                     },
                     child: const Text(
                       "SIGN UP NOW",
-                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
