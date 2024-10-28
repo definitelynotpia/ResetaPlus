@@ -31,8 +31,8 @@ String hashPassword(String password, String salt) {
   return digest.toString(); // Return the hashed password as a string
 }
 
-bool verifyPassword(String enteredPassword, String storedPasswordHash,
-    String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv) {
+String decryptPassword(String storedPasswordHash,
+    String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv){
   // Create an encrypter using the AES algorithm and the stored encryption key
   final encrypter = encrypt.Encrypter(encrypt.AES(storedKey));
 
@@ -40,9 +40,13 @@ bool verifyPassword(String enteredPassword, String storedPasswordHash,
   final encryptedPasswordHash =
       encrypt.Encrypted.fromBase64(storedPasswordHash);
 
-  // Decrypt the password hash using the encrypter and the stored initialization vector
-  final decryptedPasswordHash =
-      encrypter.decrypt(encryptedPasswordHash, iv: storedIv);
+  // Return the decrypted password hash using the encrypter and the stored initialization vector
+  return encrypter.decrypt(encryptedPasswordHash, iv: storedIv);
+}
+
+bool verifyPassword(String enteredPassword, String storedPasswordHash,
+    String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv) {
+  final decryptedPasswordHash = decryptPassword(storedPasswordHash, storedSalt, storedKey, storedIv);
 
   // Hash the entered password using the stored salt to compare with the decrypted hash
   String hashedEnteredPassword = hashPassword(enteredPassword, storedSalt);
