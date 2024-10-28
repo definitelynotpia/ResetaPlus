@@ -17,6 +17,12 @@ import 'patient pages/history_page.dart';
 import 'patient pages/profile_page.dart';
 import 'patient pages/map_page.dart';
 
+import 'doctor pages/doctor_dashboard_page.dart';
+import 'doctor pages/doctor_history_page.dart';
+import 'doctor pages/doctor_map_page.dart';
+import 'doctor pages/doctor_profile_page.dart';
+import 'doctor pages/doctor_store_page.dart';
+
 void main() async {
   await dotenv.load(fileName: "assets/.env");
   runApp(const MainApp());
@@ -157,14 +163,27 @@ class _HomePageState extends State<HomePage> {
   final Key historyPage = const PageStorageKey("historyPage");
   final Key profilePage = const PageStorageKey("profilePage");
 
+  final Key doctorStorePage = const PageStorageKey("doctorStorePage");
+  final Key doctorMapPage = const PageStorageKey("doctorMapPage");
+  final Key doctorDashboardPage = const PageStorageKey("doctorDashboardPage");
+  final Key doctorHistoryPage = const PageStorageKey("doctorHistoryPage");
+  final Key doctorProfilePage = const PageStorageKey("doctorProfilePage");
+
   late StorePage one;
   late MapPage two;
   late DashboardPage three;
   late HistoryPage four;
   late ProfilePage five;
 
+  late DoctorStorePage six;
+  late DoctorMapPage seven;
+  late DoctorDashboardPage eight;
+  late DoctorHistoryPage nine;
+  late DoctorProfilePage ten;
+
   late List<Widget> pages;
-  late Widget currentPage;
+  // Shows Loading Default page
+  late Widget currentPage = const Center(child: CircularProgressIndicator());
 
   final PageStorageBucket bucket = PageStorageBucket();
 
@@ -173,33 +192,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    one = StorePage(
-      key: storePage,
-      title: "Store",
-    );
-    two = MapPage(
-      key: mapPage,
-      title: "Map",
-    );
-    three = DashboardPage(
-      key: dashboardPage,
-      title: "Dashboard",
-    );
-    four = HistoryPage(
-      key: historyPage,
-      title: "History",
-    );
-    five = ProfilePage(
-      key: profilePage,
-      title: "Profile",
-    );
-
-    pages = [one, two, three, four, five];
-
-    currentPage = three;
-    _getusernameSession();
-    _getUserType();
     super.initState();
+    _initializeUserData();
   }
 
   // Currently used for testing out the logout button
@@ -209,7 +203,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Function for getting the user type. Currently used upon initialization
-  void _getUserType() async {
+  Future<void> _getUserType() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _userType = prefs.getString('userType') ?? "Default";
@@ -217,10 +211,68 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Function for getting the username session. Currently used upon initialization
-  void _getusernameSession() async {
+  Future<void> _getusernameSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _usernameSession = prefs.getString('username') ?? "admin";
+    });
+  }
+
+  Future<void> _initializeUserData() async {
+    await _getusernameSession();
+    await _getUserType();
+    setState(() {
+      if (_userType == 'Patient') {
+        one = StorePage(
+          key: storePage,
+          title: "Store",
+        );
+        two = MapPage(
+          key: mapPage,
+          title: "Map",
+        );
+        three = DashboardPage(
+          key: dashboardPage,
+          title: "Dashboard",
+        );
+        four = HistoryPage(
+          key: historyPage,
+          title: "History",
+        );
+        five = ProfilePage(
+          key: profilePage,
+          title: "Profile",
+        );
+
+        pages = [one, two, three, four, five];
+
+        currentPage = three;
+      } else if (_userType == 'Doctor') {
+        six = DoctorStorePage(
+          key: doctorStorePage,
+          title: "Store",
+        );
+        seven = DoctorMapPage(
+          key: doctorMapPage,
+          title: "Map",
+        );
+        eight = DoctorDashboardPage(
+          key: doctorDashboardPage,
+          title: "Dashboard",
+        );
+        nine = DoctorHistoryPage(
+          key: doctorHistoryPage,
+          title: "History",
+        );
+        ten = DoctorProfilePage(
+          key: doctorProfilePage,
+          title: "Profile",
+        );
+
+        pages = [six, seven, eight, nine, ten];
+
+        currentPage = eight;
+      }
     });
   }
 
