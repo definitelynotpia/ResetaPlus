@@ -17,7 +17,7 @@ import 'patient pages/history_page.dart';
 import 'patient pages/profile_page.dart';
 import 'patient pages/map_page.dart';
 
-void main() async{
+void main() async {
   await dotenv.load(fileName: "assets/.env");
   runApp(const MainApp());
 }
@@ -32,8 +32,8 @@ String hashPassword(String password, String salt) {
   return digest.toString(); // Return the hashed password as a string
 }
 
-String decryptPassword(String storedPasswordHash,
-    String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv){
+String decryptPassword(String storedPasswordHash, String storedSalt,
+    encrypt.Key storedKey, encrypt.IV storedIv) {
   // Create an encrypter using the AES algorithm and the stored encryption key
   final encrypter = encrypt.Encrypter(encrypt.AES(storedKey));
 
@@ -47,7 +47,8 @@ String decryptPassword(String storedPasswordHash,
 
 bool verifyPassword(String enteredPassword, String storedPasswordHash,
     String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv) {
-  final decryptedPasswordHash = decryptPassword(storedPasswordHash, storedSalt, storedKey, storedIv);
+  final decryptedPasswordHash =
+      decryptPassword(storedPasswordHash, storedSalt, storedKey, storedIv);
 
   // Hash the entered password using the stored salt to compare with the decrypted hash
   String hashedEnteredPassword = hashPassword(enteredPassword, storedSalt);
@@ -61,7 +62,8 @@ Future<MySQLConnection> createConnection() async {
   final interfaces = await NetworkInterface.list();
   final localIP = interfaces
       .expand((interface) => interface.addresses)
-      .firstWhere((addr) => addr.type == InternetAddressType.IPv4 && !addr.isLoopback);
+      .firstWhere(
+          (addr) => addr.type == InternetAddressType.IPv4 && !addr.isLoopback);
 
   final conn = await MySQLConnection.createConnection(
     host: dotenv.env['DB_ADDRESS'] ?? localIP.address,
@@ -167,6 +169,7 @@ class _HomePageState extends State<HomePage> {
   final PageStorageBucket bucket = PageStorageBucket();
 
   String _usernameSession = "John Doe";
+  String _userType = "Default";
 
   @override
   void initState() {
@@ -195,6 +198,7 @@ class _HomePageState extends State<HomePage> {
 
     currentPage = three;
     _getusernameSession();
+    _getUserType();
     super.initState();
   }
 
@@ -204,7 +208,15 @@ class _HomePageState extends State<HomePage> {
     await prefs.setBool('loggedIn', status);
   }
 
-  // Function for getting the email session. Currently used upon initialization
+  // Function for getting the user type. Currently used upon initialization
+  void _getUserType() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userType = prefs.getString('userType') ?? "Default";
+    });
+  }
+
+  // Function for getting the username session. Currently used upon initialization
   void _getusernameSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -240,9 +252,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 // User type = patient, health professional
-                const Text(
-                  "Patient",
-                  style: TextStyle(
+                Text(
+                  _userType,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                   ),

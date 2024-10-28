@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'patient pages/login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RoleSelectionPage extends StatefulWidget {
   const RoleSelectionPage({super.key});
@@ -10,6 +11,11 @@ class RoleSelectionPage extends StatefulWidget {
 }
 
 class _RoleSelectionPage extends State<RoleSelectionPage> {
+  void _setUserType(String userType) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userType', userType);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,6 +43,7 @@ class _RoleSelectionPage extends State<RoleSelectionPage> {
               ),
               child: ElevatedButton(
                 onPressed: () {
+                  _setUserType('Doctor');
                   // Navigate to Doctor's page
                   Navigator.push(
                     context,
@@ -72,10 +79,12 @@ class _RoleSelectionPage extends State<RoleSelectionPage> {
               ),
               child: ElevatedButton(
                 onPressed: () {
+                  _setUserType('Patient');
                   // Navigate to Patient's page
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const LoginPage(title: "Login")),
+                    MaterialPageRoute(
+                        builder: (context) => const LoginPage(title: "Login")),
                   );
                 },
                 style: ElevatedButton.styleFrom(
