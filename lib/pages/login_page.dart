@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
       FROM reseta_plus.patient_accounts a
       JOIN reseta_plus.patient_account_keys k ON a.patient_id = k.patient_key_id
       WHERE a.email = :email
-    ''', {'email': _email});
+      ''', {'email': _email});
 
       // Check if Widget is mounted in context
       if (context.mounted) {

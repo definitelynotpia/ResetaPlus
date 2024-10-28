@@ -15,6 +15,7 @@ import './pages/store_page.dart';
 import './pages/history_page.dart';
 import './pages/profile_page.dart';
 import './pages/map_page.dart';
+import './pages/patient_credentials_view.dart';
 
 void main() async{
   await dotenv.load(fileName: "assets/.env");
@@ -31,8 +32,8 @@ String hashPassword(String password, String salt) {
   return digest.toString(); // Return the hashed password as a string
 }
 
-bool verifyPassword(String enteredPassword, String storedPasswordHash,
-    String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv) {
+String decryptPassword(String storedPasswordHash,
+    String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv){
   // Create an encrypter using the AES algorithm and the stored encryption key
   final encrypter = encrypt.Encrypter(encrypt.AES(storedKey));
 
@@ -40,9 +41,13 @@ bool verifyPassword(String enteredPassword, String storedPasswordHash,
   final encryptedPasswordHash =
       encrypt.Encrypted.fromBase64(storedPasswordHash);
 
-  // Decrypt the password hash using the encrypter and the stored initialization vector
-  final decryptedPasswordHash =
-      encrypter.decrypt(encryptedPasswordHash, iv: storedIv);
+  // Return the decrypted password hash using the encrypter and the stored initialization vector
+  return encrypter.decrypt(encryptedPasswordHash, iv: storedIv);
+}
+
+bool verifyPassword(String enteredPassword, String storedPasswordHash,
+    String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv) {
+  final decryptedPasswordHash = decryptPassword(storedPasswordHash, storedSalt, storedKey, storedIv);
 
   // Hash the entered password using the stored salt to compare with the decrypted hash
   String hashedEnteredPassword = hashPassword(enteredPassword, storedSalt);
@@ -149,12 +154,14 @@ class _HomePageState extends State<HomePage> {
   final Key dashboardPage = const PageStorageKey("dashboardPage");
   final Key historyPage = const PageStorageKey("historyPage");
   final Key profilePage = const PageStorageKey("profilePage");
+  final Key credentialsViewPage = const PageStorageKey("credentialsViewPage");
 
   late StorePage one;
   late MapPage two;
   late DashboardPage three;
   late HistoryPage four;
   late ProfilePage five;
+  late CredentialsPage six;
 
   late List<Widget> pages;
   late Widget currentPage;
@@ -185,10 +192,14 @@ class _HomePageState extends State<HomePage> {
       key: profilePage,
       title: "Profile",
     );
+    six = CredentialsPage(
+      key: credentialsViewPage,
+      title: "credentials",
+    );
 
     pages = [one, two, three, four, five];
 
-    currentPage = three;
+    currentPage = six;
     _getusernameSession();
     super.initState();
   }
