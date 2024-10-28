@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
 import '../widgets/custom_checkbox.dart';
-import './register_page.dart';
+import 'register_page.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:shared_preferences/shared_preferences.dart';

@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
-import 'package:resetaplus/pages/login_page.dart';
+import 'package:resetaplus/patient%20pages/login_page.dart';
 import '../widgets/custom_checkbox.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;

@@ -7,14 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:mysql_client/mysql_client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:resetaplus/account_type_picker_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import './pages/login_page.dart';
-import './pages/dashboard_page.dart';
-import './pages/store_page.dart';
-import './pages/history_page.dart';
-import './pages/profile_page.dart';
-import './pages/map_page.dart';
+import 'patient pages/login_page.dart';
+import 'patient pages/dashboard_page.dart';
+import 'patient pages/store_page.dart';
+import 'patient pages/history_page.dart';
+import 'patient pages/profile_page.dart';
+import 'patient pages/map_page.dart';
 
 void main() async{
   await dotenv.load(fileName: "assets/.env");
@@ -129,7 +130,7 @@ class MainApp extends StatelessWidget {
             scrollBehavior:
                 MyCustomScrollBehavior().copyWith(scrollbars: false),
             // if user is logged in, go to Home; else, go to Login
-            home: loggedIn ? const HomePage() : const LoginPage(title: "Login"),
+            home: loggedIn ? const HomePage() : const RoleSelectionPage(),
           );
         });
   }
