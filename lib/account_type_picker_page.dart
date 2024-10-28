@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'patient pages/login_page.dart';
+import 'doctor pages/doctor_login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RoleSelectionPage extends StatefulWidget {
@@ -47,7 +48,9 @@ class _RoleSelectionPage extends State<RoleSelectionPage> {
                   // Navigate to Doctor's page
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const DoctorPage()),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            const DoctorLoginPage(title: "Login")),
                   );
                 },
                 style: ElevatedButton.styleFrom(
