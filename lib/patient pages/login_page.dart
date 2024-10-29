@@ -137,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
- @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
@@ -167,8 +167,10 @@ class _LoginPageState extends State<LoginPage> {
                       cursorColor: Theme.of(context).colorScheme.primary,
                       decoration: const InputDecoration(
                           border: GradientOutlineInputBorder(
-                              gradient: LinearGradient(
-                                  colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                              gradient: LinearGradient(colors: [
+                                Color(0xffa16ae8),
+                                Color(0xff94b9ff)
+                              ]),
                               width: 2.0),
                           prefixIcon: Icon(
                             Icons.mail,

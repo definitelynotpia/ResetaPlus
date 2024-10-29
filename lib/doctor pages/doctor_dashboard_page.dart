@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:resetaplus/main.dart';
 
 import 'package:resetaplus/widgets/custom_prescription.dart';
+import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DoctorDashboardPage extends StatefulWidget {
@@ -44,15 +45,15 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
       // SQL query to fetch the information of the medication in the prescription
       var activePrescriptionMedicationInfo = await conn.execute('''
-      SELECT 
+      SELECT
           m.medication_name,
           m.medication_info,
           m.medication_description
-      FROM 
+      FROM
           reseta_plus.patient_prescriptions p
-      JOIN 
+      JOIN
           reseta_plus.medications m ON p.medication_id = m.medication_id
-      WHERE 
+      WHERE
           p.patient_id = :patient_id
           AND p.status = 'active';
       ''', {'patient_id': _patientIDTest});
@@ -341,6 +342,26 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                 }).toList() ??
                 []), // Fallback to an empty list if _currentPrescriptions is null
           ),
+          ElevatedButton(
+              onPressed: () {
+                // Action to perform when the button is pressed
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return PrescriptionPopupForm();
+                  },
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xffa16ae8), // Background color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // Rounded corners
+                ),
+              ),
+              child: const Text(
+                "Add Prescription", // Button text
+                style: TextStyle(color: Colors.white),
+              )),
         ],
       ),
     );
