@@ -46,15 +46,15 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
     });
   }
 
-  Future<bool> emailExists(String email, BuildContext context) async {
+  Future<bool> existsInTable(String tableName, String columnName, String value) async {
     try {
       // Create a connection to the database
       final conn = await createConnection();
 
-      // Execute a query to count matching emails
+      // Prepare the SQL query
       var results = await conn.execute(
-        'SELECT COUNT(*) AS count FROM doctor_accounts WHERE email = :email',
-        {'email': _email},
+        'SELECT COUNT(*) AS count FROM $tableName WHERE $columnName = :value',
+        {'value': value},
       );
 
       // Fetch the count from the result
@@ -66,23 +66,27 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
       // Return true if count is greater than 0, otherwise false
       return int.parse(count['count']) > 0;
     } catch (e) {
-      // Print error details to the console
       debugPrint("Error: $e");
-
-      // Check if Widget is mounted in context
-      if (context.mounted) {
-        // Show error message if an exception occurs during the process
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Email Validation failed. Please try again.")),
-        );
-      }
-
-      return false;
+      return false; // Return false in case of error
     }
   }
 
   Future<void> registerUser(BuildContext context) async {
+    
+  // Check if the form is valid
+  if (!_formKey.currentState!.validate()) {
+    // Exit early if the form is not valid
+    return;
+  }
+
+  // Save the form inputs
+  _formKey.currentState!.save();
+
+  // Check for email and license existence
+  bool emailExists = await existsInTable('doctor_accounts', 'email', _email!);
+  bool licenseExists = await existsInTable('doctor_accounts', 'license_number', _licenseNumber!);
+  bool verifiedLicenseExists = await existsInTable('verified_license', 'license_number', _licenseNumber!);
+
     // Check if the form is valid
     if (_formKey.currentState!.validate()) {
       // Save the form inputs
@@ -108,9 +112,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
       // Check if Widget is mounted in context
       if (context.mounted) {
         // Check if the email exists
-        if (await emailExists(_email!, context)) {
-          debugPrint("Email already exists.");
-
+        if (emailExists) {
           // Check if Widget is mounted in context
           if (context.mounted) {
             // Handle the case where the email is already in use
@@ -119,13 +121,31 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
                   content: Text("Email already in use. Please use another.")),
             );
           }
-        } else {
+        }else if(licenseExists){
+          // Check if Widget is mounted in context
+          if (context.mounted) {
+            // Handle the case where the license is already in use
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text("License already registered to another user.")),
+            );
+          }
+        }else if(!verifiedLicenseExists){
+          // Check if Widget is mounted in context
+          if (context.mounted) {
+            // Handle the case where the license is already in use
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text("Invalid License.")),
+            );
+          }
+        }else {
           // Insert the new user into the doctor_accounts table
           await conn.execute(
             'INSERT INTO doctor_accounts (username, license_number, email, password, salt) VALUES (:username, :license_number, :email, :password, :salt)',
             {
               'username': _username,
-              'license_number': _licenseNumber,
+              'license_number': _licenseNumber?.toUpperCase(),
               'email': _email,
               'password': encryptedPassword,
               'salt': salt
