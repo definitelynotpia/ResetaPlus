@@ -31,16 +31,16 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   void initState() {
     super.initState();
     // Fetch the prescription data when the widget is initialized
-    getActivePatientMedicationProgress();
+    getActivePatientMedicationProgress(context);
   }
 
-  Future<void> getActivePatientMedicationProgress()async {
-    try{
+  Future<void> getActivePatientMedicationProgress(BuildContext context) async {
+    try {
       // Establish a connection to the database
       final conn = await createConnection();
 
       // Query to fetch distinct active patients along with their usernames
-      var activePatients = await conn.execute(''' 
+      var activePatients = await conn.execute('''
       SELECT DISTINCT pp.patient_id, pa.username
       FROM patient_prescriptions pp
       JOIN patient_accounts pa ON pp.patient_id = pa.patient_id
@@ -58,21 +58,29 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
         String? patientIdString = assoc['patient_id'];
 
         // Convert the string to an int with a default value
-        int patientIdInt = patientIdString != null 
-            ? int.tryParse(patientIdString) ?? 0 // Default to 0 if parsing fails
+        int patientIdInt = patientIdString != null
+            ? int.tryParse(patientIdString) ??
+                0 // Default to 0 if parsing fails
             : 0; // Default to 0 if patientIdString is null
 
         // Get the duration of the patient's prescription
-        num medicationDuration = await getPrescriptionDuration(patientIdInt);
+        num medicationDuration = context.mounted
+            ? await getPrescriptionDuration(patientIdInt, context)
+            : -1;
 
         // Get the current day of medication progress for the patient
-        num? currentDay = await getMedicationDayProgress(patientIdInt);
-
-        // Calculate overall medication progress based on duration and current day
-        double currentProgress= calculateOverallMedicationProgress(medicationDuration, currentDay);
+        num? currentDay = context.mounted
+            ? await getMedicationDayProgress(patientIdInt, context)
+            : -1;
 
         // Get the next intake time for the patient's medication
-        String nextIntakeTime = await getNextMedicineIntake(patientIdInt);
+        String nextIntakeTime = context.mounted
+            ? await getNextMedicineIntake(patientIdInt, context)
+            : "";
+
+        // Calculate overall medication progress based on duration and current day
+        double currentProgress =
+            calculateOverallMedicationProgress(medicationDuration, currentDay);
 
         // Add the patient's progress data to the list
         activePatientMedicationProgressData.add({
@@ -86,9 +94,9 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
       // Update the state with the active patients' medication progress data
       setState(() {
-        _activePatientMedicationProgressData = activePatientMedicationProgressData;
-      });   
-
+        _activePatientMedicationProgressData =
+            activePatientMedicationProgressData;
+      });
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
@@ -102,7 +110,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   }
 
   // Function to get the overall progress of medication
-  Future<num> getPrescriptionDuration(int patientID) async {
+  Future<num> getPrescriptionDuration(
+      int patientID, BuildContext context) async {
     try {
       final conn = await createConnection();
 
@@ -120,14 +129,15 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
       // Check if there are any active prescriptions
       if (activePrescriptionDuration.rows.isNotEmpty) {
         // Split duration string to extract value
-        final parts = activePrescriptionDuration.rows.first.assoc()['duration']!.split(' ');
+        final parts = activePrescriptionDuration.rows.first
+            .assoc()['duration']!
+            .split(' ');
 
         // Parse the duration value
         num durationValue = num.parse(parts[0]);
 
         // Extract the prescription duration from the result
         return durationValue;
-        
       } else {
         // Return 0.0 if there are no active prescriptions
         return 0.0;
@@ -145,9 +155,9 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
     }
   }
 
-
   // Function to get today's medication progress
-  Future<num?> getMedicationDayProgress(int patientID) async {
+  Future<num?> getMedicationDayProgress(
+      int patientID, BuildContext context) async {
     try {
       final conn = await createConnection();
 
@@ -181,7 +191,6 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
       // Update the state with the total count of prescriptions taken
       return totalCount;
-
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
@@ -196,7 +205,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   }
 
   // Function to get the next medicine intake time
-  Future<String> getNextMedicineIntake(int patientID) async {
+  Future<String> getNextMedicineIntake(
+      int patientID, BuildContext context) async {
     try {
       final conn = await createConnection();
 
@@ -236,7 +246,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
           DateTime nextTime = calculateNextIntake(intakeTime, frequencyStr!);
 
           // Update the next intake time if it's the earliest found
-          if (nextIntakeDateTime == null || nextTime.isBefore(nextIntakeDateTime)) {
+          if (nextIntakeDateTime == null ||
+              nextTime.isBefore(nextIntakeDateTime)) {
             nextIntakeDateTime = nextTime;
           }
         }
@@ -265,7 +276,6 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
       return 'Error occurred'; // Return a string indicating an error
     }
   }
-
 
   // Function to parse a time string into a DateTime object
   DateTime parseTime(String timeStr) {
@@ -344,244 +354,258 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
           Container(
             padding: EdgeInsets.all(8), // Padding for the outer container
             decoration: BoxDecoration(
-              color: Colors.transparent, // Ensure the outer container is transparent
+              color: Colors
+                  .transparent, // Ensure the outer container is transparent
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: (_activePatientMedicationProgressData?.map((patientData) {
-                double currentProgress = patientData['currentProgress'] ?? 0;
-                num medicationDuration = patientData['medicationDuration'] ?? '0';
-                num currentDay = patientData['currentDay'] ?? 0;
-                String nextIntakeTime = patientData['nextIntakeTime'] ?? 'N/A';
-                String username = patientData['username'] ?? 'N/A';
+              children: (_activePatientMedicationProgressData
+                      ?.map((patientData) {
+                    double currentProgress =
+                        patientData['currentProgress'] ?? 0;
+                    num medicationDuration =
+                        patientData['medicationDuration'] ?? '0';
+                    num currentDay = patientData['currentDay'] ?? 0;
+                    String nextIntakeTime =
+                        patientData['nextIntakeTime'] ?? 'N/A';
+                    String username = patientData['username'] ?? 'N/A';
 
-                return Container(
-                  // Container with gradient border for each patient data
-                  decoration: BoxDecoration(
-                    border: GradientBoxBorder(
-                      width: 2,
-                      gradient: LinearGradient(colors: [
-                        Color(0xffa16ae8),
-                        Color(0xff94b9ff),
-                      ]),
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.white, // White background for the inner container
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        username,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Color(0xFF602E9E),
+                    return Container(
+                      // Container with gradient border for each patient data
+                      decoration: BoxDecoration(
+                        border: GradientBoxBorder(
+                          width: 2,
+                          gradient: LinearGradient(colors: [
+                            Color(0xffa16ae8),
+                            Color(0xff94b9ff),
+                          ]),
                         ),
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors
+                            .white, // White background for the inner container
                       ),
-                      // TITLE - MEDICATION PROGRESS
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          const Text(
-                            "MEDICATION PROGRESS",
-                            textAlign: TextAlign.center,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            username,
                             style: TextStyle(
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
                               color: Color(0xFF602E9E),
                             ),
                           ),
-                          MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: GestureDetector(
-                              onTap: () {
-                                // TODO: opens a Calendar widget
-                              },
-                              child: Text(
-                                DateFormat('MMMM').format(_currentDate),
+                          // TITLE - MEDICATION PROGRESS
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              const Text(
+                                "MEDICATION PROGRESS",
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 16,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                   color: Color(0xFF602E9E),
                                 ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // spacer
-                      SizedBox(height: 10),
-
-                      // Prescription progress bar
-                      CustomProgressBar(
-                        value: (currentProgress),
-                        backgroundColor: Color(0xFFD9D9FF),
-                        gradientColors: [Color(0xffa16ae8), Color(0xff94b9ff)],
-                        height: 40,
-                        borderRadius: BorderRadius.circular(15),
-                        text: '${max(medicationDuration - currentDay, 0)} days Left',
-                      ),
-
-                      // date pointer
-                      Container(
-                        transform: Matrix4.translationValues(0, 10, 0),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.arrow_drop_down,
-                          size: 30,
-                        ),
-                      ),
-
-                      // weekday carousel
-                      CarouselSlider(
-                        items: List<Widget>.generate(31, (int index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 1),
-                            child: Container(
-                              decoration: (index >= currentDay)
-                                  ? BoxDecoration(
-                                      border: GradientBoxBorder(
-                                        width: 1,
-                                        gradient: LinearGradient(colors: [
-                                          Color.fromRGBO(195, 150, 255, 1),
-                                          Color(0xFF86B0FF),
-                                        ]),
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    )
-                                  : BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Color.fromRGBO(195, 150, 255, 1),
-                                          Color(0xFF86B0FF),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // TODO: opens a Calendar widget
+                                  },
+                                  child: Text(
+                                    DateFormat('MMMM').format(_currentDate),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Color(0xFF602E9E),
                                     ),
-                              child: Center(
-                                child: Text("${index + 1}"),
-                              ),
-                            ),
-                          );
-                        }),
-                        options: CarouselOptions(
-                          height: 60,
-                          aspectRatio: 1 / 1,
-                          viewportFraction: 0.2,
-                          initialPage: currentDay.toInt(),
-                          enableInfiniteScroll: false,
-                          reverse: false,
-                          autoPlay: false,
-                          enlargeCenterPage: true,
-                          enlargeFactor: 0.25,
-                          scrollDirection: Axis.horizontal,
-                        ),
-                      ),
-
-                      // spacer
-                      SizedBox(height: 15),
-
-                      // next intake alarm
-                      Text(
-                        'Your next medicine intake is at: ',
-                        style: TextStyle(
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        nextIntakeTime,
-                        style: TextStyle(
-                          fontSize: 54,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFA16AE8),
-                        ),
-                      ),
-
-                      // BUTTONS - INTAKE HISTORY AND INTAKE INSTRUCTIONS
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFA16AE8),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'INTAKE HISTORY',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
                                   ),
                                 ),
                               ),
+                            ],
+                          ),
+
+                          // spacer
+                          SizedBox(height: 10),
+
+                          // Prescription progress bar
+                          CustomProgressBar(
+                            value: (currentProgress),
+                            backgroundColor: Color(0xFFD9D9FF),
+                            gradientColors: [
+                              Color(0xffa16ae8),
+                              Color(0xff94b9ff)
+                            ],
+                            height: 40,
+                            borderRadius: BorderRadius.circular(15),
+                            text:
+                                '${max(medicationDuration - currentDay, 0)} days Left',
+                          ),
+
+                          // date pointer
+                          Container(
+                            transform: Matrix4.translationValues(0, 10, 0),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.arrow_drop_down,
+                              size: 30,
                             ),
                           ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFA16AE8),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'INTAKE INSTRUCTIONS',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
+
+                          // weekday carousel
+                          CarouselSlider(
+                            items: List<Widget>.generate(31, (int index) {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 1),
+                                child: Container(
+                                  decoration: (index >= currentDay)
+                                      ? BoxDecoration(
+                                          border: GradientBoxBorder(
+                                            width: 1,
+                                            gradient: LinearGradient(colors: [
+                                              Color.fromRGBO(195, 150, 255, 1),
+                                              Color(0xFF86B0FF),
+                                            ]),
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        )
+                                      : BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Color.fromRGBO(195, 150, 255, 1),
+                                              Color(0xFF86B0FF),
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                  child: Center(
+                                    child: Text("${index + 1}"),
+                                  ),
+                                ),
+                              );
+                            }),
+                            options: CarouselOptions(
+                              height: 60,
+                              aspectRatio: 1 / 1,
+                              viewportFraction: 0.2,
+                              initialPage: currentDay.toInt(),
+                              enableInfiniteScroll: false,
+                              reverse: false,
+                              autoPlay: false,
+                              enlargeCenterPage: true,
+                              enlargeFactor: 0.25,
+                              scrollDirection: Axis.horizontal,
+                            ),
+                          ),
+
+                          // spacer
+                          SizedBox(height: 15),
+
+                          // next intake alarm
+                          Text(
+                            'Your next medicine intake is at: ',
+                            style: TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            nextIntakeTime,
+                            style: TextStyle(
+                              fontSize: 54,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFA16AE8),
+                            ),
+                          ),
+
+                          // BUTTONS - INTAKE HISTORY AND INTAKE INSTRUCTIONS
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFA16AE8),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'INTAKE HISTORY',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFA16AE8),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'INTAKE INSTRUCTIONS',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                );
-              }).toList() ?? []),
+                    );
+                  }).toList() ??
+                  []),
             ),
           ),
 
           SizedBox(height: 20), // Add some spacing before the button
 
           ElevatedButton(
-            onPressed: () {
-              // Action to perform when the button is pressed
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return PrescriptionPopupForm();
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xffa16ae8), // Background color
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10), // Rounded corners
+              onPressed: () {
+                // Action to perform when the button is pressed
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return PrescriptionPopupForm();
+                  },
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xffa16ae8), // Background color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // Rounded corners
+                ),
               ),
-            ),
-            child: const Text(
-              "Add Prescription", // Button text
-              style: TextStyle(color: Colors.white),
-            )
-          ),
+              child: const Text(
+                "Add Prescription", // Button text
+                style: TextStyle(color: Colors.white),
+              )),
 
           SizedBox(height: 20), // Add some spacing after the button
         ],
@@ -638,7 +662,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
-                  
+
                   // Handle the prescription creation logic here
                   // e.g., call an API or update the state
 
