@@ -30,23 +30,23 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   void initState() {
     super.initState();
     // Fetch the prescription data when the widget is initialized
-    _initialize();
+    _initialize(context);
   }
 
   // Initializes necessary data by fetching the doctor ID first and then retrieving other related information
-  Future<void> _initialize() async {
+  Future<void> _initialize(BuildContext context) async {
     // Fetch the doctor ID first
-    await getDoctorID();
+    await getDoctorID(context);
 
     // Now that getDoctorID has completed, call the other functions
-    await Future.wait([
-      getActivePatientMedicationProgress()
-    ]);
+    if (context.mounted) {
+      await Future.wait([getActivePatientMedicationProgress(context)]);
+    }
   }
 
   // Function to get the doctor ID number
-  Future<void> getDoctorID() async {
-    try{
+  Future<void> getDoctorID(BuildContext context) async {
+    try {
       // Call getUserID with "doctor" to retrieve the user ID for the doctor
       int userID = await getUserID("doctor");
 
@@ -54,13 +54,13 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
       setState(() {
         _doctorID = userID;
       });
-
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error fetching data. Please try again.")),
+          const SnackBar(
+              content: Text("Error fetching data. Please try again.")),
         );
       }
     }
@@ -646,7 +646,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   }
 
   void _showPrescriptionDialog(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     String? drugName;
     String? drugInfo;
     String? description;
@@ -658,7 +658,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
           title: Text('Create Prescription'),
           content: SingleChildScrollView(
             child: Form(
-              key: _formKey,
+              key: formKey,
               child: Column(
                 children: [
                   TextFormField(
@@ -692,8 +692,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
             ),
             TextButton(
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
 
                   // Handle the prescription creation logic here
                   // e.g., call an API or update the state
