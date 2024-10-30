@@ -1,17 +1,14 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'dart:math';
 
-import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
 import 'package:resetaplus/main.dart';
 
-import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/prescription_popup.dart';
-//import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DoctorDashboardPage extends StatefulWidget {
   const DoctorDashboardPage({super.key, required String title});
@@ -23,12 +20,11 @@ class DoctorDashboardPage extends StatefulWidget {
 class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   // Current date for reference
   final DateTime _currentDate = DateTime.now();
-  // Sample patient ID for testing
-  final int _patientIDTest = 1;
 
+  // Sample doctor ID for testing
   final int _doctorIDTest = 1;
 
-  List<Map<String, String>>? _currentPrescriptions; // Medicine information in the prescription
+  // A list to store medication progress data for active patients
   List<Map<String, dynamic>>? _activePatientMedicationProgressData;
 
   @override
@@ -36,13 +32,14 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
     super.initState();
     // Fetch the prescription data when the widget is initialized
     getActivePatientMedicationProgress();
-    getCurrentPrescriptions();
   }
 
   Future<void> getActivePatientMedicationProgress()async {
     try{
+      // Establish a connection to the database
       final conn = await createConnection();
 
+      // Query to fetch distinct active patients along with their usernames
       var activePatients = await conn.execute(''' 
       SELECT DISTINCT pp.patient_id, pa.username
       FROM patient_prescriptions pp
@@ -51,8 +48,10 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
         AND pp.doctor_id = :doctor_id;
       ''', {'doctor_id': _doctorIDTest});
 
+      // Initialize a list to hold medication progress data
       List<Map<String, dynamic>>? activePatientMedicationProgressData = [];
 
+      // Iterate over each row returned from the query
       for (var row in activePatients.rows) {
         var assoc = row.assoc();
         // Retrieve the patient_id as a string
@@ -62,12 +61,20 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
         int patientIdInt = patientIdString != null 
             ? int.tryParse(patientIdString) ?? 0 // Default to 0 if parsing fails
             : 0; // Default to 0 if patientIdString is null
-        
+
+        // Get the duration of the patient's prescription
         num medicationDuration = await getPrescriptionDuration(patientIdInt);
+
+        // Get the current day of medication progress for the patient
         num? currentDay = await getMedicationDayProgress(patientIdInt);
+
+        // Calculate overall medication progress based on duration and current day
         double currentProgress= calculateOverallMedicationProgress(medicationDuration, currentDay);
+
+        // Get the next intake time for the patient's medication
         String nextIntakeTime = await getNextMedicineIntake(patientIdInt);
 
+        // Add the patient's progress data to the list
         activePatientMedicationProgressData.add({
           'username': assoc['username'],
           'currentProgress': currentProgress,
@@ -77,60 +84,11 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
         });
       }
 
-      // Update the state with the next intake time
+      // Update the state with the active patients' medication progress data
       setState(() {
         _activePatientMedicationProgressData = activePatientMedicationProgressData;
       });   
 
-    } catch (e) {
-      // Handle errors during data fetching
-      debugPrint("Error: $e");
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Error fetching data. Please try again.")),
-        );
-      }
-    }
-  }
-
-  // Function to get the information of the medication in the prescription
-  Future<void> getCurrentPrescriptions() async {
-    try {
-      final conn = await createConnection();
-
-      // SQL query to fetch the information of the medication in the prescription
-      var activePrescriptionMedicationInfo = await conn.execute('''
-      SELECT
-          m.medication_name,
-          m.medication_info,
-          m.medication_description
-      FROM
-          reseta_plus.patient_prescriptions p
-      JOIN
-          reseta_plus.medications m ON p.medication_id = m.medication_id
-      WHERE
-          p.patient_id = :patient_id
-          AND p.status = 'active';
-      ''', {'patient_id': _patientIDTest});
-
-      // Initialize the list to hold prescription data
-      List<Map<String, String>> activePrescriptionDetails = [];
-
-      // Iterate through the result rows and map them to the desired structure
-      for (var row in activePrescriptionMedicationInfo.rows) {
-        var assoc = row.assoc();
-        activePrescriptionDetails.add({
-          'drugName': assoc['medication_name'] ?? '',
-          'drugInfo': assoc['medication_info'] ?? '',
-          'description': assoc['medication_description'] ?? '',
-        });
-      }
-
-      // Update the state with the prescription information
-      setState(() {
-        _currentPrescriptions = activePrescriptionDetails;
-      });
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
@@ -277,8 +235,6 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
           // Calculate the next intake time
           DateTime nextTime = calculateNextIntake(intakeTime, frequencyStr!);
 
-          debugPrint(DateFormat('yyyy-MM-dd – kk:mm').format(nextTime));
-
           // Update the next intake time if it's the earliest found
           if (nextIntakeDateTime == null || nextTime.isBefore(nextIntakeDateTime)) {
             nextIntakeDateTime = nextTime;
@@ -305,7 +261,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
               content: Text("Error fetching data. Please try again.")),
         );
       }
-      // Optionally, you can throw an exception or return a default value
+
       return 'Error occurred'; // Return a string indicating an error
     }
   }
@@ -384,40 +340,6 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
             ],
           ),
 
-          // ROW FOR CURRENT PRESCRIPTIONS - USING WIDGET
-          Column(
-            children: (_currentPrescriptions?.map((prescription) {
-                  return PrescriptionCard(
-                    drugName: prescription['drugName'] ??
-                        "Unknown Drug", // Provide a default value if null
-                    drugInfo: prescription['drugInfo'] ??
-                        "No Info Available", // Provide a default value if null
-                    description: prescription['description'] ??
-                        "No Description Available", // Provide a default value if null
-                  );
-                }).toList() ??
-                []), // Fallback to an empty list if _currentPrescriptions is null
-          ),
-          ElevatedButton(
-              onPressed: () {
-                // Action to perform when the button is pressed
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return PrescriptionPopupForm();
-                  },
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xffa16ae8), // Background color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Rounded corners
-                ),
-              ),
-              child: const Text(
-                "Add Prescription", // Button text
-                style: TextStyle(color: Colors.white),
-              )),
           // CARD - MEDICATION PROGRESS
           Container(
             padding: EdgeInsets.all(8), // Padding for the outer container
@@ -660,7 +582,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
               style: TextStyle(color: Colors.white),
             )
           ),
-          
+
           SizedBox(height: 20), // Add some spacing after the button
         ],
       ),
