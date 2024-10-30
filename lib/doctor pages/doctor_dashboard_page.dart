@@ -21,8 +21,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   // Current date for reference
   final DateTime _currentDate = DateTime.now();
 
-  // Sample doctor ID for testing
-  final int _doctorIDTest = 1;
+  int? _doctorID;
 
   // A list to store medication progress data for active patients
   List<Map<String, dynamic>>? _activePatientMedicationProgressData;
@@ -31,7 +30,40 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   void initState() {
     super.initState();
     // Fetch the prescription data when the widget is initialized
-    getActivePatientMedicationProgress(context);
+    _initialize();
+  }
+
+  // Initializes necessary data by fetching the doctor ID first and then retrieving other related information
+  Future<void> _initialize() async {
+    // Fetch the doctor ID first
+    await getDoctorID();
+
+    // Now that getDoctorID has completed, call the other functions
+    await Future.wait([
+      getActivePatientMedicationProgress()
+    ]);
+  }
+
+  // Function to get the doctor ID number
+  Future<void> getDoctorID() async {
+    try{
+      // Call getUserID with "doctor" to retrieve the user ID for the doctor
+      int userID = await getUserID("doctor");
+
+      // Update the state with the retrieved doctor ID
+      setState(() {
+        _doctorID = userID;
+      });
+
+    } catch (e) {
+      // Handle errors during data fetching
+      debugPrint("Error: $e");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error fetching data. Please try again.")),
+        );
+      }
+    }
   }
 
   Future<void> getActivePatientMedicationProgress(BuildContext context) async {
@@ -46,7 +78,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
       JOIN patient_accounts pa ON pp.patient_id = pa.patient_id
       WHERE pp.status = 'active' 
         AND pp.doctor_id = :doctor_id;
-      ''', {'doctor_id': _doctorIDTest});
+      ''', {'doctor_id': _doctorID});
 
       // Initialize a list to hold medication progress data
       List<Map<String, dynamic>>? activePatientMedicationProgressData = [];

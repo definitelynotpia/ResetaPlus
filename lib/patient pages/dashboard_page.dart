@@ -22,8 +22,8 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   // Current date for reference
   final DateTime _currentDate = DateTime.now();
-  // Sample patient ID for testing
-  final int _patientIDTest = 1;
+  
+  int? _patientID;
 
   // Variables to hold medication data
   num? _currentDay; // Current day progress
@@ -36,16 +36,49 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    // Fetch the prescription data when the widget is initialized
-    getNextMedicineIntake(context);
-    getMedicationDayProgress(context);
-    getMedicationOverallProgress(context);
-    getCurrentPrescriptions(context);
+    // Call the async function to handle initialization
+    _initialize();
+  }
+
+  // Initializes necessary data by fetching the patient ID first and then retrieving other related information
+  Future<void> _initialize() async {
+    // Fetch the patient ID first
+    await getPatientID();
+
+    // Now that getPatientID has completed, call the other functions
+    await Future.wait([
+      getNextMedicineIntake(),
+      getMedicationDayProgress(),
+      getMedicationOverallProgress(),
+      getCurrentPrescriptions(),
+    ]);
+  }
+
+  // Function to get the patient ID number
+  Future<void> getPatientID() async {
+    try{
+      // Call getUserID with "patient" to retrieve the user ID for the patient
+      int userID = await getUserID("patient");
+
+      // Update the state with the retrieved patient ID
+      setState(() {
+        _patientID = userID;
+      });
+
+    } catch (e) {
+      // Handle errors during data fetching
+      debugPrint("Error: $e");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error fetching data. Please try again.")),
+        );
+      }
+    }
   }
 
   // Function to get the information of the medication in the prescription
-  Future<void> getCurrentPrescriptions(BuildContext context) async {
-    try {
+  Future<void> getCurrentPrescriptions() async {
+    try{
       final conn = await createConnection();
 
       // SQL query to fetch the information of the medication in the prescription
@@ -61,19 +94,22 @@ class _DashboardPageState extends State<DashboardPage> {
       WHERE 
           p.patient_id = :patient_id
           AND p.status = 'active';
-      ''', {'patient_id': _patientIDTest});
+      ''',{'patient_id': _patientID});
 
-      // Initialize the list to hold prescription data
+      // Ensure activePrescriptionDetails is initialized as an empty list before this code
       List<Map<String, String>> activePrescriptionDetails = [];
 
-      // Iterate through the result rows and map them to the desired structure
-      for (var row in activePrescriptionMedicationInfo.rows) {
-        var assoc = row.assoc();
-        activePrescriptionDetails.add({
-          'drugName': assoc['medication_name'] ?? '',
-          'drugInfo': assoc['medication_info'] ?? '',
-          'description': assoc['medication_description'] ?? '',
-        });
+      // Check if there are any rows returned
+      if (activePrescriptionMedicationInfo.rows.isNotEmpty) {
+        // Iterate through the result rows and map them to the desired structure
+        for (var row in activePrescriptionMedicationInfo.rows) {
+          var assoc = row.assoc();
+          activePrescriptionDetails.add({
+            'drugName': assoc['medication_name'] ?? '', 
+            'drugInfo': assoc['medication_info'] ?? '', 
+            'description': assoc['medication_description'] ?? '', 
+          });
+        }
       }
 
       // Update the state with the prescription information
@@ -106,7 +142,7 @@ class _DashboardPageState extends State<DashboardPage> {
       WHERE 
           patient_id = :patient_id 
           AND status = 'active';
-      ''', {'patient_id': _patientIDTest});
+      ''',{'patient_id': _patientID});
 
       // Extract the prescription duration from the result
       String? prescriptionDuration =
@@ -156,7 +192,7 @@ class _DashboardPageState extends State<DashboardPage> {
         GROUP BY 
             pi.intake_date
       ) AS subquery;
-      ''', {'patient_id': _patientIDTest});
+      ''',{'patient_id': _patientID});
 
       // Parse the total count of prescriptions taken
       num? totalCount = num.tryParse(totalActivePrescriptionIntakes.rows.first
@@ -199,7 +235,7 @@ class _DashboardPageState extends State<DashboardPage> {
       WHERE 
           p.patient_id = :patient_id
           AND p.status = 'active';
-      ''', {'patient_id': _patientIDTest});
+      ''',{'patient_id': _patientID});
 
       DateTime? nextIntakeDateTime; // Variable to hold the next intake time
 
