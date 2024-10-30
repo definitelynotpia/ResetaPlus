@@ -22,7 +22,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   // Current date for reference
   final DateTime _currentDate = DateTime.now();
-  
+
   int? _patientID;
 
   // Variables to hold medication data
@@ -30,32 +30,35 @@ class _DashboardPageState extends State<DashboardPage> {
   num? _medicationDuration; // Duration of medication
   String? _nextIntakeTime; // Next intake time formatted as a string
   double? _currentProgress; // Current overall progress of medication
-  List<Map<String, String>>? _currentPrescriptions; // Medicine information in the prescription 
+  List<Map<String, String>>?
+      _currentPrescriptions; // Medicine information in the prescription
 
   @override
   void initState() {
     super.initState();
     // Call the async function to handle initialization
-    _initialize();
+    _initialize(context);
   }
 
   // Initializes necessary data by fetching the patient ID first and then retrieving other related information
-  Future<void> _initialize() async {
+  Future<void> _initialize(BuildContext context) async {
     // Fetch the patient ID first
-    await getPatientID();
+    await getPatientID(context);
 
     // Now that getPatientID has completed, call the other functions
-    await Future.wait([
-      getNextMedicineIntake(),
-      getMedicationDayProgress(),
-      getMedicationOverallProgress(),
-      getCurrentPrescriptions(),
-    ]);
+    if (context.mounted) {
+      await Future.wait([
+        getNextMedicineIntake(context),
+        getMedicationDayProgress(context),
+        getMedicationOverallProgress(context),
+        getCurrentPrescriptions(context),
+      ]);
+    }
   }
 
   // Function to get the patient ID number
-  Future<void> getPatientID() async {
-    try{
+  Future<void> getPatientID(BuildContext context) async {
+    try {
       // Call getUserID with "patient" to retrieve the user ID for the patient
       int userID = await getUserID("patient");
 
@@ -63,21 +66,21 @@ class _DashboardPageState extends State<DashboardPage> {
       setState(() {
         _patientID = userID;
       });
-
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error fetching data. Please try again.")),
+          const SnackBar(
+              content: Text("Error fetching data. Please try again.")),
         );
       }
     }
   }
 
   // Function to get the information of the medication in the prescription
-  Future<void> getCurrentPrescriptions() async {
-    try{
+  Future<void> getCurrentPrescriptions(BuildContext context) async {
+    try {
       final conn = await createConnection();
 
       // SQL query to fetch the information of the medication in the prescription
@@ -93,7 +96,7 @@ class _DashboardPageState extends State<DashboardPage> {
       WHERE 
           p.patient_id = :patient_id
           AND p.status = 'active';
-      ''',{'patient_id': _patientID});
+      ''', {'patient_id': _patientID});
 
       // Ensure activePrescriptionDetails is initialized as an empty list before this code
       List<Map<String, String>> activePrescriptionDetails = [];
@@ -104,9 +107,9 @@ class _DashboardPageState extends State<DashboardPage> {
         for (var row in activePrescriptionMedicationInfo.rows) {
           var assoc = row.assoc();
           activePrescriptionDetails.add({
-            'drugName': assoc['medication_name'] ?? '', 
-            'drugInfo': assoc['medication_info'] ?? '', 
-            'description': assoc['medication_description'] ?? '', 
+            'drugName': assoc['medication_name'] ?? '',
+            'drugInfo': assoc['medication_info'] ?? '',
+            'description': assoc['medication_description'] ?? '',
           });
         }
       }
@@ -120,15 +123,16 @@ class _DashboardPageState extends State<DashboardPage> {
       debugPrint("Error: $e");
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error fetching data. Please try again.")),
+          const SnackBar(
+              content: Text("Error fetching data. Please try again.")),
         );
       }
     }
   }
 
   // Function to get the overall progress of medication
-  Future<void> getMedicationOverallProgress() async {
-    try{
+  Future<void> getMedicationOverallProgress(BuildContext context) async {
+    try {
       final conn = await createConnection();
 
       // SQL query to fetch the duration of active prescriptions
@@ -140,29 +144,32 @@ class _DashboardPageState extends State<DashboardPage> {
       WHERE 
           patient_id = :patient_id 
           AND status = 'active';
-      ''',{'patient_id': _patientID});
+      ''', {'patient_id': _patientID});
 
       // Extract the prescription duration from the result
-      String? prescriptionDuration = activePrescriptionDuration.rows.first.assoc()['duration'];
+      String? prescriptionDuration =
+          activePrescriptionDuration.rows.first.assoc()['duration'];
 
       // Update the state with the calculated progress
       setState(() {
-        _currentProgress = calculateOverallMedicationProgress(prescriptionDuration, _currentDay);
+        _currentProgress = calculateOverallMedicationProgress(
+            prescriptionDuration, _currentDay);
       });
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error fetching data. Please try again.")),
+          const SnackBar(
+              content: Text("Error fetching data. Please try again.")),
         );
       }
     }
   }
 
   // Function to get today's medication progress
-  Future<void> getMedicationDayProgress() async {
-    try{
+  Future<void> getMedicationDayProgress(BuildContext context) async {
+    try {
       final conn = await createConnection();
 
       // SQL query to get the count of active prescription intakes for today
@@ -187,10 +194,11 @@ class _DashboardPageState extends State<DashboardPage> {
         GROUP BY 
             pi.intake_date
       ) AS subquery;
-      ''',{'patient_id': _patientID});
+      ''', {'patient_id': _patientID});
 
       // Parse the total count of prescriptions taken
-      num? totalCount = num.tryParse(totalActivePrescriptionIntakes.rows.first.assoc()['total_all_prescriptions_taken']!);
+      num? totalCount = num.tryParse(totalActivePrescriptionIntakes.rows.first
+          .assoc()['total_all_prescriptions_taken']!);
 
       // Update the state with the total count of prescriptions taken
       setState(() {
@@ -201,14 +209,15 @@ class _DashboardPageState extends State<DashboardPage> {
       debugPrint("Error: $e");
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error fetching data. Please try again.")),
+          const SnackBar(
+              content: Text("Error fetching data. Please try again.")),
         );
       }
     }
   }
 
   // Function to get the next medicine intake time
-  Future<void> getNextMedicineIntake() async {
+  Future<void> getNextMedicineIntake(BuildContext context) async {
     try {
       final conn = await createConnection();
 
@@ -228,7 +237,7 @@ class _DashboardPageState extends State<DashboardPage> {
       WHERE 
           p.patient_id = :patient_id
           AND p.status = 'active';
-      ''',{'patient_id': _patientID});
+      ''', {'patient_id': _patientID});
 
       DateTime? nextIntakeDateTime; // Variable to hold the next intake time
 
@@ -248,7 +257,8 @@ class _DashboardPageState extends State<DashboardPage> {
           DateTime nextTime = calculateNextIntake(intakeTime, frequencyStr!);
 
           // Update the next intake time if it's the earliest found
-          if (nextIntakeDateTime == null || nextTime.isBefore(nextIntakeDateTime)) {
+          if (nextIntakeDateTime == null ||
+              nextTime.isBefore(nextIntakeDateTime)) {
             nextIntakeDateTime = nextTime;
           }
         }
@@ -270,7 +280,8 @@ class _DashboardPageState extends State<DashboardPage> {
       debugPrint("Error: $e");
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error fetching data. Please try again.")),
+          const SnackBar(
+              content: Text("Error fetching data. Please try again.")),
         );
       }
     }
@@ -280,7 +291,8 @@ class _DashboardPageState extends State<DashboardPage> {
   DateTime parseTime(String timeStr) {
     DateFormat format = DateFormat("HH:mm:ss");
     DateTime time = format.parse(timeStr);
-    return DateTime.now().copyWith(hour: time.hour, minute: time.minute, second: 0);
+    return DateTime.now()
+        .copyWith(hour: time.hour, minute: time.minute, second: 0);
   }
 
   // Function to calculate the next intake time based on last intake and frequency
@@ -322,17 +334,17 @@ class _DashboardPageState extends State<DashboardPage> {
 
     // Update the state with the medication duration
     setState(() {
-        _medicationDuration = durationValue;
+      _medicationDuration = durationValue;
     });
 
     // Avoid division by zero
     if (durationValue == 0) {
-      return 0.0; 
+      return 0.0;
     }
 
     return (currentDay / durationValue);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -409,7 +421,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     gradientColors: [Color(0xffa16ae8), Color(0xff94b9ff)],
                     height: 40,
                     borderRadius: BorderRadius.circular(15),
-                    text: '${max((_medicationDuration ?? 0) - (_currentDay ?? 0), 0)} days Left',
+                    text:
+                        '${max((_medicationDuration ?? 0) - (_currentDay ?? 0), 0)} days Left',
                   ),
 
                   // date pointer
@@ -425,7 +438,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   // weekday carousel
                   CarouselSlider(
                     // displays the days in a month
-                    items: List<Widget>.generate(31, (int index){
+                    items: List<Widget>.generate(31, (int index) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 1),
                         child: Container(
@@ -576,12 +589,16 @@ class _DashboardPageState extends State<DashboardPage> {
           // ROW FOR CURRENT PRESCRIPTIONS - USING WIDGET
           Column(
             children: (_currentPrescriptions?.map((prescription) {
-              return PrescriptionCard(
-                drugName: prescription['drugName'] ?? "Unknown Drug", // Provide a default value if null
-                drugInfo: prescription['drugInfo'] ?? "No Info Available", // Provide a default value if null
-                description: prescription['description'] ?? "No Description Available", // Provide a default value if null
-              );
-            }).toList() ?? []), // Fallback to an empty list if _currentPrescriptions is null
+                  return PrescriptionCard(
+                    drugName: prescription['drugName'] ??
+                        "Unknown Drug", // Provide a default value if null
+                    drugInfo: prescription['drugInfo'] ??
+                        "No Info Available", // Provide a default value if null
+                    description: prescription['description'] ??
+                        "No Description Available", // Provide a default value if null
+                  );
+                }).toList() ??
+                []), // Fallback to an empty list if _currentPrescriptions is null
           ),
         ],
       ),
