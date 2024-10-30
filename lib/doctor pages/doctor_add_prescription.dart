@@ -3,16 +3,16 @@ import 'package:gradient_borders/gradient_borders.dart';
 
 import 'package:resetaplus/widgets/custom_store_product.dart';
 
-class DoctorStorePage extends StatefulWidget {
-  const DoctorStorePage({super.key, required this.title});
+class DoctorAddPrescriptionPage extends StatefulWidget {
+  const DoctorAddPrescriptionPage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<StatefulWidget> createState() => _DoctorStorePageState();
+  State<StatefulWidget> createState() => _DoctorAddPrescriptionState();
 }
 
-class _DoctorStorePageState extends State<DoctorStorePage> {
+class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   // generate global key, uniquely identify Form widget and allow form validation
   final _formKey = GlobalKey<FormState>();
 

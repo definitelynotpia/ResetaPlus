@@ -21,7 +21,7 @@ import 'doctor pages/doctor_dashboard_page.dart';
 import 'doctor pages/doctor_history_page.dart';
 import 'doctor pages/doctor_map_page.dart';
 import 'doctor pages/doctor_profile_page.dart';
-import 'doctor pages/doctor_store_page.dart';
+import 'doctor pages/doctor_add_prescription.dart';
 
 void main() async {
   await dotenv.load(fileName: "assets/.env");
@@ -155,17 +155,16 @@ class _HomePageState extends State<HomePage> {
 
   int currentTab = 0;
 
-  // navigation page keys
+  // Patient Navigation Page Keys
   final Key storePage = const PageStorageKey("storePage");
   final Key mapPage = const PageStorageKey("mapPage");
   final Key dashboardPage = const PageStorageKey("dashboardPage");
   final Key historyPage = const PageStorageKey("historyPage");
   final Key profilePage = const PageStorageKey("profilePage");
 
-  final Key doctorStorePage = const PageStorageKey("doctorStorePage");
-  final Key doctorMapPage = const PageStorageKey("doctorMapPage");
+// Doctor Navigation Page Keys
+  final Key doctorAddPrescriptionPage = const PageStorageKey("doctorAddPrescriptionPage");
   final Key doctorDashboardPage = const PageStorageKey("doctorDashboardPage");
-  final Key doctorHistoryPage = const PageStorageKey("doctorHistoryPage");
   final Key doctorProfilePage = const PageStorageKey("doctorProfilePage");
 
   late StorePage one;
@@ -174,11 +173,10 @@ class _HomePageState extends State<HomePage> {
   late HistoryPage four;
   late ProfilePage five;
 
-  late DoctorStorePage six;
-  late DoctorMapPage seven;
-  late DoctorDashboardPage eight;
-  late DoctorHistoryPage nine;
-  late DoctorProfilePage ten;
+  late DoctorAddPrescriptionPage six;
+  late DoctorDashboardPage seven;
+  late DoctorProfilePage eight;
+
 
   late List<Widget> pages;
   // Shows Loading Default page
@@ -246,31 +244,27 @@ class _HomePageState extends State<HomePage> {
         pages = [one, two, three, four, five];
 
         currentPage = three;
+        
       } else if (_userType == 'Doctor') {
-        six = DoctorStorePage(
-          key: doctorStorePage,
-          title: "Store",
+        six = DoctorAddPrescriptionPage(
+          key: doctorAddPrescriptionPage,
+          title: "Add Prescription",
         );
-        seven = DoctorMapPage(
-          key: doctorMapPage,
-          title: "Map",
-        );
-        eight = DoctorDashboardPage(
+
+        seven = DoctorDashboardPage(
           key: doctorDashboardPage,
           title: "Dashboard",
         );
-        nine = DoctorHistoryPage(
-          key: doctorHistoryPage,
-          title: "History",
-        );
-        ten = DoctorProfilePage(
+
+        eight = DoctorProfilePage(
           key: doctorProfilePage,
           title: "Profile",
         );
 
-        pages = [six, seven, eight, nine, ten];
 
-        currentPage = eight;
+        pages = [six, seven, eight];
+
+        currentPage = seven;
       }
     });
   }
@@ -510,11 +504,21 @@ const List<BottomNavigationBarItem> _doctorNavItems = [
   //Patient List
   BottomNavigationBarItem(
     icon: Icon(
-      Icons.person,
+      Icons.people,
       color: Color(0xffF8F6F5),
       size: 30,),
     label: "Patient List",
-    tooltip: "Patient List",
+    tooltip: "View Patient List",
+  ),
+
+  //Doctor Profile
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.person,
+      color: Color(0xffF8F6F5),
+      size: 30,),
+    label: "Profile",
+    tooltip: "Edit Profile Settings",
   )
 ];
 
