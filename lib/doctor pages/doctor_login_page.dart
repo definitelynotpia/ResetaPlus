@@ -57,6 +57,13 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
     }
   }
 
+  void _setDoctorIdSession(String? doctorId) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (doctorId != null) {
+      await prefs.setString('doctor_id', doctorId); // Save the doctor_id
+    }
+  }
+
   Future<void> loginUser(BuildContext context) async {
     // Check if the form is valid
     if (_formKey.currentState!.validate()) {
@@ -73,10 +80,10 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
 
       // Fetch accounts and keys in one go using parameterized query
       var result = await conn.execute('''
-      SELECT a.*, k.encryption_key, k.initialization_vector 
-      FROM reseta_plus.doctor_accounts a
-      JOIN reseta_plus.doctor_account_keys k ON a.doctor_id = k.doctor_key_id
-      WHERE a.email = :email
+        SELECT a.doctor_id, a.*, k.encryption_key, k.initialization_vector 
+        FROM reseta_plus.doctor_accounts a
+        JOIN reseta_plus.doctor_account_keys k ON a.doctor_id = k.doctor_key_id
+        WHERE a.email = :email
       ''', {'email': _email});
 
       // Check if Widget is mounted in context
@@ -94,6 +101,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
               encrypt.Key(base64.decode(patientAccountData['encryption_key'])),
               encrypt.IV(base64
                   .decode(patientAccountData['initialization_vector'])))) {
+            _setDoctorIdSession(patientAccountData['doctor_id']);
             _setusernameSession(patientAccountData['username']);
             _setLoggedInStatus(true);
             Navigator.pop(context); // Closes current window

@@ -10,6 +10,7 @@ import 'package:resetaplus/main.dart';
 
 import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/custom_progressbar.dart';
+import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DoctorDashboardPage extends StatefulWidget {
@@ -100,15 +101,15 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
       // SQL query to fetch the information of the medication in the prescription
       var activePrescriptionMedicationInfo = await conn.execute('''
-      SELECT 
+      SELECT
           m.medication_name,
           m.medication_info,
           m.medication_description
-      FROM 
+      FROM
           reseta_plus.patient_prescriptions p
-      JOIN 
+      JOIN
           reseta_plus.medications m ON p.medication_id = m.medication_id
-      WHERE 
+      WHERE
           p.patient_id = :patient_id
           AND p.status = 'active';
       ''', {'patient_id': _patientIDTest});
@@ -383,6 +384,40 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
             ],
           ),
 
+          // ROW FOR CURRENT PRESCRIPTIONS - USING WIDGET
+          Column(
+            children: (_currentPrescriptions?.map((prescription) {
+                  return PrescriptionCard(
+                    drugName: prescription['drugName'] ??
+                        "Unknown Drug", // Provide a default value if null
+                    drugInfo: prescription['drugInfo'] ??
+                        "No Info Available", // Provide a default value if null
+                    description: prescription['description'] ??
+                        "No Description Available", // Provide a default value if null
+                  );
+                }).toList() ??
+                []), // Fallback to an empty list if _currentPrescriptions is null
+          ),
+          ElevatedButton(
+              onPressed: () {
+                // Action to perform when the button is pressed
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return PrescriptionPopupForm();
+                  },
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xffa16ae8), // Background color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // Rounded corners
+                ),
+              ),
+              child: const Text(
+                "Add Prescription", // Button text
+                style: TextStyle(color: Colors.white),
+              )),
           // CARD - MEDICATION PROGRESS
           Container(
             padding: EdgeInsets.all(8), // Padding for the outer container
@@ -604,20 +639,28 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
           SizedBox(height: 20), // Add some spacing before the button
 
-          // Button for making a prescription
           ElevatedButton(
             onPressed: () {
-              _showPrescriptionDialog(context);
+              // Action to perform when the button is pressed
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return PrescriptionPopupForm();
+                },
+              );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xffa16ae8), // Button color
+              backgroundColor: const Color(0xffa16ae8), // Background color
               shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10), // Rounded corners
+              ),
             ),
-            child: Text(
-              'Make a Prescription',
-              style: TextStyle(color: Colors.white),),
+            child: const Text(
+              "Add Prescription", // Button text
+              style: TextStyle(color: Colors.white),
+            )
           ),
+          
           SizedBox(height: 20), // Add some spacing after the button
         ],
       ),
