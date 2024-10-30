@@ -21,7 +21,7 @@ import 'doctor pages/doctor_dashboard_page.dart';
 import 'doctor pages/doctor_history_page.dart';
 import 'doctor pages/doctor_map_page.dart';
 import 'doctor pages/doctor_profile_page.dart';
-import 'doctor pages/doctor_store_page.dart';
+import 'doctor pages/doctor_add_prescription.dart';
 
 void main() async {
   await dotenv.load(fileName: "assets/.env");
@@ -97,7 +97,6 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
-  // TODO: add user session
   Future<bool> _getLoggedInStatus() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -156,17 +155,16 @@ class _HomePageState extends State<HomePage> {
 
   int currentTab = 0;
 
-  // navigation page keys
+  // Patient Navigation Page Keys
   final Key storePage = const PageStorageKey("storePage");
   final Key mapPage = const PageStorageKey("mapPage");
   final Key dashboardPage = const PageStorageKey("dashboardPage");
   final Key historyPage = const PageStorageKey("historyPage");
   final Key profilePage = const PageStorageKey("profilePage");
 
-  final Key doctorStorePage = const PageStorageKey("doctorStorePage");
-  final Key doctorMapPage = const PageStorageKey("doctorMapPage");
+// Doctor Navigation Page Keys
+  final Key doctorAddPrescriptionPage = const PageStorageKey("doctorAddPrescriptionPage");
   final Key doctorDashboardPage = const PageStorageKey("doctorDashboardPage");
-  final Key doctorHistoryPage = const PageStorageKey("doctorHistoryPage");
   final Key doctorProfilePage = const PageStorageKey("doctorProfilePage");
 
   late StorePage one;
@@ -175,11 +173,10 @@ class _HomePageState extends State<HomePage> {
   late HistoryPage four;
   late ProfilePage five;
 
-  late DoctorStorePage six;
-  late DoctorMapPage seven;
-  late DoctorDashboardPage eight;
-  late DoctorHistoryPage nine;
-  late DoctorProfilePage ten;
+  late DoctorAddPrescriptionPage six;
+  late DoctorDashboardPage seven;
+  late DoctorProfilePage eight;
+
 
   late List<Widget> pages;
   // Shows Loading Default page
@@ -247,37 +244,45 @@ class _HomePageState extends State<HomePage> {
         pages = [one, two, three, four, five];
 
         currentPage = three;
+        
       } else if (_userType == 'Doctor') {
-        six = DoctorStorePage(
-          key: doctorStorePage,
-          title: "Store",
+        six = DoctorAddPrescriptionPage(
+          key: doctorAddPrescriptionPage,
+          title: "Add Prescription",
         );
-        seven = DoctorMapPage(
-          key: doctorMapPage,
-          title: "Map",
-        );
-        eight = DoctorDashboardPage(
+
+        seven = DoctorDashboardPage(
           key: doctorDashboardPage,
           title: "Dashboard",
         );
-        nine = DoctorHistoryPage(
-          key: doctorHistoryPage,
-          title: "History",
-        );
-        ten = DoctorProfilePage(
+
+        eight = DoctorProfilePage(
           key: doctorProfilePage,
           title: "Profile",
         );
 
-        pages = [six, seven, eight, nine, ten];
 
-        currentPage = eight;
+        pages = [six, seven, eight];
+
+        currentPage = seven;
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+
+    // late List<BottomNavigationBarItem> navbarItems;
+    late List<BottomNavigationBarItem> navbarItems = _patientNavItems;
+    
+    if(_userType == 'Patient') {
+      navbarItems = _patientNavItems;
+
+    } else if(_userType == 'Doctor') {
+      navbarItems = _doctorNavItems;
+      
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xffF8F6F5),
       extendBody: true,
@@ -419,59 +424,7 @@ class _HomePageState extends State<HomePage> {
                 });
               },
 
-              // navbar buttons
-              items: const <BottomNavigationBarItem>[
-                // medicine search page
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.medication,
-                    color: Color(0xffF8F6F5),
-                    size: 30,
-                  ),
-                  label: "Medicine Lookup",
-                  tooltip: "Medicine Lookup",
-                ),
-                // pharmacy locator map page
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.store,
-                    color: Color(0xffF8F6F5),
-                    size: 30,
-                  ),
-                  label: "Pharmacy Locator",
-                  tooltip: "Pharmacy Locator",
-                ),
-                // dashboard home page
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.home,
-                    color: Color(0xffF8F6F5),
-                    size: 30,
-                  ),
-                  label: "Home",
-                  tooltip: "Home",
-                ),
-                // medical history page (prescriptions)
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.history,
-                    color: Color(0xffF8F6F5),
-                    size: 30,
-                  ),
-                  label: "Medical History",
-                  tooltip: "Medical History",
-                ),
-                // user profile page
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.person,
-                    color: Color(0xffF8F6F5),
-                    size: 30,
-                  ),
-                  label: "Profile",
-                  tooltip: "Profile",
-                ),
-              ],
+              items: navbarItems,
             ),
           ),
         ],
@@ -479,3 +432,175 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+/*
+
+NOTES:
+
+These are functions to display the navbar items (icons)
+The Lists were made to eliminate the need to always add 
+the "const" modifier to every item and instead 
+we only add it at the top of the List declaration
+
+These functions can be deleted but I'm keeping them incase
+we need to write something similar or we run into problems
+while trying to display the navbar items on runtime -
+
+-Mike
+
+*/
+// List<BottomNavigationBarItem> _doctorNavItems(){
+//     return [
+//       const BottomNavigationBarItem(
+//         icon: Icon(Icons.add_outlined,color: Color(0xffF8F6F5),size: 30,),
+//         label: "Create Prescription",
+//         tooltip: "Create Prescription for Patient",
+//       ),
+//       const BottomNavigationBarItem(
+//         icon: Icon(Icons.person,color: Color(0xffF8F6F5),size: 30,),
+//         label: "Patient List",
+//         tooltip: "Patient List",
+//       )
+//     ];
+// }
+
+// List<BottomNavigationBarItem> _patientNavItems(){
+//     return [
+//       const BottomNavigationBarItem(
+//         icon: Icon(Icons.add_outlined,color: Color(0xffF8F6F5),size: 30,),
+//         label: "Create Prescription",
+//         tooltip: "Create Prescription for Patient",
+//       ),
+//       const BottomNavigationBarItem(
+//         icon: Icon(Icons.person,color: Color(0xffF8F6F5),size: 30,),
+//         label: "Patient List",
+//         tooltip: "Patient List",
+//       )
+//     ];
+// }
+
+
+/*
+
+NOTES:
+
+These are Lists of NavBar items (icons) that will be displayed
+according to the type of user that is logged in.
+
+
+*/
+const List<BottomNavigationBarItem> _doctorNavItems = [
+
+  //Create Prescription
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.add_outlined,
+      color: Color(0xffF8F6F5),
+      size: 30,),
+    label: "Create Prescription",
+    tooltip: "Create Prescription for Patient",
+  ),
+
+  //Patient List
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.people,
+      color: Color(0xffF8F6F5),
+      size: 30,),
+    label: "Patient List",
+    tooltip: "View Patient List",
+  ),
+
+  //Doctor Profile
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.person,
+      color: Color(0xffF8F6F5),
+      size: 30,),
+    label: "Profile",
+    tooltip: "Edit Profile Settings",
+  )
+];
+
+const List<BottomNavigationBarItem> _patientNavItems = [
+
+  //Medicine Lookup Page
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.medication, 
+      color: Color(0xffF8F6F5), 
+      size: 30,),
+    label: "Medicine Lookup",
+    tooltip: "Medicine Lookup",
+  ),
+
+  // Pharmacy Locator Map Page
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.store,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
+    label: "Pharmacy Locator",
+    tooltip: "Pharmacy Locator",
+  ),
+
+  // Dashboard Home Page
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.home,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
+    label: "Home",
+    tooltip: "Home",
+  ),
+
+  // Medical History Page (prescriptions)
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.history,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
+    label: "Medical History",
+    tooltip: "Medical History",
+  ),
+  
+  // User Profile Page
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.person,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
+    label: "Profile",
+    tooltip: "Profile",
+  )
+];
+
+const List<BottomNavigationBarItem> _pharmacyNavItems = [
+
+  // Medicine Lookup Page
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.medication, 
+      color: Color(0xffF8F6F5), 
+      size: 30,),
+    label: "Medicine Lookup",
+    tooltip: "Medicine Lookup",
+  ),
+
+  // QR Code Scanner
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.qr_code,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
+    label: "QR Code Scanner",
+    tooltip: "QR Code Scanner",
+  ),
+
+];
+
