@@ -7,8 +7,10 @@ import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
 import 'package:resetaplus/main.dart';
 
+import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/prescription_popup.dart';
+//import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DoctorDashboardPage extends StatefulWidget {
   const DoctorDashboardPage({super.key, required String title});
