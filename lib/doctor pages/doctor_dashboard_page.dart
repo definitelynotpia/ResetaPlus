@@ -406,6 +406,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
           ),
           ElevatedButton(
               onPressed: () {
+                // Change the number based on the prescription 
+                // that you want the QR code from
                 displayQRCode(context, 1);
               },
               style: ElevatedButton.styleFrom(

@@ -1,8 +1,11 @@
 import 'dart:io';
-import '../main.dart'; // Import to work with files
+import 'dart:async';   
+import 'package:resetaplus/main.dart';
 
 import 'package:flutter/material.dart';
 import 'package:mysql_client/src/mysql_client/connection.dart';
+ // For loading environment variables
+
 
 class QrCodeDisplay extends StatefulWidget {
   final int prescriptionId;
@@ -10,6 +13,7 @@ class QrCodeDisplay extends StatefulWidget {
   const QrCodeDisplay({
     super.key, 
     required this.prescriptionId
+    
   });
 
   @override
@@ -17,32 +21,51 @@ class QrCodeDisplay extends StatefulWidget {
 
 }
 
-
-
 class _QrCodeDisplayState extends State<QrCodeDisplay> {
   String? qrFilePath; // To hold the QR code file path
   File? qrCodeFile;
-  bool isLoading = true; // Loading state
+  bool isLoading = true; 
+
 
   @override
   void initState() {
     super.initState();
+    // testFunction();
     fetchQrCode(); // Fetch QR code file path when the widget is initialized
+    
   }
 
+  // testFunction() async {
+  //   try {
+  //     final conn = await createConnection();
+  //     var result = await conn.execute('SELECT qr_code_filepath FROM patient_prescriptions LIMIT 1;');
+
+  //     if (result.isNotEmpty) {
+  //       debugPrint('QR Code File Path: exists');
+  //     } else {
+  //       debugPrint('No data found in the patient_prescriptions table.');
+  //     }
+
+  //     await conn.close();
+  //   } catch (e) {
+  //       debugPrint('Error fetching QR code: $e');
+  //     }
+  // }
+  
   Future<void> fetchQrCode() async {
     try {
       String? filePath = await fetchQrCodeFilePath(widget.prescriptionId); // Fetch the file path
-      File? qrCodeFile = await locateQrCode(filePath);
+      qrCodeFile = await locateQrCode(filePath);
 
-      // if (mounted) {
-      //   setState(() {
-      //     qrFilePath = path; // Update the state with the fetched path
-      //     isLoading = false; // Set loading to false
-      //   });
-      // }
+      if (mounted) {
+        setState(() {
+          qrFilePath = filePath; // Update the state with the fetched path
+          isLoading = false; // Set loading to false
+        });
+      }
     } catch (e) {
       debugPrint("Error fetching QR code: $e");
+      
       if (mounted) {
         setState(() {
           isLoading = false; // Set loading to false even on error
@@ -50,34 +73,41 @@ class _QrCodeDisplayState extends State<QrCodeDisplay> {
       }
     }
   }
-
     // Function to fetch QR code file path from the database
-  Future<String?> fetchQrCodeFilePath(int prescriptionId) async {
-    final conn = await createConnection();
+  Future <String?> fetchQrCodeFilePath(int prescriptionId) async {
+      final conn = await createConnection();
+      debugPrint("Connected to DB");
 
-  try {
-      debugPrint("Fetching QR code file path for prescription ID: $prescriptionId");
+      try {
+        debugPrint("Fetching QR code file path for prescription ID: $prescriptionId");
 
-      var result = await conn.query('''
-        SELECT qr_code_filepath 
-        FROM patient_prescriptions 
-        WHERE prescription_id = ?''',
-        // 'prescriptionId': 2},
-        [1],
-      );
+        // For testing
+        // const testQuery = '''
+        //   SELECT qr_code_filepath 
+        //   FROM patient_prescriptions 
+        //   WHERE prescription_id = 2''';
 
-      debugPrint("Query result: $result");
-      if (result.isNotEmpty) {
-        debugPrint('QR Code File Path: ${result.first['qr_code_filepath']}');
-        return result.first['qr_code_filepath'] as String?;
-      } else {
-        debugPrint('No record found with prescription_id = 2');
-        return null; // Return null if no file path is found
+        const query = '''
+          SELECT qr_code_filepath 
+          FROM patient_prescriptions 
+          WHERE prescription_id = :prescriptionId''';
+
+        var result = await conn.execute(query, {'prescriptionId': widget.prescriptionId,});
+
+        debugPrint("Query result: $result");
+
+          // Check if the result has rows
+          if (result.rows.isNotEmpty) {  // Check the number of rows returned
+            // Access each row
+              return result.rows.first.colByName('qr_code_filepath')?.toString(); // Change type casting as necessary
+          } else {
+            debugPrint('No data found for prescription ID: $prescriptionId');
+            return null;
+          }
+        
+      } finally {
+        await conn.close();
       }
-      
-    } finally {
-      await conn.close();
-    }
   }
 
   Future<File?> locateQrCode(String? filePath) async {
@@ -117,13 +147,4 @@ class _QrCodeDisplayState extends State<QrCodeDisplay> {
     );
   }
 }
-
-extension on MySQLConnection {
-  query(String s, List<int> list) {}
-}
-
-// extension on MySQLConnection {
-//   query(String s, Map<String, int> map) {}
-// }
-
 
