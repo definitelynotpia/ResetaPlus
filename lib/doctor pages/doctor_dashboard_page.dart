@@ -186,7 +186,6 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
     }
   }
 
-
   // Function to get today's medication progress
   Future<num?> getMedicationDayProgress(int patientID) async {
     try {
@@ -308,7 +307,6 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
       return 'Error occurred'; // Return a string indicating an error
     }
   }
-
 
   // Function to parse a time string into a DateTime object
   DateTime parseTime(String timeStr) {
