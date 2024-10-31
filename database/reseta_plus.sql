@@ -25,13 +25,28 @@ DROP TABLE IF EXISTS `medications`;
 CREATE TABLE `medications` (
   `medication_id` int NOT NULL AUTO_INCREMENT,
   `medication_name` varchar(255) NOT NULL,
-  `medication_dosage` varchar(255) NOT NULL,
   `medication_form` varchar(255) NOT NULL,
   `manufacturer` varchar(255) NOT NULL,
   `medication_info` varchar(255) NOT NULL,
   `medication_description` varchar(255) NOT NULL,
   PRIMARY KEY (`medication_id`),
   UNIQUE KEY `medication_id_UNIQUE` (`medication_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `medications_dosage`
+--
+
+DROP TABLE IF EXISTS `medications_dosage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `medications_dosage` (
+  `dosage_id` int NOT NULL AUTO_INCREMENT,
+  `medication_id` varchar(255) NOT NULL,
+  `dosage` varchar(255) NOT NULL,
+  PRIMARY KEY (`dosage_id`),
+  UNIQUE KEY `dosage_id_UNIQUE` (`dosage_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

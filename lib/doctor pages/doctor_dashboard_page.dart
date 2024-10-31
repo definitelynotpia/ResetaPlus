@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:resetaplus/main.dart';
 
 import 'package:resetaplus/widgets/custom_prescription.dart';
-import 'package:resetaplus/widgets/custom_progressbar.dart';
+import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DoctorDashboardPage extends StatefulWidget {
@@ -100,15 +100,15 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
       // SQL query to fetch the information of the medication in the prescription
       var activePrescriptionMedicationInfo = await conn.execute('''
-      SELECT 
+      SELECT
           m.medication_name,
           m.medication_info,
           m.medication_description
-      FROM 
+      FROM
           reseta_plus.patient_prescriptions p
-      JOIN 
+      JOIN
           reseta_plus.medications m ON p.medication_id = m.medication_id
-      WHERE 
+      WHERE
           p.patient_id = :patient_id
           AND p.status = 'active';
       ''', {'patient_id': _patientIDTest});
@@ -383,242 +383,40 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
             ],
           ),
 
-          // CARD - MEDICATION PROGRESS
-          Container(
-            padding: EdgeInsets.all(8), // Padding for the outer container
-            decoration: BoxDecoration(
-              color: Colors.transparent, // Ensure the outer container is transparent
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: (_activePatientMedicationProgressData?.map((patientData) {
-                double currentProgress = patientData['currentProgress'] ?? 0;
-                num medicationDuration = patientData['medicationDuration'] ?? '0';
-                num currentDay = patientData['currentDay'] ?? 0;
-                String nextIntakeTime = patientData['nextIntakeTime'] ?? 'N/A';
-                String username = patientData['username'] ?? 'N/A';
-
-                return Container(
-                  // Container with gradient border for each patient data
-                  decoration: BoxDecoration(
-                    border: GradientBoxBorder(
-                      width: 2,
-                      gradient: LinearGradient(colors: [
-                        Color(0xffa16ae8),
-                        Color(0xff94b9ff),
-                      ]),
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.white, // White background for the inner container
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        username,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Color(0xFF602E9E),
-                        ),
-                      ),
-                      // TITLE - MEDICATION PROGRESS
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          const Text(
-                            "MEDICATION PROGRESS",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF602E9E),
-                            ),
-                          ),
-                          MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: GestureDetector(
-                              onTap: () {
-                                // TODO: opens a Calendar widget
-                              },
-                              child: Text(
-                                DateFormat('MMMM').format(_currentDate),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Color(0xFF602E9E),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // spacer
-                      SizedBox(height: 10),
-
-                      // Prescription progress bar
-                      CustomProgressBar(
-                        value: (currentProgress),
-                        backgroundColor: Color(0xFFD9D9FF),
-                        gradientColors: [Color(0xffa16ae8), Color(0xff94b9ff)],
-                        height: 40,
-                        borderRadius: BorderRadius.circular(15),
-                        text: '${max(medicationDuration - currentDay, 0)} days Left',
-                      ),
-
-                      // date pointer
-                      Container(
-                        transform: Matrix4.translationValues(0, 10, 0),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.arrow_drop_down,
-                          size: 30,
-                        ),
-                      ),
-
-                      // weekday carousel
-                      CarouselSlider(
-                        items: List<Widget>.generate(31, (int index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 1),
-                            child: Container(
-                              decoration: (index >= currentDay)
-                                  ? BoxDecoration(
-                                      border: GradientBoxBorder(
-                                        width: 1,
-                                        gradient: LinearGradient(colors: [
-                                          Color.fromRGBO(195, 150, 255, 1),
-                                          Color(0xFF86B0FF),
-                                        ]),
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    )
-                                  : BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Color.fromRGBO(195, 150, 255, 1),
-                                          Color(0xFF86B0FF),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                              child: Center(
-                                child: Text("${index + 1}"),
-                              ),
-                            ),
-                          );
-                        }),
-                        options: CarouselOptions(
-                          height: 60,
-                          aspectRatio: 1 / 1,
-                          viewportFraction: 0.2,
-                          initialPage: currentDay.toInt(),
-                          enableInfiniteScroll: false,
-                          reverse: false,
-                          autoPlay: false,
-                          enlargeCenterPage: true,
-                          enlargeFactor: 0.25,
-                          scrollDirection: Axis.horizontal,
-                        ),
-                      ),
-
-                      // spacer
-                      SizedBox(height: 15),
-
-                      // next intake alarm
-                      Text(
-                        'Your next medicine intake is at: ',
-                        style: TextStyle(
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        nextIntakeTime,
-                        style: TextStyle(
-                          fontSize: 54,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFA16AE8),
-                        ),
-                      ),
-
-                      // BUTTONS - INTAKE HISTORY AND INTAKE INSTRUCTIONS
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFA16AE8),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'INTAKE HISTORY',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFA16AE8),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'INTAKE INSTRUCTIONS',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }).toList() ?? []),
-            ),
+          // ROW FOR CURRENT PRESCRIPTIONS - USING WIDGET
+          Column(
+            children: (_currentPrescriptions?.map((prescription) {
+                  return PrescriptionCard(
+                    drugName: prescription['drugName'] ??
+                        "Unknown Drug", // Provide a default value if null
+                    drugInfo: prescription['drugInfo'] ??
+                        "No Info Available", // Provide a default value if null
+                    description: prescription['description'] ??
+                        "No Description Available", // Provide a default value if null
+                  );
+                }).toList() ??
+                []), // Fallback to an empty list if _currentPrescriptions is null
           ),
-
-          SizedBox(height: 20), // Add some spacing before the button
-
-          // Button for making a prescription
           ElevatedButton(
-            onPressed: () {
-              _showPrescriptionDialog(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xffa16ae8), // Button color
-              shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-            ),
-            child: Text(
-              'Make a Prescription',
-              style: TextStyle(color: Colors.white),),
-          ),
-          SizedBox(height: 20), // Add some spacing after the button
+              onPressed: () {
+                // Action to perform when the button is pressed
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return PrescriptionPopupForm();
+                  },
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xffa16ae8), // Background color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // Rounded corners
+                ),
+              ),
+              child: const Text(
+                "Add Prescription", // Button text
+                style: TextStyle(color: Colors.white),
+              )),
         ],
       ),
     );
