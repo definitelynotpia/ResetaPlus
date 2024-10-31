@@ -10,6 +10,7 @@ import 'package:resetaplus/main.dart';
 import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/intake_history_popup.dart';
+import 'package:resetaplus/widgets/intake_instuctions_popup.dart';
 import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
@@ -607,7 +608,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                                     showDialog(
                                       context: context,
                                       builder: (BuildContext context) {
-                                        return PrescriptionPopupForm();
+                                        return IntakeInstructionsPopup(patientID: patientID);
                                       },
                                     );
                                   },
