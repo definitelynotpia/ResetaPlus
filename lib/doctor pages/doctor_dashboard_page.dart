@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'dart:math';
+import '../widgets/display_qr_code.dart';
 
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -355,6 +356,14 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
     return (currentDay / duration);
   }
 
+  void displayQRCode(BuildContext context, int prescriptionId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QrCodeDisplay(prescriptionId: prescriptionId), // Pass the prescription ID
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -397,13 +406,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
           ),
           ElevatedButton(
               onPressed: () {
-                // Action to perform when the button is pressed
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return PrescriptionPopupForm();
-                  },
-                );
+                displayQRCode(context, 1);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xffa16ae8), // Background color
@@ -412,7 +415,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                 ),
               ),
               child: const Text(
-                "Add Prescription", // Button text
+                "Show QR Code", // Button text
                 style: TextStyle(color: Colors.white),
               )),
         ],

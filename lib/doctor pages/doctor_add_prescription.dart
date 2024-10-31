@@ -290,7 +290,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
       // Get directory where the QR will be saved
       // In this case, its using the local Documents folder
       final directory = await getApplicationDocumentsDirectory();
-      final qrFilePath = "${directory.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.png";
+      final qrFilePath = "${directory.path}\\qr_code_${DateTime.now().millisecondsSinceEpoch}.png";
 
       // Convert QR code to an image file
       final picData = await painter.toImageData(500);

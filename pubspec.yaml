@@ -12,6 +12,7 @@ dependencies:
   gradient_borders: ^1.0.1
   gradient_icon: ^2.0.9
   mysql_client: ^0.0.27
+  mysql1: 0.20.0
   http: ^1.2.0
   crypto: ^3.0.1
   encrypt: ^5.0.0
