@@ -87,17 +87,17 @@ Future<int> getUserID(String userType) async {
   // Construct the table name and ID field based on the user type
   String tableName = '${userType}_accounts';
   String idName = '${userType}_id';
-  try{
+  try {
     // Create a database connection
     final conn = await createConnection();
 
     // SQL query to fetch the user ID based on the username
-    var userIdData = await conn.execute(''' 
+    var userIdData = await conn.execute('''
     SELECT $idName 
     FROM $tableName 
     WHERE username = :username
     LIMIT 1;
-    ''',{'username': await getUsernameSession()});
+    ''', {'username': await getUsernameSession()});
 
     int userID = 0; // Initialize userID to 0
 
@@ -110,14 +110,13 @@ Future<int> getUserID(String userType) async {
       String? patientIdString = assoc[idName];
 
       // Convert the string to an int, defaulting to 0 if parsing fails
-      userID = patientIdString != null 
-                    ? int.tryParse(patientIdString) ?? 0 // Default to 0 if parsing fails
-                    : 0; // Default to 0 if patientIdString is null;
+      userID = patientIdString != null
+          ? int.tryParse(patientIdString) ?? 0 // Default to 0 if parsing fails
+          : 0; // Default to 0 if patientIdString is null;
     }
 
-  // Return the retrieved user ID
-  return userID;
-
+    // Return the retrieved user ID
+    return userID;
   } catch (e) {
     // Handle errors during data fetching
     debugPrint("Error: $e");
@@ -182,6 +181,10 @@ class MainApp extends StatelessWidget {
             title: "Reseta+", // app title
             theme: ThemeData(
               fontFamily: "Montserrat", // set custom font as default
+              // textTheme: Theme.of(context).textTheme.apply(
+              //       fontFamily: "Montserrat",
+              //       fontSizeFactor: 1.2,
+              //     ),
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
               useMaterial3: true,
             ),
@@ -261,7 +264,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Function for getting the username session. Currently used upon initialization
-Future<void> _setusernameSession() async {
+  Future<void> _setusernameSession() async {
     // Await the asynchronous call to get the username
     String? username = await getUsernameSession();
 

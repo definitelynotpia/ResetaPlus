@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
 import 'package:resetaplus/doctor%20pages/doctor_login_page.dart';
-import '../widgets/custom_checkbox.dart';
+import '../widgets/gradient_checkbox.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
@@ -46,7 +46,8 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
     });
   }
 
-  Future<bool> existsInTable(String tableName, String columnName, String value) async {
+  Future<bool> existsInTable(
+      String tableName, String columnName, String value) async {
     try {
       // Create a connection to the database
       final conn = await createConnection();
@@ -72,20 +73,21 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
   }
 
   Future<void> registerUser(BuildContext context) async {
-    
-  // Check if the form is valid
-  if (!_formKey.currentState!.validate()) {
-    // Exit early if the form is not valid
-    return;
-  }
+    // Check if the form is valid
+    if (!_formKey.currentState!.validate()) {
+      // Exit early if the form is not valid
+      return;
+    }
 
-  // Save the form inputs
-  _formKey.currentState!.save();
+    // Save the form inputs
+    _formKey.currentState!.save();
 
-  // Check for email and license existence
-  bool emailExists = await existsInTable('doctor_accounts', 'email', _email!);
-  bool licenseExists = await existsInTable('doctor_accounts', 'license_number', _licenseNumber!);
-  bool verifiedLicenseExists = await existsInTable('verified_license', 'license_number', _licenseNumber!);
+    // Check for email and license existence
+    bool emailExists = await existsInTable('doctor_accounts', 'email', _email!);
+    bool licenseExists = await existsInTable(
+        'doctor_accounts', 'license_number', _licenseNumber!);
+    bool verifiedLicenseExists = await existsInTable(
+        'verified_license', 'license_number', _licenseNumber!);
 
     // Check if the form is valid
     if (_formKey.currentState!.validate()) {
@@ -121,7 +123,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
                   content: Text("Email already in use. Please use another.")),
             );
           }
-        }else if(licenseExists){
+        } else if (licenseExists) {
           // Check if Widget is mounted in context
           if (context.mounted) {
             // Handle the case where the license is already in use
@@ -130,16 +132,15 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
                   content: Text("License already registered to another user.")),
             );
           }
-        }else if(!verifiedLicenseExists){
+        } else if (!verifiedLicenseExists) {
           // Check if Widget is mounted in context
           if (context.mounted) {
             // Handle the case where the license is already in use
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text("Invalid License.")),
+              const SnackBar(content: Text("Invalid License.")),
             );
           }
-        }else {
+        } else {
           // Insert the new user into the doctor_accounts table
           await conn.execute(
             'INSERT INTO doctor_accounts (username, license_number, email, password, salt) VALUES (:username, :license_number, :email, :password, :salt)',
@@ -235,7 +236,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
           // set size constraints to app logo
           SizedBox(
             height: MediaQuery.of(context).size.height / 5,
-            child: Image.asset('assets/logo_ResetaPlus.png'),
+            child: Image.asset('assets/logo_ResetaPlus_doctors.png'),
           ),
           SizedBox(height: MediaQuery.of(context).size.height / 20),
           // Sign in form
@@ -401,31 +402,144 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
                           _rememberUser = value;
                         },
                       ),
+
                       // Forgot password container
                       Padding(
                         padding: const EdgeInsets.only(top: 18),
-                        child: GestureDetector(
-                          // forgot password script
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              // display message
-                              const SnackBar(
-                                content: Text(
-                                    "Check your email for a link to reset your password."),
-                              ),
-                            );
-                          },
-                          // Forgot password text
-                          child: const MouseRegion(
-                            // on hover, set mouse cursor to click
-                            cursor: SystemMouseCursors.click,
-                            child: Text(
-                              "Forgot password?",
-                              style: TextStyle(
-                                fontSize: 16,
+                        child: TextButton(
+                          onPressed: () => showDialog<String>(
+                            context: context,
+                            builder: (BuildContext context) => Dialog(
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    // spacer
+                                    const SizedBox(height: 15),
+
+                                    // Dialog description
+                                    const Text(
+                                      "FORGOT PASSWORD?",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2,
+                                      ),
+                                    ),
+                                    const Text(
+                                      "No worries. We’ll send a password reset link to your email.",
+                                      style: TextStyle(
+                                        color: Color(0xff585858),
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+
+                                    // spacer
+                                    const SizedBox(height: 15),
+
+                                    // Reset password button
+                                    Container(
+                                      height: 50,
+                                      transform:
+                                          Matrix4.translationValues(-25, 0, 0),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(colors: [
+                                          Color(0xffa16ae8),
+                                          Color(0xff94b9ff)
+                                        ]),
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                // display message
+                                                const SnackBar(
+                                                  content: Text(
+                                                      "Check your email for a link to reset your password."),
+                                                ),
+                                              );
+                                            },
+                                            // content
+                                            style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                shadowColor:
+                                                    Colors.transparent),
+                                            child: const Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.arrow_back,
+                                                  color: Colors.white,
+                                                ),
+                                                Text(
+                                                  "Back to Login",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                    fontSize: 18,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    // Back to login
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        ElevatedButton(
+                                          // Register form script
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          // content
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              shadowColor: Colors.transparent),
+                                          child: const Row(
+                                            children: [
+                                              Icon(
+                                                Icons.arrow_back,
+                                                color: Color(0xff8d4fdf),
+                                              ),
+                                              Text(
+                                                "Back to Login",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xff8d4fdf),
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 15),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
+                          child: const Text('Forgot password?'),
                         ),
                       )
                     ],
