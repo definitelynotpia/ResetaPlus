@@ -181,6 +181,39 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     }
   }
 
+ void _showPrescriptionSummary() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Prescription Summary'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Please ensure all the fields are correct'),
+              Text('Patient: ${selectedPatient ?? 'Unknown'}'),
+              Text('Medication: ${selectedMedication ?? 'Unknown'}'),
+              Text('Dosage: ${selectedDosage ?? 'Unknown'}'),
+              Text('Frequency: $frequency'),
+              Text('Duration: $duration'),
+              Text('Intake Instructions: $intakeInstructions'),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                insertPrescription();
+              },
+              child: const Text('Submit Prescription'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -344,7 +377,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty || int.tryParse(value) == null) {
-                      value = selec
+                      // value = frequency;
                       return "Frequency must be a valid number.";
                     }
                     return null;
@@ -394,20 +427,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
                 child: ElevatedButton(
                   onPressed: (){
                     if (_formKey.currentState!.validate()) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PrescriptionSummaryPage(
-                            patient: selectedPatient, 
-                            medication: selectedMedication,
-                            dosage: selectedDosage,
-                            frequency: frequency,
-                            duration: duration,
-                            intakeInstructions: ,
-
-                            )
-                          )
-                        );
+                      _showPrescriptionSummary();
                     }
                   }, 
                   child: const Text('Submit')),
@@ -420,45 +440,4 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   }
 }
 
-// Prescription Summary
-class PrescriptionSummaryPage extends StatelessWidget {
-  final String patient;
-  final String medication;
-  final String dosage;
-  final String frequency;
-  final String duration;
-  final String intakeInstructions;
 
-  const PrescriptionSummaryPage({
-    super.key, 
-    required this.patient,
-    required this.medication,
-    required this.dosage,
-    required this.frequency,
-    required this.duration,
-    required this.intakeInstructions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Prescription Summary'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Patient: $patient', style: const TextStyle(fontSize: 18)),
-            Text('Medication: $medication', style: const TextStyle(fontSize: 18)),
-            Text('Dosage: $dosage', style: const TextStyle(fontSize: 18)),
-            Text('Frequency: $frequency', style: const TextStyle(fontSize: 18)),
-            Text('Duration: $duration', style: const TextStyle(fontSize: 18)),
-            Text('Intake Instructions: $intakeInstructions', style: const TextStyle(fontSize: 18)),
-          ],
-        ),
-      ),
-    );
-  }
-}
