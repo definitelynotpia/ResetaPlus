@@ -10,6 +10,8 @@ import 'package:resetaplus/main.dart';
 
 import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/custom_prescription.dart';
+import 'package:resetaplus/widgets/intake_history_popup.dart';
+import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -506,26 +508,35 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
 
-                  // BUTTONS - INTAKE HISTORY AND INTAKE INSTRUCTIONS
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFA16AE8),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'INTAKE HISTORY',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
+                        child: InkWell(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return IntakeHistoryPopup(patientID: _patientID ?? 0);
+                              },
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFA16AE8),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'INTAKE HISTORY',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
                               ),
                             ),
                           ),
@@ -533,21 +544,31 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                       SizedBox(width: 10),
                       Expanded(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFA16AE8),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'INTAKE INSTRUCTIONS',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
+                        child: InkWell(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return PrescriptionPopupForm();
+                              },
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFA16AE8),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'INTAKE INSTRUCTIONS',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
                               ),
                             ),
                           ),
@@ -555,6 +576,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ],
                   ),
+
                 ],
               ),
             ),

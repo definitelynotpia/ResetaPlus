@@ -118,6 +118,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
         // Add the patient's progress data to the list
         activePatientMedicationProgressData.add({
+          'patientID': assoc['patient_id'],
           'username': assoc['username'],
           'currentProgress': currentProgress,
           'medicationDuration': medicationDuration,
@@ -644,71 +645,6 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
           SizedBox(height: 20), // Add some spacing after the button
         ],
       ),
-    );
-  }
-
-  void _showPrescriptionDialog(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-    String? drugName;
-    String? drugInfo;
-    String? description;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Create Prescription'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Drug Name'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the drug name';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => drugName = value,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Drug Info'),
-                    onSaved: (value) => drugInfo = value,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Description'),
-                    onSaved: (value) => description = value,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-
-                  // Handle the prescription creation logic here
-                  // e.g., call an API or update the state
-
-                  // Close the dialog after saving
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Text('Create Prescription'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
