@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -47,7 +48,6 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   List<Map<String, String>> patients = [];
   List<Map<String, String>> medications = [];
   List<String> dosages = [];
-
   @override
   void initState() {
     super.initState();
@@ -151,6 +151,9 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
 
   Future<void> insertPrescription() async {
     try {
+      final qrData = generateQRCodeData();
+      final qrFilePath = await saveQRCode(qrData);
+      
       final conn = await createConnection();
       await conn.execute(
         'INSERT INTO patient_prescriptions (' 
@@ -196,7 +199,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
           'status': status,
           'intake_instructions': intakeInstructions,
           'doctor_id': doctorId,
-          'qr_code_filepath': qrCodeFilepath
+          'qr_code_filepath': qrFilePath
         },
       );
 
@@ -212,36 +215,95 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   }
 
   void _showPrescriptionSummary() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Prescription Summary'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Please ensure all the fields are correct'),
-              Text('Patient: ${selectedPatient ?? 'Unknown'}'),
-              Text('Medication: ${selectedMedication ?? 'Unknown'}'),
-              Text('Dosage: ${selectedDosage ?? 'Unknown'}'),
-              Text('Frequency: $frequency'),
-              Text('Duration: $duration'),
-              Text('Intake Instructions: $intakeInstructions'),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                insertPrescription();
-              },
-              child: const Text('Submit Prescription'),
-            ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Prescription Summary'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Please ensure all the fields are correct'),
+            Text('Patient: ${selectedPatient ?? 'Unknown'}'),
+            Text('Medication: ${selectedMedication ?? 'Unknown'}'),
+            Text('Dosage: ${selectedDosage ?? 'Unknown'}'),
+            Text('Frequency: $frequency'),
+            Text('Duration: $duration'),
+            Text('Intake Instructions: $intakeInstructions'),
           ],
-        );
-      },
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              insertPrescription();
+            },
+            child: const Text('Submit Prescription'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+// Stores the inputs in the form fields into a Map
+// It then parses the data into a string
+  String generateQRCodeData(){
+    final qrData = {
+    'patient_id': selectedPatientId,
+    'medication_id': selectedMedicationId,
+    'prescription_date': DateTime.now().toIso8601String().split('T').first,
+    'prescription_end_date': DateTime.now()
+        .add(Duration(days: int.parse(duration!)))
+        .toIso8601String()
+        .split('T')
+        .first,
+    'frequency': frequency,
+    'dosage': selectedDosage,
+    'duration': duration,
+    'refills': refills,
+    'status': status,
+    'intake_instructions': intakeInstructions,
+    'doctor_id': doctorId
+  };
+
+  return qrData.toString();
+  
+}
+
+// Saves data into a QR Code into your local Documents folder
+  Future<String> saveQRCode(String qrData) async {
+    final qrValidationResult = QrValidator.validate(
+      data: qrData,
+      version: QrVersions.auto,
+      errorCorrectionLevel: QrErrorCorrectLevel.L,
     );
+
+    if (qrValidationResult.status == QrValidationStatus.valid) {
+      final qrCode = qrValidationResult.qrCode!;
+      final painter = QrPainter.withQr(
+        qr: qrCode,
+        gapless: true,
+      );
+
+      // Get directory where the QR will be saved
+      // In this case, its using the local Documents folder
+      final directory = await getApplicationDocumentsDirectory();
+      final qrFilePath = "${directory.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.png";
+
+      // Convert QR code to an image file
+      final picData = await painter.toImageData(500);
+      final bytes = picData!.buffer.asUint8List();
+      final qrFile = File(qrFilePath);
+      await qrFile.writeAsBytes(bytes);
+
+      return qrFilePath; // Return the file path
+
+    } else {
+      throw Exception("Invalid QR data");
+
+    }
   }
 
   @override
