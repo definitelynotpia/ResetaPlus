@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:searchfield/searchfield.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resetaplus/main.dart';
-
+import 'package:path_provider/path_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class SearchItem {
   final String name;
@@ -40,6 +43,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   String? doctorId;
   String refills = '0';
   String status = 'active';
+  String qrCodeFilepath = 'test';
   List<Map<String, String>> patients = [];
   List<Map<String, String>> medications = [];
   List<String> dosages = [];
@@ -149,7 +153,32 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     try {
       final conn = await createConnection();
       await conn.execute(
-        'INSERT INTO patient_prescriptions (patient_id, medication_id, prescription_date, prescription_end_date, frequency, dosage, duration, refills, status, intake_instructions, doctor_id) VALUES (:patient_id, :medication_id, :prescription_date, :prescription_end_date, :frequency, :dosage, :duration, :refills, :status, :intake_instructions, :doctor_id)',
+        'INSERT INTO patient_prescriptions (' 
+          'patient_id,'
+          'medication_id,' 
+          'prescription_date,' 
+          'prescription_end_date,'
+          'frequency,'
+          'dosage,' 
+          'duration,' 
+          'refills,' 
+          'status,' 
+          'intake_instructions,'
+          'doctor_id,'
+          'qr_code_filepath)'
+        'VALUES ('
+          ':patient_id,' 
+          ':medication_id,' 
+          ':prescription_date,'
+          ':prescription_end_date,' 
+          ':frequency,' 
+          ':dosage,' 
+          ':duration,' 
+          ':refills,' 
+          ':status,'
+          ':intake_instructions,'
+          ':doctor_id,'
+          ':qr_code_filepath)',
         {
           'patient_id': selectedPatientId,
           'medication_id': selectedMedicationId,
@@ -167,6 +196,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
           'status': status,
           'intake_instructions': intakeInstructions,
           'doctor_id': doctorId,
+          'qr_code_filepath': qrCodeFilepath
         },
       );
 
@@ -181,7 +211,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     }
   }
 
- void _showPrescriptionSummary() {
+  void _showPrescriptionSummary() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
