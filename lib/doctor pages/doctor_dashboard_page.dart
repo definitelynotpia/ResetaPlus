@@ -9,6 +9,7 @@ import 'package:resetaplus/main.dart';
 
 import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/custom_progressbar.dart';
+import 'package:resetaplus/widgets/intake_history_popup.dart';
 import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
@@ -397,6 +398,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: (_activePatientMedicationProgressData
                       ?.map((patientData) {
+                    int patientID = 
+                        int.parse(patientData['patientID']);
                     double currentProgress =
                         patientData['currentProgress'] ?? 0;
                     num medicationDuration =
@@ -567,21 +570,31 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFA16AE8),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'INTAKE HISTORY',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
+                                child: InkWell(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return IntakeHistoryPopup(patientID: patientID);
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFA16AE8),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'INTAKE HISTORY',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -589,21 +602,31 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                               ),
                               SizedBox(width: 10),
                               Expanded(
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFA16AE8),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'INTAKE INSTRUCTIONS',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
+                                child: InkWell(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return PrescriptionPopupForm();
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFA16AE8),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'INTAKE INSTRUCTIONS',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                        ),
                                       ),
                                     ),
                                   ),
