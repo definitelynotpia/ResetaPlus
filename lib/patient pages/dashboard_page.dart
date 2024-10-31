@@ -224,12 +224,8 @@ class _DashboardPageState extends State<DashboardPage> {
       // SQL query to get the next intake time for active prescriptions
       var patientPrescriptionIntakeData = await conn.execute('''
       SELECT 
-          p.prescription_id,
-          pi.prescription_intake_id,
           p.frequency,
-          pi.intake_date,
-          pi.intake_time,
-          pi.status
+          pi.intake_time
       FROM 
           reseta_plus.patient_prescriptions p
       JOIN 
