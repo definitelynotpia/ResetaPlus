@@ -177,6 +177,9 @@ class _HomePageState extends State<HomePage> {
   late DoctorDashboardPage seven;
   late DoctorProfilePage eight;
 
+  // late PharmacyDashboardPage nine;
+  // late PharmacyScanQRPage ten;
+
 
   late List<Widget> pages;
   // Shows Loading Default page
