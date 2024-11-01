@@ -7,8 +7,12 @@ import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
 import 'package:resetaplus/main.dart';
 
+import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/custom_progressbar.dart';
+import 'package:resetaplus/widgets/intake_history_popup.dart';
+import 'package:resetaplus/widgets/intake_instuctions_popup.dart';
 import 'package:resetaplus/widgets/prescription_popup.dart';
+//import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DoctorDashboardPage extends StatefulWidget {
   const DoctorDashboardPage({super.key, required String title});
@@ -116,6 +120,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
         // Add the patient's progress data to the list
         activePatientMedicationProgressData.add({
+          'patientID': assoc['patient_id'],
           'username': assoc['username'],
           'currentProgress': currentProgress,
           'medicationDuration': medicationDuration,
@@ -394,6 +399,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: (_activePatientMedicationProgressData
                       ?.map((patientData) {
+                    int patientID = 
+                        int.parse(patientData['patientID']);
                     double currentProgress =
                         patientData['currentProgress'] ?? 0;
                     num medicationDuration =
@@ -564,21 +571,31 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFA16AE8),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'INTAKE HISTORY',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
+                                child: InkWell(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return IntakeHistoryPopup(patientID: patientID);
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFA16AE8),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'INTAKE HISTORY',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -586,21 +603,31 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                               ),
                               SizedBox(width: 10),
                               Expanded(
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFA16AE8),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'INTAKE INSTRUCTIONS',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
+                                child: InkWell(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return IntakeInstructionsPopup(patientID: patientID);
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFA16AE8),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'INTAKE INSTRUCTIONS',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -642,71 +669,6 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
           SizedBox(height: 20), // Add some spacing after the button
         ],
       ),
-    );
-  }
-
-  void _showPrescriptionDialog(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-    String? drugName;
-    String? drugInfo;
-    String? description;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Create Prescription'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Drug Name'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the drug name';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => drugName = value,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Drug Info'),
-                    onSaved: (value) => drugInfo = value,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Description'),
-                    onSaved: (value) => description = value,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-
-                  // Handle the prescription creation logic here
-                  // e.g., call an API or update the state
-
-                  // Close the dialog after saving
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Text('Create Prescription'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
