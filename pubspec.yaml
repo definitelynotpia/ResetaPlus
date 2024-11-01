@@ -22,6 +22,7 @@ dependencies:
   shared_preferences: ^2.3.2
   dropdown_search: ^6.0.1
   searchfield: ^1.1.7
+  flutter_material_design_icons: ^1.1.7447
   qr_flutter: ^4.0.0 
   path_provider: ^2.0.9  
 
@@ -36,6 +37,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logo_ResetaPlus.png
+    - assets/logo_ResetaPlus_doctors.png
     - assets/.env
   fonts:
     - family: Montserrat
