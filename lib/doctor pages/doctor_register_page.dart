@@ -8,6 +8,7 @@ import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
 import 'package:resetaplus/doctor%20pages/doctor_login_page.dart';
 import '../widgets/gradient_checkbox.dart';
+import '../register_consent_forms.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
@@ -37,7 +38,8 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
   // Hide password?
   bool _obscureText = true;
   // Remember user?
-  bool _rememberUser = false;
+  bool _termsAndConditionsConsent = false;
+  bool _privacyPolicyConsent = false;
 
   // Toggles the password show status
   void _toggleObscuredText() {
@@ -171,11 +173,12 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
               const SnackBar(content: Text("Successfully registered!")),
             );
 
-            // Navigate to the login page after successful registration
+            // Navigate to the Register page after successful registration
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const DoctorLoginPage(title: "Login")),
+                  builder: (context) =>
+                      const DoctorLoginPage(title: "Register")),
             );
           }
         }
@@ -227,397 +230,367 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      // add Column widget to have multiple Widgets
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // set size constraints to app logo
-          SizedBox(
-            height: MediaQuery.of(context).size.height / 5,
-            child: Image.asset('assets/logo_ResetaPlus_doctors.png'),
-          ),
-          SizedBox(height: MediaQuery.of(context).size.height / 20),
-          // Sign in form
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width / 1.5,
-              minWidth: MediaQuery.of(context).size.width / 2,
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // Username input field
-                  TextFormField(
-                    cursorColor: Theme.of(context).colorScheme.primary,
-                    decoration: const InputDecoration(
-                        border: GradientOutlineInputBorder(
-                            gradient: LinearGradient(
-                                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                            width: 2.0),
-                        prefixIcon: Icon(
-                          Icons.person,
-                          color: Color(0xFFa16ae8),
-                        ),
-                        label: Text("Username")),
-                    // Username validation script
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Field cannot be empty.";
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _username = value,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 40),
-                  // License Number input field
-                  TextFormField(
-                    cursorColor: Theme.of(context).colorScheme.primary,
-                    decoration: const InputDecoration(
-                        border: GradientOutlineInputBorder(
-                            gradient: LinearGradient(
-                                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                            width: 2.0),
-                        prefixIcon: Icon(
-                          Icons.person,
-                          color: Color(0xFFa16ae8),
-                        ),
-                        label: Text("License Number")),
-                    // License Number validation script
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Field cannot be empty.";
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _licenseNumber = value,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 40),
-                  // Email input field
-                  TextFormField(
-                    cursorColor: Theme.of(context).colorScheme.primary,
-                    decoration: const InputDecoration(
-                        border: GradientOutlineInputBorder(
-                            gradient: LinearGradient(
-                                colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                            width: 2.0),
-                        prefixIcon: Icon(
-                          Icons.mail,
-                          color: Color(0xFFa16ae8),
-                        ),
-                        label: Text("Email")),
-                    autofillHints: const [AutofillHints.email],
-                    // Email validation script
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Field cannot be empty.";
-                      } else if (!EmailValidator.validate(value)) {
-                        return "Please input a valid email address.";
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _email = value,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 40),
-                  // Password input field
-                  TextFormField(
-                    cursorColor: Theme.of(context).colorScheme.primary,
-                    decoration: InputDecoration(
-                      border: const GradientOutlineInputBorder(
-                          gradient: LinearGradient(
-                              colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                          width: 2.0),
-                      label: const Text("Password"),
-                      prefixIcon: const Icon(
-                        Icons.lock,
-                        color: Color(0xFFa16ae8),
-                      ),
-                      suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureText
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: const Color(0xFFa16ae8),
-                          ),
-                          onPressed: _toggleObscuredText),
-                    ),
-                    obscureText: _obscureText,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    // password validation script
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Field cannot be empty.";
-                      } else {
-                        _password = value;
-                        return null;
-                      }
-                    },
-                    onSaved: (value) => _password = value,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 40),
-                  // Confirm password input field
-                  TextFormField(
-                    cursorColor: Theme.of(context).colorScheme.primary,
-                    decoration: const InputDecoration(
-                      border: GradientOutlineInputBorder(
-                          gradient: LinearGradient(
-                              colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                          width: 2.0),
-                      label: Text("Password"),
-                      prefixIcon: Icon(
-                        Icons.lock,
-                        color: Color(0xFFa16ae8),
-                      ),
-                    ),
-                    obscureText: true,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    // Confirm password validation script
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Field cannot be empty.";
-                      }
-                      if (value != _password) {
-                        // Check if it matches the password
-                        return "Passwords do not match.";
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _confirmPassword = value,
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 75),
-                  // Remember me checkbox, Forgot password link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      backgroundColor: const Color(0xffF8F6F5),
+      body: Center(
+        // add Column widget to have multiple Widgets
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              vertical: MediaQuery.of(context).size.height * 0.04,
+              horizontal: MediaQuery.of(context).size.width * 0.05),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // set size constraints to app logo
+              SizedBox(
+                height: MediaQuery.of(context).size.height / 6.5,
+                child: Image.asset('assets/logo_ResetaPlus_doctors.png'),
+              ),
+
+              // Sign in form
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    // row widget to display multiple widgets in the same line
-                    children: <Widget>[
-                      // Custom widget with gradient checkbox icon
-                      CustomCheckbox(
-                        rememberUser: _rememberUser,
-                        onChange: (value) {
-                          _rememberUser = value;
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Username input field
+                      TextFormField(
+                        cursorColor: Theme.of(context).colorScheme.primary,
+                        decoration: const InputDecoration(
+                            border: GradientOutlineInputBorder(
+                                gradient: LinearGradient(colors: [
+                                  Color(0xffa16ae8),
+                                  Color(0xff94b9ff)
+                                ]),
+                                width: 2.0),
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: Color(0xFFa16ae8),
+                            ),
+                            label: Text("Username")),
+                        // Username validation script
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Field cannot be empty.";
+                          }
+                          return null;
                         },
+                        onSaved: (value) => _username = value,
                       ),
 
-                      // Forgot password container
-                      Padding(
-                        padding: const EdgeInsets.only(top: 18),
-                        child: TextButton(
-                          onPressed: () => showDialog<String>(
-                            context: context,
-                            builder: (BuildContext context) => Dialog(
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    // spacer
-                                    const SizedBox(height: 15),
+                      // spacer
+                      const SizedBox(height: 10),
 
-                                    // Dialog description
-                                    const Text(
-                                      "FORGOT PASSWORD?",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 2,
-                                      ),
-                                    ),
-                                    const Text(
-                                      "No worries. We’ll send a password reset link to your email.",
-                                      style: TextStyle(
-                                        color: Color(0xff585858),
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
+                      // License Number input field
+                      TextFormField(
+                        cursorColor: Theme.of(context).colorScheme.primary,
+                        decoration: const InputDecoration(
+                            border: GradientOutlineInputBorder(
+                                gradient: LinearGradient(colors: [
+                                  Color(0xffa16ae8),
+                                  Color(0xff94b9ff)
+                                ]),
+                                width: 2.0),
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: Color(0xFFa16ae8),
+                            ),
+                            label: Text("License Number")),
+                        // License Number validation script
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Field cannot be empty.";
+                          }
+                          return null;
+                        },
+                        onSaved: (value) => _licenseNumber = value,
+                      ),
 
-                                    // spacer
-                                    const SizedBox(height: 15),
+                      // spacer
+                      const SizedBox(height: 10),
 
-                                    // Reset password button
-                                    Container(
-                                      height: 50,
-                                      transform:
-                                          Matrix4.translationValues(-25, 0, 0),
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(colors: [
-                                          Color(0xffa16ae8),
-                                          Color(0xff94b9ff)
-                                        ]),
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                // display message
-                                                const SnackBar(
-                                                  content: Text(
-                                                      "Check your email for a link to reset your password."),
-                                                ),
-                                              );
-                                            },
-                                            // content
-                                            style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                shadowColor:
-                                                    Colors.transparent),
-                                            child: const Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.arrow_back,
-                                                  color: Colors.white,
-                                                ),
-                                                Text(
-                                                  "Back to Login",
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                    fontSize: 18,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                      // Email input field
+                      TextFormField(
+                        cursorColor: Theme.of(context).colorScheme.primary,
+                        decoration: const InputDecoration(
+                            border: GradientOutlineInputBorder(
+                                gradient: LinearGradient(colors: [
+                                  Color(0xffa16ae8),
+                                  Color(0xff94b9ff)
+                                ]),
+                                width: 2.0),
+                            prefixIcon: Icon(
+                              Icons.mail,
+                              color: Color(0xFFa16ae8),
+                            ),
+                            label: Text("Email")),
+                        autofillHints: const [AutofillHints.email],
+                        // Email validation script
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Field cannot be empty.";
+                          } else if (!EmailValidator.validate(value)) {
+                            return "Please input a valid email address.";
+                          }
+                          return null;
+                        },
+                        onSaved: (value) => _email = value,
+                      ),
 
-                                    // Back to login
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ElevatedButton(
-                                          // Register form script
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          // content
-                                          style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              shadowColor: Colors.transparent),
-                                          child: const Row(
-                                            children: [
-                                              Icon(
-                                                Icons.arrow_back,
-                                                color: Color(0xff8d4fdf),
-                                              ),
-                                              Text(
-                                                "Back to Login",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color(0xff8d4fdf),
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                      // spacer
+                      const SizedBox(height: 10),
 
-                                    const SizedBox(height: 15),
-                                  ],
+                      // Password input field
+                      TextFormField(
+                        cursorColor: Theme.of(context).colorScheme.primary,
+                        decoration: InputDecoration(
+                          border: const GradientOutlineInputBorder(
+                              gradient: LinearGradient(colors: [
+                                Color(0xffa16ae8),
+                                Color(0xff94b9ff)
+                              ]),
+                              width: 2.0),
+                          label: const Text("Password"),
+                          prefixIcon: const Icon(
+                            Icons.lock,
+                            color: Color(0xFFa16ae8),
+                          ),
+                          suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureText
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: const Color(0xFFa16ae8),
+                              ),
+                              onPressed: _toggleObscuredText),
+                        ),
+                        obscureText: _obscureText,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        // password validation script
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Field cannot be empty.";
+                          } else {
+                            _password = value;
+                            return null;
+                          }
+                        },
+                        onSaved: (value) => _password = value,
+                      ),
+
+                      // spacer
+                      const SizedBox(height: 10),
+
+                      // Confirm password input field
+                      TextFormField(
+                        cursorColor: Theme.of(context).colorScheme.primary,
+                        decoration: const InputDecoration(
+                          border: GradientOutlineInputBorder(
+                              gradient: LinearGradient(colors: [
+                                Color(0xffa16ae8),
+                                Color(0xff94b9ff)
+                              ]),
+                              width: 2.0),
+                          label: Text("Confirm password"),
+                          prefixIcon: Icon(
+                            Icons.lock,
+                            color: Color(0xFFa16ae8),
+                          ),
+                        ),
+                        obscureText: true,
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        // Confirm password validation script
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Field cannot be empty.";
+                          }
+                          if (value != _password) {
+                            // Check if it matches the password
+                            return "Passwords do not match.";
+                          }
+                          return null;
+                        },
+                        onSaved: (value) => _confirmPassword = value,
+                      ),
+
+                      // spacer
+                      const SizedBox(height: 10),
+
+                      // Terms and conditions
+                      CustomCheckbox(
+                        checkboxValue: _privacyPolicyConsent,
+                        onChange: (value) {
+                          _privacyPolicyConsent = value;
+                        },
+                        child: Wrap(
+                          alignment: WrapAlignment.start,
+                          children: [
+                            // statement
+                            const Text(
+                              "I agree to ",
+                              style: TextStyle(fontSize: 16),
+                            ),
+
+                            // t&c page button
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                // go to Sign Up form script
+                                onTap: () {
+                                  // Navigate to T&C consent form page
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              RegisterConsentForms(page: 1)));
+                                },
+                                child: const Text(
+                                  "Reseta+ Terms & Conditions",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    decoration: TextDecoration.underline,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          child: const Text('Forgot password?'),
+                            const Text(
+                              ".",
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
                         ),
-                      )
+                      ),
+
+                      // Privacy policy
+                      CustomCheckbox(
+                        checkboxValue: _privacyPolicyConsent,
+                        onChange: (value) {
+                          _privacyPolicyConsent = value;
+                        },
+                        child: Wrap(
+                          alignment: WrapAlignment.start,
+                          children: [
+                            // statement
+                            const Text(
+                              "I agree to ",
+                              style: TextStyle(fontSize: 16),
+                            ),
+
+                            // privacy policy page button
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                // go to Sign Up form script
+                                onTap: () {
+                                  // Navigate to Privacy Policy consent form page
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              RegisterConsentForms(page: 2)));
+                                },
+                                child: const Text(
+                                  "Reseta+ Privacy Policy",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    decoration: TextDecoration.underline,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const Text(
+                              ".",
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // spacer
+                      const SizedBox(height: 20),
+
+                      // Register button
+                      Container(
+                        height: 50,
+                        width: 200,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                              colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: ElevatedButton(
+                          // Register form script
+                          onPressed: () => registerUser(context),
+                          // content
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent),
+                          child: const Text(
+                            "SIGN UP",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.height / 35),
-                  // Login button
-                  Container(
-                    height: 50,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                          colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                      borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+
+              // Login prompt
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 3,
+                children: <Widget>[
+                  // Sign up question prompt
+                  const Text(
+                    "ALREADY HAVE AN ACCOUNT?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
                     ),
-                    child: ElevatedButton(
-                      // login form script
-                      onPressed: () => registerUser(context),
-                      // content
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent),
+                  ),
+                  // Sign Up button
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      // go to Sign Up form script
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DoctorLoginPage(
+                              title: "Register",
+                            ),
+                          ),
+                        );
+                      },
                       child: const Text(
-                        "SIGN UP",
+                        "SIGN IN",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 16,
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
-          SizedBox(height: MediaQuery.of(context).size.height / 20),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 3,
-            children: <Widget>[
-              // Sign up question prompt
-              const Text(
-                "ALREADY HAVE AN ACCOUNT?",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-              // Sign Up button
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  // go to Sign Up form script
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DoctorLoginPage(
-                          title: "Login",
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    "SIGN IN",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
-        ],
+        ),
       ),
-    ));
+    );
   }
 }
