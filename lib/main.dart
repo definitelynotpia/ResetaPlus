@@ -181,6 +181,7 @@ class _HomePageState extends State<HomePage> {
   // late PharmacyScanQRPage ten;
 
 
+
   late List<Widget> pages;
   // Shows Loading Default page
   late Widget currentPage = const Center(child: CircularProgressIndicator());
