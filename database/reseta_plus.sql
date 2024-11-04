@@ -1,6 +1,8 @@
+CREATE DATABASE  IF NOT EXISTS `reseta_plus` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `reseta_plus`;
 -- MySQL dump 10.13  Distrib 8.0.40, for Win64 (x86_64)
 --
--- Host: localhost    Database: reseta_plus
+-- Host: 127.0.0.1    Database: reseta_plus
 -- ------------------------------------------------------
 -- Server version	8.0.40
 
@@ -16,6 +18,42 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `doctor_account_keys`
+--
+
+DROP TABLE IF EXISTS `doctor_account_keys`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `doctor_account_keys` (
+  `doctor_key_id` int NOT NULL AUTO_INCREMENT,
+  `encryption_key` varchar(255) DEFAULT NULL,
+  `initialization_vector` varchar(255) DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`doctor_key_id`),
+  UNIQUE KEY `doctor_key_id_UNIQUE` (`doctor_key_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `doctor_accounts`
+--
+
+DROP TABLE IF EXISTS `doctor_accounts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `doctor_accounts` (
+  `doctor_id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `license_number` varchar(255) DEFAULT NULL,
+  `salt` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`doctor_id`),
+  UNIQUE KEY `user_id_UNIQUE` (`doctor_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `medications`
 --
 
@@ -25,13 +63,14 @@ DROP TABLE IF EXISTS `medications`;
 CREATE TABLE `medications` (
   `medication_id` int NOT NULL AUTO_INCREMENT,
   `medication_name` varchar(255) NOT NULL,
+  `medication_dosage` varchar(255) NOT NULL,
   `medication_form` varchar(255) NOT NULL,
   `manufacturer` varchar(255) NOT NULL,
   `medication_info` varchar(255) NOT NULL,
   `medication_description` varchar(255) NOT NULL,
   PRIMARY KEY (`medication_id`),
   UNIQUE KEY `medication_id_UNIQUE` (`medication_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -47,7 +86,7 @@ CREATE TABLE `medications_dosage` (
   `dosage` varchar(255) NOT NULL,
   PRIMARY KEY (`dosage_id`),
   UNIQUE KEY `dosage_id_UNIQUE` (`dosage_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -64,7 +103,7 @@ CREATE TABLE `patient_account_keys` (
   `username` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`patient_key_id`),
   UNIQUE KEY `patient_key_id_UNIQUE` (`patient_key_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -82,7 +121,7 @@ CREATE TABLE `patient_accounts` (
   `salt` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`patient_id`),
   UNIQUE KEY `user_id_UNIQUE` (`patient_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -101,7 +140,7 @@ CREATE TABLE `patient_prescription_intakes` (
   `status` varchar(255) NOT NULL,
   PRIMARY KEY (`prescription_intake_id`),
   UNIQUE KEY `prescription_intake_jd_UNIQUE` (`prescription_intake_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,46 +163,50 @@ CREATE TABLE `patient_prescriptions` (
   `status` varchar(255) NOT NULL,
   `intake_instructions` varchar(255) NOT NULL,
   `doctor_id` int NOT NULL,
+  `qr_code_filepath` varchar(255) NOT NULL,
   PRIMARY KEY (`prescription_id`),
   UNIQUE KEY `prescription_id_UNIQUE` (`prescription_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `doctor_account_keys`
+-- Table structure for table `pharmacy_account_keys`
 --
 
-DROP TABLE IF EXISTS `doctor_account_keys`;
+DROP TABLE IF EXISTS `pharmacy_account_keys`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `doctor_account_keys` (
-  `doctor_key_id` int NOT NULL AUTO_INCREMENT,
+CREATE TABLE `pharmacy_account_keys` (
+  `pharmacy_key_id` int NOT NULL AUTO_INCREMENT,
   `encryption_key` varchar(255) DEFAULT NULL,
   `initialization_vector` varchar(255) DEFAULT NULL,
   `username` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`doctor_key_id`),
-  UNIQUE KEY `doctor_key_id_UNIQUE` (`doctor_key_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`pharmacy_key_id`),
+  UNIQUE KEY `pharmacy_key_id_UNIQUE` (`pharmacy_key_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `doctor_accounts`
+-- Table structure for table `pharmacy_accounts`
 --
 
-DROP TABLE IF EXISTS `doctor_accounts`;
+DROP TABLE IF EXISTS `pharmacy_accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `doctor_accounts` (
-  `doctor_id` int NOT NULL AUTO_INCREMENT,
+CREATE TABLE `pharmacy_accounts` (
+  `pharmacy_id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
-  `license_number` varchar(255) DEFAULT NULL,
   `salt` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`doctor_id`),
-  UNIQUE KEY `user_id_UNIQUE` (`doctor_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`pharmacy_id`),
+  UNIQUE KEY `pharmacy_id_UNIQUE` (`pharmacy_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `verified_license`
+--
 
 DROP TABLE IF EXISTS `verified_license`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -173,9 +216,8 @@ CREATE TABLE `verified_license` (
   `license_number` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`license_id`),
   UNIQUE KEY `user_id_UNIQUE` (`license_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -186,4 +228,4 @@ CREATE TABLE `verified_license` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-24 14:40:00
+-- Dump completed on 2024-11-05  0:33:43
