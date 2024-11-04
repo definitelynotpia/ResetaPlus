@@ -205,6 +205,7 @@ class _HomePageState extends State<HomePage> {
   double iconSize = 40;
 
   int currentTab = 0;
+  String currentPageTitle = "Dashboard";
 
   // Patient Navigation Page Keys
   final Key storePage = const PageStorageKey("storePage");
@@ -214,7 +215,8 @@ class _HomePageState extends State<HomePage> {
   final Key profilePage = const PageStorageKey("profilePage");
 
 // Doctor Navigation Page Keys
-  final Key doctorAddPrescriptionPage = const PageStorageKey("doctorAddPrescriptionPage");
+  final Key doctorAddPrescriptionPage =
+      const PageStorageKey("doctorAddPrescriptionPage");
   final Key doctorDashboardPage = const PageStorageKey("doctorDashboardPage");
   final Key doctorProfilePage = const PageStorageKey("doctorProfilePage");
 
@@ -227,7 +229,6 @@ class _HomePageState extends State<HomePage> {
   late DoctorAddPrescriptionPage six;
   late DoctorDashboardPage seven;
   late DoctorProfilePage eight;
-
 
   late List<Widget> pages;
   // Shows Loading Default page
@@ -298,7 +299,6 @@ class _HomePageState extends State<HomePage> {
         pages = [one, two, three, four, five];
 
         currentPage = three;
-        
       } else if (_userType == 'Doctor') {
         six = DoctorAddPrescriptionPage(
           key: doctorAddPrescriptionPage,
@@ -315,7 +315,6 @@ class _HomePageState extends State<HomePage> {
           title: "Profile",
         );
 
-
         pages = [six, seven, eight];
 
         currentPage = seven;
@@ -325,16 +324,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     // late List<BottomNavigationBarItem> navbarItems;
     late List<BottomNavigationBarItem> navbarItems = _patientNavItems;
-    
-    if(_userType == 'Patient') {
-      navbarItems = _patientNavItems;
 
-    } else if(_userType == 'Doctor') {
+    if (_userType == 'Patient') {
+      navbarItems = _patientNavItems;
+    } else if (_userType == 'Doctor') {
       navbarItems = _doctorNavItems;
-      
     }
 
     return Scaffold(
@@ -342,70 +338,113 @@ class _HomePageState extends State<HomePage> {
       extendBody: true,
 
       appBar: AppBar(
-        titleSpacing: MediaQuery.of(context).size.width * 0.03,
-        toolbarHeight: MediaQuery.of(context).size.height * 0.16,
+        // titleSpacing: MediaQuery.of(context).size.width * 0.03,
+        toolbarHeight: 60,
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // title and subtitle
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Username
-                Text(
-                  _usernameSession,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 26,
-                  ),
-                ),
-                // User type = patient, health professional
-                Text(
-                  _userType,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                )
-              ],
-            ),
-            // Only for Test purposes
-            ElevatedButton(
-                onPressed: () {
-                  // Action to perform when the button is pressed
-                  _setLoggedInStatus(false);
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context, // Opens another instance of MainApp
-                      MaterialPageRoute(builder: (context) => const MainApp()));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffa16ae8), // Background color
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
-                  ),
-                ),
-                child: const Text(
-                  "Test Logout", // Button text
-                  style: TextStyle(color: Colors.white),
-                )),
-            // profile picture
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.person,
-                size: 40,
-                color: Color(0xffa16ae8),
-              ),
-            ),
-          ],
+          children:
+              (currentPage is ProfilePage || currentPage is DoctorProfilePage)
+                  // if on Profile Page
+                  ? <Widget>[
+                      // Page title
+                      Text(
+                        _usernameSession,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      Text(
+                        _userType,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      // info button
+                      IconButton(
+                        visualDensity: const VisualDensity(horizontal: -2.0),
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.info_outline),
+                        color: Colors.white,
+                        onPressed: () {},
+                      ),
+
+                      // settings button
+                      IconButton(
+                        visualDensity: const VisualDensity(horizontal: -2.0),
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.settings),
+                        color: Colors.white,
+                        onPressed: () {},
+                      ),
+
+                      ElevatedButton(
+                        onPressed: () {
+                          // Action to perform when the button is pressed
+                          _setLoggedInStatus(false);
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context, // Opens another instance of MainApp
+                              MaterialPageRoute(
+                                  builder: (context) => const MainApp()));
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(color: Colors.white),
+                            )),
+                        child: const Text(
+                          "Logout",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ]
+                  : <Widget>[
+                      // Page title
+                      Text(
+                        currentPageTitle,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      // info button
+                      IconButton(
+                        visualDensity: const VisualDensity(horizontal: -2.0),
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.info_outline),
+                        color: Colors.white,
+                        onPressed: () {},
+                      ),
+
+                      // settings button
+                      IconButton(
+                        visualDensity: const VisualDensity(horizontal: -2.0),
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.settings),
+                        color: Colors.white,
+                        onPressed: () {},
+                      ),
+                    ],
         ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -416,10 +455,6 @@ class _HomePageState extends State<HomePage> {
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(10),
-              bottomRight: Radius.circular(10),
             ),
           ),
         ),
@@ -475,6 +510,7 @@ class _HomePageState extends State<HomePage> {
                 setState(() {
                   currentTab = index;
                   currentPage = pages[index];
+                  currentPageTitle = (pages[index] as dynamic).title;
                 });
               },
 
@@ -533,7 +569,6 @@ while trying to display the navbar items on runtime -
 //     ];
 // }
 
-
 /*
 
 NOTES:
@@ -544,13 +579,13 @@ according to the type of user that is logged in.
 
 */
 const List<BottomNavigationBarItem> _doctorNavItems = [
-
   //Create Prescription
   BottomNavigationBarItem(
     icon: Icon(
       Icons.add_outlined,
       color: Color(0xffF8F6F5),
-      size: 30,),
+      size: 30,
+    ),
     label: "Create Prescription",
     tooltip: "Create Prescription for Patient",
   ),
@@ -560,7 +595,8 @@ const List<BottomNavigationBarItem> _doctorNavItems = [
     icon: Icon(
       Icons.people,
       color: Color(0xffF8F6F5),
-      size: 30,),
+      size: 30,
+    ),
     label: "Patient List",
     tooltip: "View Patient List",
   ),
@@ -570,20 +606,21 @@ const List<BottomNavigationBarItem> _doctorNavItems = [
     icon: Icon(
       Icons.person,
       color: Color(0xffF8F6F5),
-      size: 30,),
+      size: 30,
+    ),
     label: "Profile",
     tooltip: "Edit Profile Settings",
   )
 ];
 
 const List<BottomNavigationBarItem> _patientNavItems = [
-
   //Medicine Lookup Page
   BottomNavigationBarItem(
     icon: Icon(
-      Icons.medication, 
-      color: Color(0xffF8F6F5), 
-      size: 30,),
+      Icons.medication,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
     label: "Medicine Lookup",
     tooltip: "Medicine Lookup",
   ),
@@ -620,7 +657,7 @@ const List<BottomNavigationBarItem> _patientNavItems = [
     label: "Medical History",
     tooltip: "Medical History",
   ),
-  
+
   // User Profile Page
   BottomNavigationBarItem(
     icon: Icon(
@@ -634,13 +671,13 @@ const List<BottomNavigationBarItem> _patientNavItems = [
 ];
 
 const List<BottomNavigationBarItem> _pharmacyNavItems = [
-
   // Medicine Lookup Page
   BottomNavigationBarItem(
     icon: Icon(
-      Icons.medication, 
-      color: Color(0xffF8F6F5), 
-      size: 30,),
+      Icons.medication,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
     label: "Medicine Lookup",
     tooltip: "Medicine Lookup",
   ),
@@ -655,7 +692,4 @@ const List<BottomNavigationBarItem> _pharmacyNavItems = [
     label: "QR Code Scanner",
     tooltip: "QR Code Scanner",
   ),
-
 ];
-
-
