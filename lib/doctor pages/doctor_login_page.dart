@@ -251,10 +251,16 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
                           // Custom widget with gradient checkbox icon
                           Flexible(
                             child: CustomCheckbox(
-                              rememberUser: _rememberUser,
+                              checkboxValue: _rememberUser,
                               onChange: (value) {
                                 _rememberUser = value;
                               },
+                              child: const Text(
+                                "Remember me",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ),
 
