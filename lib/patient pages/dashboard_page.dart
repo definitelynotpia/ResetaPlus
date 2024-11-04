@@ -12,7 +12,6 @@ import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/intake_history_popup.dart';
 import 'package:resetaplus/widgets/intake_instuctions_popup.dart';
-import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -518,7 +517,8 @@ class _DashboardPageState extends State<DashboardPage> {
                             showDialog(
                               context: context,
                               builder: (BuildContext context) {
-                                return IntakeHistoryPopup(patientID: _patientID ?? 0);
+                                return IntakeHistoryPopup(
+                                    patientID: _patientID ?? 0);
                               },
                             );
                           },
@@ -550,7 +550,8 @@ class _DashboardPageState extends State<DashboardPage> {
                             showDialog(
                               context: context,
                               builder: (BuildContext context) {
-                                return IntakeInstructionsPopup(patientID: _patientID ?? 0);
+                                return IntakeInstructionsPopup(
+                                    patientID: _patientID ?? 0);
                               },
                             );
                           },
@@ -577,7 +578,6 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ],
                   ),
-
                 ],
               ),
             ),

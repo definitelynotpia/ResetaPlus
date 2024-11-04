@@ -17,8 +17,6 @@ import 'patient pages/profile_page.dart';
 import 'patient pages/map_page.dart';
 
 import 'doctor pages/doctor_dashboard_page.dart';
-import 'doctor pages/doctor_history_page.dart';
-import 'doctor pages/doctor_map_page.dart';
 import 'doctor pages/doctor_profile_page.dart';
 import 'doctor pages/doctor_add_prescription.dart';
 

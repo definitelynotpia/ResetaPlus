@@ -38,7 +38,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
   // Hide password?
   bool _obscureText = true;
   // Remember user?
-  bool _termsAndConditionsConsent = false;
+  final bool _termsAndConditionsConsent = false;
   bool _privacyPolicyConsent = false;
 
   // Toggles the password show status

@@ -38,6 +38,7 @@ flutter:
   assets:
     - assets/logo_ResetaPlus.png
     - assets/logo_ResetaPlus_doctors.png
+    - assets/logo_ResetaPlus_name.png
     - assets/.env
   fonts:
     - family: Montserrat

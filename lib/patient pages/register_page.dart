@@ -37,7 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
   // Hide password?
   bool _obscureText = true;
   // Remember user?
-  bool _termsAndConditionsConsent = false;
+  final bool _termsAndConditionsConsent = false;
   bool _privacyPolicyConsent = false;
 
   // Toggles the password show status
@@ -393,7 +393,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              RegisterConsentForms(page: 1)));
+                                              RegisterConsentForms(page: 0)));
                                 },
                                 child: const Text(
                                   "Reseta+ Terms & Conditions",
@@ -439,7 +439,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              RegisterConsentForms(page: 2)));
+                                              RegisterConsentForms(page: 1)));
                                 },
                                 child: const Text(
                                   "Reseta+ Privacy Policy",

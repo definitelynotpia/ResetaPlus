@@ -1,12 +1,15 @@
 // ref: https://stackoverflow.com/a/69387027
 import 'package:flutter/material.dart';
+import 'package:gradient_borders/gradient_borders.dart';
 
 class CustomTabBar extends StatefulWidget {
+  final int tabIndex;
   final List<Widget> tabs;
   final List<String> tabNames;
 
   const CustomTabBar({
     super.key,
+    required this.tabIndex,
     required this.tabNames,
     required this.tabs,
   });
@@ -26,11 +29,25 @@ class _CustomTabBarState extends State<CustomTabBar>
       tabList.add((Tab(text: tabNames[i])));
     }
     return TabBar(
-      unselectedLabelColor: const Color.fromARGB(36, 0, 0, 0),
-      labelColor: Colors.purple,
+      // label decoration
+      labelColor: const Color(0xff8d4fdf),
+      unselectedLabelColor: const Color(0xff9881b5),
+      indicatorPadding: const EdgeInsets.symmetric(horizontal: 0),
+      indicatorSize: TabBarIndicatorSize.tab,
+      // indicator for selected tab
+      indicator: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+        border: GradientBoxBorder(
+          width: 1,
+          gradient:
+              LinearGradient(colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+        ),
+      ),
+      indicatorColor: Colors.white,
+      // isScrollable: true,
       tabs: tabList,
       controller: tabController,
-      indicatorSize: TabBarIndicatorSize.tab,
     );
   }
 
@@ -38,7 +55,8 @@ class _CustomTabBarState extends State<CustomTabBar>
     List<Widget> tabList = <Widget>[];
 
     for (var i = 0; i < tabs.length; i++) {
-      tabList.add((Padding(
+      tabList.add(SingleChildScrollView(
+          child: Padding(
         padding: const EdgeInsets.all(10),
         child: tabs[i],
       )));
@@ -59,15 +77,70 @@ class _CustomTabBarState extends State<CustomTabBar>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // generate customizable tab bar with tab names
-          getTabBar(widget.tabNames),
-          // generate customizable tabview with provided widget list
-          getTabs(widget.tabs),
-        ],
+    return DefaultTabController(
+      initialIndex: widget.tabIndex,
+      length: widget.tabs.length,
+      child: Scaffold(
+        backgroundColor: const Color(0xffF8F6F5),
+        body: Stack(
+          children: [
+            // tabbar + tabview container
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: const GradientBoxBorder(
+                  width: 1,
+                  gradient: LinearGradient(
+                      colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
+                ),
+                color: const Color(0x1a9881b5),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 35),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white,
+                  ),
+                  child: Column(children: [getTabs(widget.tabs)]),
+                ),
+              ),
+            ),
+
+            // tabbar stacked on Container to prevent double border
+            SizedBox(
+              height: 35,
+              width: (MediaQuery.of(context).size.width - 20) + 4,
+              child: getTabBar(widget.tabNames),
+            ),
+
+            // cover bottom border of active tab indicator with white
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                transform: Matrix4.translationValues(0, 33, 0),
+                height: 10,
+                width: (MediaQuery.of(context).size.width - 20) - 2,
+                color: Colors.white,
+              ),
+            ),
+
+            // cover bottom border of active tab indicator with white
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                transform: Matrix4.translationValues(0, -1, 0),
+                height: 10,
+                width: (MediaQuery.of(context).size.width - 30) - 2,
+                decoration: const BoxDecoration(
+                  borderRadius:
+                      BorderRadius.vertical(bottom: Radius.circular(12)),
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

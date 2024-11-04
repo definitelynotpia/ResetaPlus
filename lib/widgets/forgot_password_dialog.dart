@@ -145,6 +145,7 @@ Future<void> forgotPasswordDialog(BuildContext context) async {
                           Icons.arrow_back,
                           color: Color(0xff8d4fdf),
                         ),
+                        SizedBox(width: 3),
                         Text(
                           "Back to Login",
                           textAlign: TextAlign.center,

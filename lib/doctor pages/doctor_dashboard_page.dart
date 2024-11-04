@@ -7,7 +7,6 @@ import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
 import 'package:resetaplus/main.dart';
 
-import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/intake_history_popup.dart';
 import 'package:resetaplus/widgets/intake_instuctions_popup.dart';
