@@ -15,7 +15,9 @@ import 'package:resetaplus/widgets/intake_instuctions_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key, required String title});
+  const DashboardPage({super.key, required this.title});
+
+  final String title;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -386,6 +388,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           color: Color(0xFF602E9E),
                         ),
                       ),
+
                       // Sign Up button
                       MouseRegion(
                         cursor: SystemMouseCursors.click,
