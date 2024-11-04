@@ -204,8 +204,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   double iconSize = 40;
 
-  int currentTab = 0;
-  String currentPageTitle = "Dashboard";
+  late int currentTab;
+  late String currentPageTitle;
 
   // Patient Navigation Page Keys
   final Key storePage = const PageStorageKey("storePage");
@@ -298,7 +298,9 @@ class _HomePageState extends State<HomePage> {
 
         pages = [one, two, three, four, five];
 
+        currentTab = 2;
         currentPage = three;
+        currentPageTitle = "Dashboard";
       } else if (_userType == 'Doctor') {
         six = DoctorAddPrescriptionPage(
           key: doctorAddPrescriptionPage,
@@ -317,7 +319,9 @@ class _HomePageState extends State<HomePage> {
 
         pages = [six, seven, eight];
 
+        currentTab = 1;
         currentPage = seven;
+        currentPageTitle = "Dashboard";
       }
     });
   }
@@ -325,7 +329,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     // late List<BottomNavigationBarItem> navbarItems;
-    late List<BottomNavigationBarItem> navbarItems = _patientNavItems;
+    late List<BottomNavigationBarItem> navbarItems;
 
     if (_userType == 'Patient') {
       navbarItems = _patientNavItems;
@@ -386,6 +390,8 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.white,
                         onPressed: () {},
                       ),
+
+                      const SizedBox(width: 4),
 
                       ElevatedButton(
                         onPressed: () {
@@ -497,10 +503,12 @@ class _HomePageState extends State<HomePage> {
             height: MediaQuery.of(context).size.height * .1,
             child: BottomNavigationBar(
               backgroundColor: Colors.transparent,
+              // selected design
               selectedFontSize: 0,
+              selectedItemColor: Colors.white,
+              // unselected design
               unselectedFontSize: 0,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
+              unselectedItemColor: const Color(0x66402e52),
               type: BottomNavigationBarType.fixed,
               elevation: 0,
 
@@ -583,7 +591,6 @@ const List<BottomNavigationBarItem> _doctorNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.add_outlined,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Create Prescription",
@@ -594,7 +601,6 @@ const List<BottomNavigationBarItem> _doctorNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.people,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Patient List",
@@ -605,7 +611,6 @@ const List<BottomNavigationBarItem> _doctorNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.person,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Profile",
@@ -618,7 +623,6 @@ const List<BottomNavigationBarItem> _patientNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.medication,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Medicine Lookup",
@@ -629,7 +633,6 @@ const List<BottomNavigationBarItem> _patientNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.store,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Pharmacy Locator",
@@ -640,7 +643,6 @@ const List<BottomNavigationBarItem> _patientNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.home,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Home",
@@ -651,7 +653,6 @@ const List<BottomNavigationBarItem> _patientNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.history,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Medical History",
@@ -662,7 +663,6 @@ const List<BottomNavigationBarItem> _patientNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.person,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Profile",
@@ -675,7 +675,6 @@ const List<BottomNavigationBarItem> _pharmacyNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.medication,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Medicine Lookup",
@@ -686,7 +685,6 @@ const List<BottomNavigationBarItem> _pharmacyNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.qr_code,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "QR Code Scanner",
