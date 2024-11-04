@@ -2,16 +2,16 @@
 
 import 'package:flutter/material.dart';
 
-class DoctorProfilePage extends StatefulWidget {
-  const DoctorProfilePage({super.key, required this.title});
+class PharmacyProfilePage extends StatefulWidget {
+  const PharmacyProfilePage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<StatefulWidget> createState() => _DoctorProfilePageState();
+  State<StatefulWidget> createState() => _PharmacyProfilePageState();
 }
 
-class _DoctorProfilePageState extends State<DoctorProfilePage> {
+class _PharmacyProfilePageState extends State<PharmacyProfilePage> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(backgroundColor: Color(0xffF8F6F5));

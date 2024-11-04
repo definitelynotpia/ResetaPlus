@@ -11,16 +11,16 @@ import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class DoctorLoginPage extends StatefulWidget {
-  const DoctorLoginPage({super.key, required this.title});
+class PharmacyLoginPage extends StatefulWidget {
+  const PharmacyLoginPage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<StatefulWidget> createState() => _DoctorLoginPageState();
+  State<StatefulWidget> createState() => _PharmacyLoginPageState();
 }
 
-class _DoctorLoginPageState extends State<DoctorLoginPage> {
+class _PharmacyLoginPageState extends State<PharmacyLoginPage> {
   // generate global key, uniquely identify Form widget and allow form validation
   final _formKey = GlobalKey<FormState>();
 
@@ -57,7 +57,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
     }
   }
 
-  void _setDoctorIdSession(String? pharmacyId) async {
+  void _setPharmacyIdSession(String? pharmacyId) async {
     final prefs = await SharedPreferences.getInstance();
     if (pharmacyId != null) {
       await prefs.setString('pharmacy_id', pharmacyId); // Save the pharmacy_id
@@ -101,7 +101,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
               encrypt.Key(base64.decode(patientAccountData['encryption_key'])),
               encrypt.IV(base64
                   .decode(patientAccountData['initialization_vector'])))) {
-            _setDoctorIdSession(patientAccountData['pharmacy_id']);
+            _setPharmacyIdSession(patientAccountData['pharmacy_id']);
             _setusernameSession(patientAccountData['username']);
             _setLoggedInStatus(true);
             Navigator.pop(context); // Closes current window
@@ -329,7 +329,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const DoctorRegisterPage(
+                          builder: (context) => const PharmacyRegisterPage(
                             title: "Register",
                           ),
                         ),

@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
-import 'package:resetaplus/doctor%20pages/doctor_login_page.dart';
+import 'package:resetaplus/pharmacy%20pages/pharmacy_login_page.dart';
 import '../widgets/custom_checkbox.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
@@ -14,16 +14,16 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 final _encryptionKey = encrypt.Key.fromLength(32); // 32 bytes for AES-256
 final _initializationVector = encrypt.IV.fromLength(16); // 16 bytes for AES
 
-class DoctorRegisterPage extends StatefulWidget {
-  const DoctorRegisterPage({super.key, required this.title});
+class PharmacyRegisterPage extends StatefulWidget {
+  const PharmacyRegisterPage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<StatefulWidget> createState() => _DoctorRegisterPageState();
+  State<StatefulWidget> createState() => _PharmacyRegisterPageState();
 }
 
-class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
+class _PharmacyRegisterPageState extends State<PharmacyRegisterPage> {
   // generate global key, uniquely identify Form widget and allow form validation
   final _formKey = GlobalKey<FormState>();
 
@@ -120,7 +120,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
             );
           }
         }else {
-          // Insert the new user into the doctor_accounts table
+          // Insert the new user into the pharmacy_accounts table
           await conn.execute(
             'INSERT INTO pharmacy_accounts (username, email, password, salt) VALUES (:username, :email, :password, :salt)',
             {
@@ -131,7 +131,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
             },
           );
 
-          // Insert the encryption keys into the doctor_account_keys table
+          // Insert the encryption keys into the pharmacy_account_keys table
           await conn.execute(
             'INSERT INTO pharmacy_account_keys (encryption_key, initialization_vector, username) VALUES (:encryption_key, :initialization_vector, :username)',
             {
@@ -153,7 +153,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const DoctorLoginPage(title: "Login")),
+                  builder: (context) => const PharmacyLoginPage(title: "Login")),
             );
           }
         }
@@ -440,7 +440,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const DoctorLoginPage(
+                        builder: (context) => const PharmacyLoginPage(
                           title: "Login",
                         ),
                       ),

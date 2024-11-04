@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'patient pages/login_page.dart';
+import 'pharmacy pages/pharmacy_login_page.dart';
 import 'doctor pages/doctor_login_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class RoleSelectionPage extends StatefulWidget {
   const RoleSelectionPage({super.key});
@@ -105,6 +106,45 @@ class _RoleSelectionPage extends State<RoleSelectionPage> {
                 ),
               ),
             ),
+
+            SizedBox(height: MediaQuery.of(context).size.height / 20),
+
+            // Pharmacy button
+            Container(
+              height: 50,
+              width: 200,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xffa16ae8), Color(0xff94b9ff)],
+                ),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  _setUserType('Pharmacy');
+                  // Navigate to Patient's page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const PharmacyLoginPage(title: "Login")),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                ),
+                child: const Text(
+                  "Pharmacist",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ),
+
           ],
         ),
       ),

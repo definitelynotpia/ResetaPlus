@@ -23,6 +23,10 @@ import 'doctor pages/doctor_map_page.dart';
 import 'doctor pages/doctor_profile_page.dart';
 import 'doctor pages/doctor_add_prescription.dart';
 
+import 'pharmacy pages/pharmacy_dashboard_page.dart';
+import 'pharmacy pages/pharmacy_scan_qr_page.dart';
+import 'pharmacy pages/pharmacy_profile_page.dart';
+
 void main() async {
   await dotenv.load(fileName: "assets/.env");
   runApp(const MainApp());
@@ -167,6 +171,14 @@ class _HomePageState extends State<HomePage> {
   final Key doctorDashboardPage = const PageStorageKey("doctorDashboardPage");
   final Key doctorProfilePage = const PageStorageKey("doctorProfilePage");
 
+// Pharmacy Navigation Page Keys
+
+  final Key pharmacyDashboardPage = const PageStorageKey("pharmacyDashboardPage");
+  final Key pharmacyScanQRPage= const PageStorageKey("pharmacyScanQRPage");
+  final Key pharmacyProfilePage = const PageStorageKey("pharmacyProfilePage");
+
+
+
   late StorePage one;
   late MapPage two;
   late DashboardPage three;
@@ -177,10 +189,9 @@ class _HomePageState extends State<HomePage> {
   late DoctorDashboardPage seven;
   late DoctorProfilePage eight;
 
-  // late PharmacyDashboardPage nine;
-  // late PharmacyScanQRPage ten;
-
-
+  late PharmacyDashboardPage nine;
+  late PharmacyScanQRPage ten;
+  late PharmacyProfilePage eleven;
 
   late List<Widget> pages;
   // Shows Loading Default page
@@ -269,6 +280,26 @@ class _HomePageState extends State<HomePage> {
         pages = [six, seven, eight];
 
         currentPage = seven;
+
+      } else if (_userType == 'Pharmacy') {
+
+          nine = PharmacyDashboardPage(
+          key: pharmacyDashboardPage,
+          title: "Add Prescription",
+        );
+
+          ten = PharmacyScanQRPage(
+          key: pharmacyScanQRPage,
+          title: "Dashboard",
+        );
+          eleven = PharmacyProfilePage(
+          key: pharmacyProfilePage,
+          title: "Profile",
+        );
+
+        pages = [nine, ten, eleven];
+
+        currentPage = ten;
       }
     });
   }
@@ -285,6 +316,8 @@ class _HomePageState extends State<HomePage> {
     } else if(_userType == 'Doctor') {
       navbarItems = _doctorNavItems;
       
+    } else if (_userType == 'Pharmacy'){
+      navbarItems = _pharmacyNavItems;
     }
 
     return Scaffold(
@@ -585,14 +618,14 @@ const List<BottomNavigationBarItem> _patientNavItems = [
 
 const List<BottomNavigationBarItem> _pharmacyNavItems = [
 
-  // Medicine Lookup Page
+  // Dashboard
   BottomNavigationBarItem(
     icon: Icon(
-      Icons.medication, 
+      Icons.home, 
       color: Color(0xffF8F6F5), 
       size: 30,),
-    label: "Medicine Lookup",
-    tooltip: "Medicine Lookup",
+    label: "Home",
+    tooltip: "Home Page",
   ),
 
   // QR Code Scanner
@@ -605,6 +638,17 @@ const List<BottomNavigationBarItem> _pharmacyNavItems = [
     label: "QR Code Scanner",
     tooltip: "QR Code Scanner",
   ),
+
+    // User Profile Page
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.person,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
+    label: "Profile",
+    tooltip: "Profile",
+  )
 
 ];
 

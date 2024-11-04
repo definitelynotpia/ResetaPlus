@@ -13,20 +13,18 @@ import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
-class DoctorDashboardPage extends StatefulWidget {
-  const DoctorDashboardPage({super.key, required String title});
+class PharmacyScanQRPage extends StatefulWidget {
+  const PharmacyScanQRPage({super.key, required String title});
 
   @override
-  State<DoctorDashboardPage> createState() => _DoctorDashboardPageState();
+  State<PharmacyScanQRPage> createState() => _PharmacyScanQRPageState();
 }
 
-class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
+class _PharmacyScanQRPageState extends State<PharmacyScanQRPage> {
   // Current date for reference
   final DateTime _currentDate = DateTime.now();
   // Sample patient ID for testing
-  final int _patientIDTest = 1;
-
-  final int _doctorIDTest = 1;
+  final int _pharmacyIDTest = 1;
 
   @override
   void initState() {

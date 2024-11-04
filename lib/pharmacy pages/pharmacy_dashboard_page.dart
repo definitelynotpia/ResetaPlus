@@ -17,16 +17,15 @@ class PharmacyDashboardPage extends StatefulWidget {
   const PharmacyDashboardPage({super.key, required String title});
 
   @override
-  State<PharmacyDashboardPage> createState() => _DoctorDashboardPageState();
+  State<PharmacyDashboardPage> createState() => _PharmacyDashboardPageState();
 }
 
-class _DoctorDashboardPageState extends State<PharmacyDashboardPage> {
+class _PharmacyDashboardPageState extends State<PharmacyDashboardPage> {
   // Current date for reference
   final DateTime _currentDate = DateTime.now();
   // Sample patient ID for testing
-  final int _patientIDTest = 1;
 
-  final int _doctorIDTest = 1;
+  final int _pharmacyIDTest = 1;
 
   @override
   void initState() {
