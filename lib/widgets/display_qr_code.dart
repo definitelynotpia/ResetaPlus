@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:resetaplus/main.dart';
 
 import 'package:flutter/material.dart';
-import 'package:mysql_client/src/mysql_client/connection.dart';
  // For loading environment variables
 
 
@@ -34,23 +33,6 @@ class _QrCodeDisplayState extends State<QrCodeDisplay> {
     fetchQrCode(); // Fetch QR code file path when the widget is initialized
     
   }
-
-  // testFunction() async {
-  //   try {
-  //     final conn = await createConnection();
-  //     var result = await conn.execute('SELECT qr_code_filepath FROM patient_prescriptions LIMIT 1;');
-
-  //     if (result.isNotEmpty) {
-  //       debugPrint('QR Code File Path: exists');
-  //     } else {
-  //       debugPrint('No data found in the patient_prescriptions table.');
-  //     }
-
-  //     await conn.close();
-  //   } catch (e) {
-  //       debugPrint('Error fetching QR code: $e');
-  //     }
-  // }
   
   Future<void> fetchQrCode() async {
     try {

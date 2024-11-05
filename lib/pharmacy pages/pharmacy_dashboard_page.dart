@@ -1,17 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-import 'dart:math';
-import '../widgets/display_qr_code.dart';
-
-import 'package:carousel_slider/carousel_options.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:gradient_borders/box_borders/gradient_box_border.dart';
-import 'package:intl/intl.dart';
-import 'package:resetaplus/main.dart';
-
-import 'package:resetaplus/widgets/custom_prescription.dart';
-import 'package:resetaplus/widgets/prescription_popup.dart';
-//import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class PharmacyDashboardPage extends StatefulWidget {
   const PharmacyDashboardPage({super.key, required String title});
@@ -42,7 +29,7 @@ class _PharmacyDashboardPageState extends State<PharmacyDashboardPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Active Patients',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -54,24 +41,11 @@ class _PharmacyDashboardPageState extends State<PharmacyDashboardPage> {
                 thickness: 3,
                 color: Colors.grey[300]!,
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
+              
             ],
           ),
 
-          // ROW FOR CURRENT PRESCRIPTIONS - USING WIDGET
-          // Column(
-          //   children: (_currentPrescriptions?.map((prescription) {
-          //         return PrescriptionCard(
-          //           drugName: prescription['drugName'] ??
-          //               "Unknown Drug", // Provide a default value if null
-          //           drugInfo: prescription['drugInfo'] ??
-          //               "No Info Available", // Provide a default value if null
-          //           description: prescription['description'] ??
-          //               "No Description Available", // Provide a default value if null
-          //         );
-          //       }).toList() ??
-          //       []), // Fallback to an empty list if _currentPrescriptions is null
-          // ),
           ElevatedButton(
               onPressed: () {
                 // Change the number based on the prescription 
