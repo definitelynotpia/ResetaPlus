@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class PharmacyScanQRPage extends StatefulWidget {
   const PharmacyScanQRPage({super.key, required String title});
@@ -11,54 +12,17 @@ class PharmacyScanQRPage extends StatefulWidget {
 class _PharmacyScanQRPageState extends State<PharmacyScanQRPage> {
 
   @override
-  void initState() {
-    super.initState();
-
-  }
-  
-  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      // Wrap content with SingleChildScrollView for scrolling
-      child: Column(
-        children: [
-                    Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Active Patients',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                  color: Color(0xFF602E9E),
-                ),
-              ),
-              Divider(
-                thickness: 3,
-                color: Colors.grey[300]!,
-              ),
-              const SizedBox(height: 5),
-              
-            ],
-          ),
-          
-          ElevatedButton(
-              onPressed: () {
-                // Change the number based on the prescription 
-                // that you want the QR code from
-                // displayQRCode(context, 1);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xffa16ae8), // Background color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Rounded corners
-                ),
-              ),
-              child: const Text(
-                "Show QR Code", // Button text
-                style: TextStyle(color: Colors.white),
-              )),
-        ],
+    return Scaffold(
+      appBar: AppBar(title: const Text('QR Scanner')),
+      body: SizedBox(
+        height: 400,
+        child: MobileScanner(onDetect: (capture) {
+          final List<Barcode> barcodes = capture.barcodes;
+          for (final barcode in barcodes) {
+            debugPrint(barcode.rawValue ?? "No Data found in QR");
+          }
+        }),
       ),
     );
   }

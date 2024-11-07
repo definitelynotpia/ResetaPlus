@@ -285,12 +285,12 @@ class _HomePageState extends State<HomePage> {
 
           nine = PharmacyDashboardPage(
           key: pharmacyDashboardPage,
-          title: "Add Prescription",
+          title: "Dashboard",
         );
 
           ten = PharmacyScanQRPage(
           key: pharmacyScanQRPage,
-          title: "Dashboard",
+          title: "Scan QR",
         );
           eleven = PharmacyProfilePage(
           key: pharmacyProfilePage,
@@ -299,7 +299,7 @@ class _HomePageState extends State<HomePage> {
 
         pages = [nine, ten, eleven];
 
-        currentPage = ten;
+        currentPage = nine;
       }
     });
   }
