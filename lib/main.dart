@@ -516,7 +516,6 @@ while trying to display the navbar items on runtime -
 //     ];
 // }
 
-
 /*
 
 NOTES:
@@ -524,8 +523,8 @@ NOTES:
 These are Lists of NavBar items (icons) that will be displayed
 according to the type of user that is logged in.
 
-
 */
+
 const List<BottomNavigationBarItem> _doctorNavItems = [
 
   //Create Prescription
