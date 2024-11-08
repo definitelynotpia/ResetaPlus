@@ -204,8 +204,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   double iconSize = 40;
 
-  late int currentTab;
-  late String currentPageTitle;
+  int currentTab = 0;
+  String currentPageTitle = "Dashboard";
 
   // Patient Navigation Page Keys
   final Key storePage = const PageStorageKey("storePage");
@@ -300,7 +300,6 @@ class _HomePageState extends State<HomePage> {
 
         currentTab = 2;
         currentPage = three;
-        currentPageTitle = "Dashboard";
       } else if (_userType == 'Doctor') {
         six = DoctorAddPrescriptionPage(
           key: doctorAddPrescriptionPage,
@@ -321,7 +320,6 @@ class _HomePageState extends State<HomePage> {
 
         currentTab = 1;
         currentPage = seven;
-        currentPageTitle = "Dashboard";
       }
     });
   }
@@ -329,7 +327,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     // late List<BottomNavigationBarItem> navbarItems;
-    late List<BottomNavigationBarItem> navbarItems;
+    List<BottomNavigationBarItem> navbarItems = _patientNavItems;
 
     if (_userType == 'Patient') {
       navbarItems = _patientNavItems;

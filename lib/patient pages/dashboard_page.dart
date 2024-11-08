@@ -356,7 +356,7 @@ class _DashboardPageState extends State<DashboardPage> {
             // Outer container with gradient border
             decoration: BoxDecoration(
               border: GradientBoxBorder(
-                width: 2,
+                width: 1,
                 gradient: LinearGradient(colors: [
                   Color(0xffa16ae8),
                   Color(0xff94b9ff),
@@ -365,7 +365,7 @@ class _DashboardPageState extends State<DashboardPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
@@ -384,29 +384,41 @@ class _DashboardPageState extends State<DashboardPage> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          // fontWeight: FontWeight.bold,
                           color: Color(0xFF602E9E),
                         ),
                       ),
 
-                      // Sign Up button
-                      MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          // go to Sign Up form script
-                          onTap: () {
-                            // TODO: opens a Calendar widget that allows user to view
-                            // their previous and upcoming medication schedule
-                            // this will change the Weekday Carousel
-                          },
-                          child: Text(
-                            DateFormat('MMMM').format(_currentDate),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF602E9E),
-                            ),
-                          ),
+                      Container(
+                        transform: Matrix4.translationValues(10, 0, 0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.horizontal(
+                              left: Radius.circular(12)),
+                          color: Color(0xffa16ae8),
+                        ),
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                              // go to Sign Up form script
+                              onTap: () {
+                                // TODO: opens a Calendar widget that allows user to view
+                                // their previous and upcoming medication schedule
+                                // this will change the Weekday Carousel
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Text(
+                                  DateFormat('MMM d, yyyy')
+                                      .format(_currentDate)
+                                      .toUpperCase(),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xfff8f6f5),
+                                  ),
+                                ),
+                              )),
                         ),
                       ),
                     ],
@@ -456,6 +468,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     ]),
                                   ),
                                   borderRadius: BorderRadius.circular(10),
+                                  color: Color(0xfff8f6f5),
                                 )
                               // if date has passed
                               : BoxDecoration(
@@ -470,7 +483,17 @@ class _DashboardPageState extends State<DashboardPage> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                           child: Center(
-                            child: Text("${index + 1}"),
+                            // day label
+                            child: Text(
+                              "${index + 1}",
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: (index >= (_currentDay ?? 0))
+                                    ? Color(0xffa16ae8)
+                                    : Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       );
