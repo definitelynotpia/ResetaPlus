@@ -220,10 +220,10 @@ packages:
     dependency: transitive
     description:
       name: js
-      sha256: c1b2e9b5ea78c45e1a0788d29606ba27dc5f71f019f32ca5140f61ef071838cf
+      sha256: f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.1"
+    version: "0.6.7"
   leak_tracker:
     dependency: transitive
     description:
@@ -256,6 +256,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  logging:
+    dependency: transitive
+    description:
+      name: logging
+      sha256: c8245ada5f1717ed44271ed1c26b8ce85ca3228fd2ffdb75468ab01979309d61
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.0"
   matcher:
     dependency: transitive
     description:
@@ -280,6 +288,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.15.0"
+  mobile_scanner:
+    dependency: "direct main"
+    description:
+      name: mobile_scanner
+      sha256: "728828a798d1a2ee506beb652ca23d974c542c96ed03dcbd5eaf97bef96cdaad"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.2"
+  mysql1:
+    dependency: "direct main"
+    description:
+      name: mysql1
+      sha256: "68aec7003d2abc85769bafa1777af3f4a390a90c31032b89636758ff8eb839e9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.0"
   mysql_client:
     dependency: "direct main"
     description:
@@ -368,6 +392,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.9.1"
+  pool:
+    dependency: transitive
+    description:
+      name: pool
+      sha256: "20fe868b6314b322ea036ba325e6fc0711a22948856475e2c2b6306e8ab39c2a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.1"
+  pretty_qr_code:
+    dependency: "direct main"
+    description:
+      name: pretty_qr_code
+      sha256: cbdb4af29da1c1fa21dd76f809646c591320ab9e435d3b0eab867492d43607d5
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.0"
   qr:
     dependency: transitive
     description:

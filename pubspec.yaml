@@ -12,6 +12,7 @@ dependencies:
   gradient_borders: ^1.0.1
   gradient_icon: ^2.0.9
   mysql_client: ^0.0.27
+  mysql1: ^0.20.0
   http: ^1.2.0
   crypto: ^3.0.1
   encrypt: ^5.0.0
@@ -24,9 +25,10 @@ dependencies:
   searchfield: ^1.1.7
   flutter_material_design_icons: ^1.1.7447
   qr_flutter: ^4.0.0 
+  pretty_qr_code: ^3.3.0
+  # qr_code_scanner: ^1.0.1
   path_provider: ^2.0.9  
-
-
+  mobile_scanner: ^6.0.2
 
 dev_dependencies:
   flutter_test:

@@ -381,7 +381,7 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
                     if (_formKey.currentState!.validate()) {
                       insertPrescription();
                       Navigator.of(context)
-                          .pop(); // Close the dialog after submitting
+                        .pop(); // Close the dialog after submitting
                     }
                   },
                   child: const Text('Submit Prescription'),
