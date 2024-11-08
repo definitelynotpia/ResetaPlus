@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
-import '../widgets/custom_checkbox.dart';
+import '../widgets/gradient_checkbox.dart';
 import 'pharmacy_register_page.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
@@ -241,10 +241,16 @@ class _PharmacyLoginPageState extends State<PharmacyLoginPage> {
                       children: <Widget>[
                         // Custom widget with gradient checkbox icon
                         CustomCheckbox(
-                          rememberUser: _rememberUser,
+                          checkboxValue: _rememberUser,
                           onChange: (value) {
                             _rememberUser = value;
                           },
+                          child: const Text(
+                            "Remember me",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                         // Forgot password container
                         Padding(

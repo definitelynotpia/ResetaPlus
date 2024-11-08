@@ -2,14 +2,15 @@
 import 'dart:math';
 import '../widgets/display_qr_code.dart';
 
-import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
 import 'package:resetaplus/main.dart';
 
-import 'package:resetaplus/widgets/custom_prescription.dart';
+import 'package:resetaplus/widgets/custom_progressbar.dart';
+import 'package:resetaplus/widgets/intake_history_popup.dart';
+import 'package:resetaplus/widgets/intake_instuctions_popup.dart';
 import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
@@ -23,65 +24,40 @@ class DoctorDashboardPage extends StatefulWidget {
 class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   // Current date for reference
   final DateTime _currentDate = DateTime.now();
-  // Sample patient ID for testing
-  final int _patientIDTest = 1;
 
-  final int _doctorIDTest = 1;
+  int? _doctorID;
 
-  List<Map<String, String>>? _currentPrescriptions; // Medicine information in the prescription
+  // A list to store medication progress data for active patients
   List<Map<String, dynamic>>? _activePatientMedicationProgressData;
 
   @override
   void initState() {
     super.initState();
     // Fetch the prescription data when the widget is initialized
-    getActivePatientMedicationProgress();
-    getCurrentPrescriptions();
+    _initialize(context);
   }
 
-  Future<void> getActivePatientMedicationProgress()async {
-    try{
-      final conn = await createConnection();
+  // Initializes necessary data by fetching the doctor ID first and then retrieving other related information
+  Future<void> _initialize(BuildContext context) async {
+    // Fetch the doctor ID first
+    await getDoctorID(context);
 
-      var activePatients = await conn.execute(''' 
-      SELECT DISTINCT pp.patient_id, pa.username
-      FROM patient_prescriptions pp
-      JOIN patient_accounts pa ON pp.patient_id = pa.patient_id
-      WHERE pp.status = 'active' 
-        AND pp.doctor_id = :doctor_id;
-      ''', {'doctor_id': _doctorIDTest});
+    // Now that getDoctorID has completed, call the other functions
+    if (context.mounted) {
+      await Future.wait([getActivePatientMedicationProgress(context)]);
+    }
+  }
 
-      List<Map<String, dynamic>>? activePatientMedicationProgressData = [];
+  // Function to get the doctor ID number
+  Future<void> getDoctorID(BuildContext context) async {
+    try {
+      // Call getUserID with "doctor" to retrieve the user ID for the doctor
+      int userID = await getUserID("doctor");
 
-      for (var row in activePatients.rows) {
-        var assoc = row.assoc();
-        // Retrieve the patient_id as a string
-        String? patientIdString = assoc['patient_id'];
-
-        // Convert the string to an int with a default value
-        int patientIdInt = patientIdString != null 
-            ? int.tryParse(patientIdString) ?? 0 // Default to 0 if parsing fails
-            : 0; // Default to 0 if patientIdString is null
-        
-        num medicationDuration = await getPrescriptionDuration(patientIdInt);
-        num? currentDay = await getMedicationDayProgress(patientIdInt);
-        double currentProgress= calculateOverallMedicationProgress(medicationDuration, currentDay);
-        String nextIntakeTime = await getNextMedicineIntake(patientIdInt);
-
-        activePatientMedicationProgressData.add({
-          'username': assoc['username'],
-          'currentProgress': currentProgress,
-          'medicationDuration': medicationDuration,
-          'currentDay': currentDay,
-          'nextIntakeTime': nextIntakeTime,
-        });
-      }
-
-      // Update the state with the next intake time
+      // Update the state with the retrieved doctor ID
       setState(() {
-        _activePatientMedicationProgressData = activePatientMedicationProgressData;
-      });   
-
+        _doctorID = userID;
+      });
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
@@ -94,42 +70,69 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
     }
   }
 
-  // Function to get the information of the medication in the prescription
-  Future<void> getCurrentPrescriptions() async {
+  Future<void> getActivePatientMedicationProgress(BuildContext context) async {
     try {
+      // Establish a connection to the database
       final conn = await createConnection();
 
-      // SQL query to fetch the information of the medication in the prescription
-      var activePrescriptionMedicationInfo = await conn.execute('''
-      SELECT
-          m.medication_name,
-          m.medication_info,
-          m.medication_description
-      FROM
-          reseta_plus.patient_prescriptions p
-      JOIN
-          reseta_plus.medications m ON p.medication_id = m.medication_id
-      WHERE
-          p.patient_id = :patient_id
-          AND p.status = 'active';
-      ''', {'patient_id': _patientIDTest});
+      // Query to fetch distinct active patients along with their usernames
+      var activePatients = await conn.execute('''
+      SELECT DISTINCT pp.patient_id, pa.username
+      FROM patient_prescriptions pp
+      JOIN patient_accounts pa ON pp.patient_id = pa.patient_id
+      WHERE pp.status = 'active' 
+        AND pp.doctor_id = :doctor_id;
+      ''', {'doctor_id': _doctorID});
 
-      // Initialize the list to hold prescription data
-      List<Map<String, String>> activePrescriptionDetails = [];
+      // Initialize a list to hold medication progress data
+      List<Map<String, dynamic>>? activePatientMedicationProgressData = [];
 
-      // Iterate through the result rows and map them to the desired structure
-      for (var row in activePrescriptionMedicationInfo.rows) {
+      // Iterate over each row returned from the query
+      for (var row in activePatients.rows) {
         var assoc = row.assoc();
-        activePrescriptionDetails.add({
-          'drugName': assoc['medication_name'] ?? '',
-          'drugInfo': assoc['medication_info'] ?? '',
-          'description': assoc['medication_description'] ?? '',
+        // Retrieve the patient_id as a string
+        String? patientIdString = assoc['patient_id'];
+
+        // Convert the string to an int with a default value
+        int patientIdInt = patientIdString != null
+            ? int.tryParse(patientIdString) ??
+                0 // Default to 0 if parsing fails
+            : 0; // Default to 0 if patientIdString is null
+
+        // Get the duration of the patient's prescription
+        num medicationDuration = context.mounted
+            ? await getPrescriptionDuration(patientIdInt, context)
+            : -1;
+
+        // Get the current day of medication progress for the patient
+        num? currentDay = context.mounted
+            ? await getMedicationDayProgress(patientIdInt, context)
+            : -1;
+
+        // Get the next intake time for the patient's medication
+        String nextIntakeTime = context.mounted
+            ? await getNextMedicineIntake(patientIdInt, context)
+            : "";
+
+        // Calculate overall medication progress based on duration and current day
+        double currentProgress =
+            calculateOverallMedicationProgress(medicationDuration, currentDay);
+
+        // Add the patient's progress data to the list
+        activePatientMedicationProgressData.add({
+          'patientID': assoc['patient_id'],
+          'username': assoc['username'],
+          'currentProgress': currentProgress,
+          'medicationDuration': medicationDuration,
+          'currentDay': currentDay,
+          'nextIntakeTime': nextIntakeTime,
         });
       }
 
-      // Update the state with the prescription information
+      // Update the state with the active patients' medication progress data
       setState(() {
-        _currentPrescriptions = activePrescriptionDetails;
+        _activePatientMedicationProgressData =
+            activePatientMedicationProgressData;
       });
     } catch (e) {
       // Handle errors during data fetching
@@ -144,7 +147,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   }
 
   // Function to get the overall progress of medication
-  Future<num> getPrescriptionDuration(int patientID) async {
+  Future<num> getPrescriptionDuration(
+      int patientID, BuildContext context) async {
     try {
       final conn = await createConnection();
 
@@ -162,14 +166,15 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
       // Check if there are any active prescriptions
       if (activePrescriptionDuration.rows.isNotEmpty) {
         // Split duration string to extract value
-        final parts = activePrescriptionDuration.rows.first.assoc()['duration']!.split(' ');
+        final parts = activePrescriptionDuration.rows.first
+            .assoc()['duration']!
+            .split(' ');
 
         // Parse the duration value
         num durationValue = num.parse(parts[0]);
 
         // Extract the prescription duration from the result
         return durationValue;
-        
       } else {
         // Return 0.0 if there are no active prescriptions
         return 0.0;
@@ -188,7 +193,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   }
 
   // Function to get today's medication progress
-  Future<num?> getMedicationDayProgress(int patientID) async {
+  Future<num?> getMedicationDayProgress(
+      int patientID, BuildContext context) async {
     try {
       final conn = await createConnection();
 
@@ -222,7 +228,6 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
       // Update the state with the total count of prescriptions taken
       return totalCount;
-
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
@@ -237,7 +242,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
   }
 
   // Function to get the next medicine intake time
-  Future<String> getNextMedicineIntake(int patientID) async {
+  Future<String> getNextMedicineIntake(
+      int patientID, BuildContext context) async {
     try {
       final conn = await createConnection();
 
@@ -276,10 +282,9 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
           // Calculate the next intake time
           DateTime nextTime = calculateNextIntake(intakeTime, frequencyStr!);
 
-          debugPrint(DateFormat('yyyy-MM-dd – kk:mm').format(nextTime));
-
           // Update the next intake time if it's the earliest found
-          if (nextIntakeDateTime == null || nextTime.isBefore(nextIntakeDateTime)) {
+          if (nextIntakeDateTime == null ||
+              nextTime.isBefore(nextIntakeDateTime)) {
             nextIntakeDateTime = nextTime;
           }
         }
@@ -304,7 +309,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
               content: Text("Error fetching data. Please try again.")),
         );
       }
-      // Optionally, you can throw an exception or return a default value
+
       return 'Error occurred'; // Return a string indicating an error
     }
   }
@@ -390,20 +395,264 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
             ],
           ),
 
-          // ROW FOR CURRENT PRESCRIPTIONS - USING WIDGET
-          Column(
-            children: (_currentPrescriptions?.map((prescription) {
-                  return PrescriptionCard(
-                    drugName: prescription['drugName'] ??
-                        "Unknown Drug", // Provide a default value if null
-                    drugInfo: prescription['drugInfo'] ??
-                        "No Info Available", // Provide a default value if null
-                    description: prescription['description'] ??
-                        "No Description Available", // Provide a default value if null
-                  );
-                }).toList() ??
-                []), // Fallback to an empty list if _currentPrescriptions is null
+          // CARD - MEDICATION PROGRESS
+          Container(
+            padding: EdgeInsets.all(8), // Padding for the outer container
+            decoration: BoxDecoration(
+              color: Colors
+                  .transparent, // Ensure the outer container is transparent
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: (_activePatientMedicationProgressData
+                      ?.map((patientData) {
+                    int patientID = 
+                        int.parse(patientData['patientID']);
+                    double currentProgress =
+                        patientData['currentProgress'] ?? 0;
+                    num medicationDuration =
+                        patientData['medicationDuration'] ?? '0';
+                    num currentDay = patientData['currentDay'] ?? 0;
+                    String nextIntakeTime =
+                        patientData['nextIntakeTime'] ?? 'N/A';
+                    String username = patientData['username'] ?? 'N/A';
+
+                    return Container(
+                      // Container with gradient border for each patient data
+                      decoration: BoxDecoration(
+                        border: GradientBoxBorder(
+                          width: 2,
+                          gradient: LinearGradient(colors: [
+                            Color(0xffa16ae8),
+                            Color(0xff94b9ff),
+                          ]),
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors
+                            .white, // White background for the inner container
+                      ),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            username,
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Color(0xFF602E9E),
+                            ),
+                          ),
+                          // TITLE - MEDICATION PROGRESS
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              const Text(
+                                "MEDICATION PROGRESS",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF602E9E),
+                                ),
+                              ),
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // TODO: opens a Calendar widget
+                                  },
+                                  child: Text(
+                                    DateFormat('MMMM').format(_currentDate),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Color(0xFF602E9E),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // spacer
+                          SizedBox(height: 10),
+
+                          // Prescription progress bar
+                          CustomProgressBar(
+                            value: (currentProgress),
+                            backgroundColor: Color(0xFFD9D9FF),
+                            gradientColors: [
+                              Color(0xffa16ae8),
+                              Color(0xff94b9ff)
+                            ],
+                            height: 40,
+                            borderRadius: BorderRadius.circular(15),
+                            text:
+                                '${max(medicationDuration - currentDay, 0)} days Left',
+                          ),
+
+                          // date pointer
+                          Container(
+                            transform: Matrix4.translationValues(0, 10, 0),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.arrow_drop_down,
+                              size: 30,
+                            ),
+                          ),
+
+                          // weekday carousel
+                          CarouselSlider(
+                            items: List<Widget>.generate(31, (int index) {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 1),
+                                child: Container(
+                                  decoration: (index >= currentDay)
+                                      ? BoxDecoration(
+                                          border: GradientBoxBorder(
+                                            width: 1,
+                                            gradient: LinearGradient(colors: [
+                                              Color.fromRGBO(195, 150, 255, 1),
+                                              Color(0xFF86B0FF),
+                                            ]),
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        )
+                                      : BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Color.fromRGBO(195, 150, 255, 1),
+                                              Color(0xFF86B0FF),
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                  child: Center(
+                                    child: Text("${index + 1}"),
+                                  ),
+                                ),
+                              );
+                            }),
+                            options: CarouselOptions(
+                              height: 60,
+                              aspectRatio: 1 / 1,
+                              viewportFraction: 0.2,
+                              initialPage: currentDay.toInt(),
+                              enableInfiniteScroll: false,
+                              reverse: false,
+                              autoPlay: false,
+                              enlargeCenterPage: true,
+                              enlargeFactor: 0.25,
+                              scrollDirection: Axis.horizontal,
+                            ),
+                          ),
+
+                          // spacer
+                          SizedBox(height: 15),
+
+                          // next intake alarm
+                          Text(
+                            'Your next medicine intake is at: ',
+                            style: TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            nextIntakeTime,
+                            style: TextStyle(
+                              fontSize: 54,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFA16AE8),
+                            ),
+                          ),
+
+                          // BUTTONS - INTAKE HISTORY AND INTAKE INSTRUCTIONS
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return IntakeHistoryPopup(patientID: patientID);
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFA16AE8),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'INTAKE HISTORY',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return IntakeInstructionsPopup(patientID: patientID);
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFA16AE8),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'INTAKE INSTRUCTIONS',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList() ??
+                  []),
+            ),
           ),
+
+          SizedBox(height: 20), // Add some spacing before the button
+
           ElevatedButton(
               onPressed: () {
                 // Change the number based on the prescription 
@@ -420,73 +669,10 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                 "Show QR Code", // Button text
                 style: TextStyle(color: Colors.white),
               )),
+
+          SizedBox(height: 20), // Add some spacing after the button
         ],
       ),
-    );
-  }
-
-  void _showPrescriptionDialog(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
-    String? drugName;
-    String? drugInfo;
-    String? description;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Create Prescription'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Drug Name'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the drug name';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => drugName = value,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Drug Info'),
-                    onSaved: (value) => drugInfo = value,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Description'),
-                    onSaved: (value) => description = value,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  
-                  // Handle the prescription creation logic here
-                  // e.g., call an API or update the state
-
-                  // Close the dialog after saving
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Text('Create Prescription'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

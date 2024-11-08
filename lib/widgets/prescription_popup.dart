@@ -15,8 +15,10 @@ class SearchItem {
 }
 
 class PrescriptionPopupForm extends StatefulWidget {
+  const PrescriptionPopupForm({super.key});
+
   @override
-  _PrescriptionPopupFormState createState() => _PrescriptionPopupFormState();
+  State<PrescriptionPopupForm> createState() => _PrescriptionPopupFormState();
 }
 
 class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
@@ -29,8 +31,8 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
   String? selectedMedicationId;
   String? frequency;
   String? duration;
-  String? intakeInstructions;
   String? doctorId;
+  String? intakeInstructions;
   String refills = '0';
   String status = 'active';
   List<Map<String, String>> patients = [];
@@ -176,7 +178,7 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add Prescription'),
+      title: const Text('Add Prescription'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -184,7 +186,7 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
             children: <Widget>[
               // SearchField for Patient Selection
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: SearchField<SearchItem>(
                   hint: 'Search for Patient',
                   searchInputDecoration: SearchInputDecoration(
@@ -231,7 +233,7 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
 
               // SearchField for Medication Selection
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: SearchField<SearchItem>(
                   hint: 'Search for Medication',
                   searchInputDecoration: SearchInputDecoration(
@@ -279,7 +281,7 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
 
               // Dropdown for Dosage Selection
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -294,11 +296,11 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
                     ),
                   ),
                   value: selectedDosage,
-                  hint: Text('Select Dosage'),
+                  hint: const Text('Select Dosage'),
                   items: dosages.map((dosage) {
                     return DropdownMenuItem(
-                      child: Text(dosage),
                       value: dosage,
+                      child: Text(dosage),
                     );
                   }).toList(),
                   onChanged: (newValue) {
@@ -317,10 +319,10 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
 
               // TextFields for Frequency, Duration, and Intake Instructions
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
                   decoration:
-                      InputDecoration(labelText: 'Frequency(times/day)'),
+                      const InputDecoration(labelText: 'Frequency(times/day)'),
                   keyboardType: TextInputType.number,
                   onChanged: (value) {
                     frequency = value;
@@ -336,9 +338,10 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
-                  decoration: InputDecoration(labelText: 'Duration (in days)'),
+                  decoration:
+                      const InputDecoration(labelText: 'Duration (in days)'),
                   keyboardType: TextInputType.number,
                   onChanged: (value) {
                     duration = value;
@@ -354,9 +357,10 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
-                  decoration: InputDecoration(labelText: 'Intake Instructions'),
+                  decoration:
+                      const InputDecoration(labelText: 'Intake Instructions'),
                   onChanged: (value) {
                     intakeInstructions = value;
                   },
@@ -371,7 +375,7 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
 
               // Submit Button
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
@@ -380,7 +384,7 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
                         .pop(); // Close the dialog after submitting
                     }
                   },
-                  child: Text('Submit Prescription'),
+                  child: const Text('Submit Prescription'),
                 ),
               ),
             ],

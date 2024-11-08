@@ -10,7 +10,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:resetaplus/account_type_picker_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'patient pages/login_page.dart';
 import 'patient pages/dashboard_page.dart';
 import 'patient pages/store_page.dart';
 import 'patient pages/history_page.dart';
@@ -18,8 +17,6 @@ import 'patient pages/profile_page.dart';
 import 'patient pages/map_page.dart';
 
 import 'doctor pages/doctor_dashboard_page.dart';
-import 'doctor pages/doctor_history_page.dart';
-import 'doctor pages/doctor_map_page.dart';
 import 'doctor pages/doctor_profile_page.dart';
 import 'doctor pages/doctor_add_prescription.dart';
 
@@ -87,6 +84,56 @@ Future<MySQLConnection> createConnection() async {
   return conn; // Return the connection object
 }
 
+// Function for getting the ID number of the provided user type (patient/doctor)
+Future<int> getUserID(String userType) async {
+  // Construct the table name and ID field based on the user type
+  String tableName = '${userType}_accounts';
+  String idName = '${userType}_id';
+  try {
+    // Create a database connection
+    final conn = await createConnection();
+
+    // SQL query to fetch the user ID based on the username
+    var userIdData = await conn.execute('''
+    SELECT $idName 
+    FROM $tableName 
+    WHERE username = :username
+    LIMIT 1;
+    ''', {'username': await getUsernameSession()});
+
+    int userID = 0; // Initialize userID to 0
+
+    // Check if the query returned any rows
+    if (userIdData.rows.isNotEmpty) {
+      // Retrieve the first row's associated data
+      var assoc = userIdData.rows.first.assoc();
+
+      // Get the patient ID as a string
+      String? patientIdString = assoc[idName];
+
+      // Convert the string to an int, defaulting to 0 if parsing fails
+      userID = patientIdString != null
+          ? int.tryParse(patientIdString) ?? 0 // Default to 0 if parsing fails
+          : 0; // Default to 0 if patientIdString is null;
+    }
+
+    // Return the retrieved user ID
+    return userID;
+  } catch (e) {
+    // Handle errors during data fetching
+    debugPrint("Error: $e");
+  }
+
+  // Return 0 if an error occurs or no user ID was found
+  return 0;
+}
+
+// Function for getting the username session. Currently used upon initialization
+Future<String> getUsernameSession() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('username') ?? "admin";
+}
+
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
   @override
@@ -135,6 +182,10 @@ class MainApp extends StatelessWidget {
             title: "Reseta+", // app title
             theme: ThemeData(
               fontFamily: "Montserrat", // set custom font as default
+              // textTheme: Theme.of(context).textTheme.apply(
+              //       fontFamily: "Montserrat",
+              //       fontSizeFactor: 1.2,
+              //     ),
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
               useMaterial3: true,
             ),
@@ -158,6 +209,7 @@ class _HomePageState extends State<HomePage> {
   double iconSize = 40;
 
   int currentTab = 0;
+  String currentPageTitle = "Dashboard";
 
   // Patient Navigation Page Keys
   final Key storePage = const PageStorageKey("storePage");
@@ -167,7 +219,8 @@ class _HomePageState extends State<HomePage> {
   final Key profilePage = const PageStorageKey("profilePage");
 
 // Doctor Navigation Page Keys
-  final Key doctorAddPrescriptionPage = const PageStorageKey("doctorAddPrescriptionPage");
+  final Key doctorAddPrescriptionPage =
+      const PageStorageKey("doctorAddPrescriptionPage");
   final Key doctorDashboardPage = const PageStorageKey("doctorDashboardPage");
   final Key doctorProfilePage = const PageStorageKey("doctorProfilePage");
 
@@ -188,7 +241,6 @@ class _HomePageState extends State<HomePage> {
   late DoctorAddPrescriptionPage six;
   late DoctorDashboardPage seven;
   late DoctorProfilePage eight;
-
   late PharmacyDashboardPage nine;
   late PharmacyScanQRPage ten;
   late PharmacyProfilePage eleven;
@@ -223,15 +275,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Function for getting the username session. Currently used upon initialization
-  Future<void> _getusernameSession() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future<void> _setusernameSession() async {
+    // Await the asynchronous call to get the username
+    String? username = await getUsernameSession();
+
+    // Use setState to update the username session
     setState(() {
-      _usernameSession = prefs.getString('username') ?? "admin";
+      _usernameSession = username; // Now username is a String or null
     });
   }
 
   Future<void> _initializeUserData() async {
-    await _getusernameSession();
+    await _setusernameSession();
     await _getUserType();
     setState(() {
       if (_userType == 'Patient') {
@@ -258,8 +313,8 @@ class _HomePageState extends State<HomePage> {
 
         pages = [one, two, three, four, five];
 
+        currentTab = 2;
         currentPage = three;
-        
       } else if (_userType == 'Doctor') {
         six = DoctorAddPrescriptionPage(
           key: doctorAddPrescriptionPage,
@@ -276,9 +331,9 @@ class _HomePageState extends State<HomePage> {
           title: "Profile",
         );
 
-
         pages = [six, seven, eight];
 
+        currentTab = 1;
         currentPage = seven;
 
       } else if (_userType == 'Pharmacy') {
@@ -306,16 +361,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     // late List<BottomNavigationBarItem> navbarItems;
-    late List<BottomNavigationBarItem> navbarItems = _patientNavItems;
-    
-    if(_userType == 'Patient') {
-      navbarItems = _patientNavItems;
+    List<BottomNavigationBarItem> navbarItems = _patientNavItems;
 
-    } else if(_userType == 'Doctor') {
+    if (_userType == 'Patient') {
+      navbarItems = _patientNavItems;
+    } else if (_userType == 'Doctor') {
       navbarItems = _doctorNavItems;
-      
     } else if (_userType == 'Pharmacy'){
       navbarItems = _pharmacyNavItems;
     }
@@ -325,70 +377,115 @@ class _HomePageState extends State<HomePage> {
       extendBody: true,
 
       appBar: AppBar(
-        titleSpacing: MediaQuery.of(context).size.width * 0.03,
-        toolbarHeight: MediaQuery.of(context).size.height * 0.16,
+        // titleSpacing: MediaQuery.of(context).size.width * 0.03,
+        toolbarHeight: 60,
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // title and subtitle
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Username
-                Text(
-                  _usernameSession,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 26,
-                  ),
-                ),
-                // User type = patient, health professional
-                Text(
-                  _userType,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                )
-              ],
-            ),
-            // Only for Test purposes
-            ElevatedButton(
-                onPressed: () {
-                  // Action to perform when the button is pressed
-                  _setLoggedInStatus(false);
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context, // Opens another instance of MainApp
-                      MaterialPageRoute(builder: (context) => const MainApp()));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffa16ae8), // Background color
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
-                  ),
-                ),
-                child: const Text(
-                  "Test Logout", // Button text
-                  style: TextStyle(color: Colors.white),
-                )),
-            // profile picture
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.person,
-                size: 40,
-                color: Color(0xffa16ae8),
-              ),
-            ),
-          ],
+          children:
+              (currentPage is ProfilePage || currentPage is DoctorProfilePage)
+                  // if on Profile Page
+                  ? <Widget>[
+                      // Page title
+                      Text(
+                        _usernameSession,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      Text(
+                        _userType,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      // info button
+                      IconButton(
+                        visualDensity: const VisualDensity(horizontal: -2.0),
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.info_outline),
+                        color: Colors.white,
+                        onPressed: () {},
+                      ),
+
+                      // settings button
+                      IconButton(
+                        visualDensity: const VisualDensity(horizontal: -2.0),
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.settings),
+                        color: Colors.white,
+                        onPressed: () {},
+                      ),
+
+                      const SizedBox(width: 4),
+
+                      ElevatedButton(
+                        onPressed: () {
+                          // Action to perform when the button is pressed
+                          _setLoggedInStatus(false);
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context, // Opens another instance of MainApp
+                              MaterialPageRoute(
+                                  builder: (context) => const MainApp()));
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(color: Colors.white),
+                            )),
+                        child: const Text(
+                          "Logout",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ]
+                  : <Widget>[
+                      // Page title
+                      Text(
+                        currentPageTitle,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      // info button
+                      IconButton(
+                        visualDensity: const VisualDensity(horizontal: -2.0),
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.info_outline),
+                        color: Colors.white,
+                        onPressed: () {},
+                      ),
+
+                      // settings button
+                      IconButton(
+                        visualDensity: const VisualDensity(horizontal: -2.0),
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.settings),
+                        color: Colors.white,
+                        onPressed: () {},
+                      ),
+                    ],
         ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -399,10 +496,6 @@ class _HomePageState extends State<HomePage> {
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(10),
-              bottomRight: Radius.circular(10),
             ),
           ),
         ),
@@ -445,10 +538,12 @@ class _HomePageState extends State<HomePage> {
             height: MediaQuery.of(context).size.height * .1,
             child: BottomNavigationBar(
               backgroundColor: Colors.transparent,
+              // selected design
               selectedFontSize: 0,
+              selectedItemColor: Colors.white,
+              // unselected design
               unselectedFontSize: 0,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
+              unselectedItemColor: const Color(0x66402e52),
               type: BottomNavigationBarType.fixed,
               elevation: 0,
 
@@ -458,6 +553,7 @@ class _HomePageState extends State<HomePage> {
                 setState(() {
                   currentTab = index;
                   currentPage = pages[index];
+                  currentPageTitle = (pages[index] as dynamic).title;
                 });
               },
 
@@ -526,13 +622,12 @@ according to the type of user that is logged in.
 */
 
 const List<BottomNavigationBarItem> _doctorNavItems = [
-
   //Create Prescription
   BottomNavigationBarItem(
     icon: Icon(
       Icons.add_outlined,
-      color: Color(0xffF8F6F5),
-      size: 30,),
+      size: 30,
+    ),
     label: "Create Prescription",
     tooltip: "Create Prescription for Patient",
   ),
@@ -541,8 +636,8 @@ const List<BottomNavigationBarItem> _doctorNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.people,
-      color: Color(0xffF8F6F5),
-      size: 30,),
+      size: 30,
+    ),
     label: "Patient List",
     tooltip: "View Patient List",
   ),
@@ -551,21 +646,20 @@ const List<BottomNavigationBarItem> _doctorNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.person,
-      color: Color(0xffF8F6F5),
-      size: 30,),
+      size: 30,
+    ),
     label: "Profile",
     tooltip: "Edit Profile Settings",
   )
 ];
 
 const List<BottomNavigationBarItem> _patientNavItems = [
-
   //Medicine Lookup Page
   BottomNavigationBarItem(
     icon: Icon(
-      Icons.medication, 
-      color: Color(0xffF8F6F5), 
-      size: 30,),
+      Icons.medication,
+      size: 30,
+    ),
     label: "Medicine Lookup",
     tooltip: "Medicine Lookup",
   ),
@@ -574,7 +668,6 @@ const List<BottomNavigationBarItem> _patientNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.store,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Pharmacy Locator",
@@ -585,7 +678,6 @@ const List<BottomNavigationBarItem> _patientNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.home,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Home",
@@ -596,18 +688,16 @@ const List<BottomNavigationBarItem> _patientNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.history,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Medical History",
     tooltip: "Medical History",
   ),
-  
+
   // User Profile Page
   BottomNavigationBarItem(
     icon: Icon(
       Icons.person,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "Profile",
@@ -616,13 +706,12 @@ const List<BottomNavigationBarItem> _patientNavItems = [
 ];
 
 const List<BottomNavigationBarItem> _pharmacyNavItems = [
-
   // Dashboard
   BottomNavigationBarItem(
     icon: Icon(
-      Icons.home, 
-      color: Color(0xffF8F6F5), 
-      size: 30,),
+      Icons.home,
+      size: 30,
+    ),
     label: "Home",
     tooltip: "Home Page",
   ),
@@ -631,13 +720,11 @@ const List<BottomNavigationBarItem> _pharmacyNavItems = [
   BottomNavigationBarItem(
     icon: Icon(
       Icons.qr_code,
-      color: Color(0xffF8F6F5),
       size: 30,
     ),
     label: "QR Code Scanner",
     tooltip: "QR Code Scanner",
   ),
-
     // User Profile Page
   BottomNavigationBarItem(
     icon: Icon(
@@ -650,4 +737,3 @@ const List<BottomNavigationBarItem> _pharmacyNavItems = [
   )
 
 ];
-

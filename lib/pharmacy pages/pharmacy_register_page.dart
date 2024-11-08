@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
 import 'package:resetaplus/pharmacy%20pages/pharmacy_login_page.dart';
-import '../widgets/custom_checkbox.dart';
+import '../widgets/gradient_checkbox.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
@@ -46,7 +46,8 @@ class _PharmacyRegisterPageState extends State<PharmacyRegisterPage> {
     });
   }
 
-  Future<bool> existsInTable(String tableName, String columnName, String value) async {
+  Future<bool> existsInTable(
+      String tableName, String columnName, String value) async {
     try {
       // Create a connection to the database
       final conn = await createConnection();
@@ -72,18 +73,18 @@ class _PharmacyRegisterPageState extends State<PharmacyRegisterPage> {
   }
 
   Future<void> registerUser(BuildContext context) async {
-    
-  // Check if the form is valid
-  if (!_formKey.currentState!.validate()) {
-    // Exit early if the form is not valid
-    return;
-  }
+    // Check if the form is valid
+    if (!_formKey.currentState!.validate()) {
+      // Exit early if the form is not valid
+      return;
+    }
 
-  // Save the form inputs
-  _formKey.currentState!.save();
+    // Save the form inputs
+    _formKey.currentState!.save();
 
-  // Check for email and license existence
-  bool emailExists = await existsInTable('pharmacy_accounts', 'email', _email!);
+    // Check for email and license existence
+    bool emailExists =
+        await existsInTable('pharmacy_accounts', 'email', _email!);
 
     // Check if the form is valid
     if (_formKey.currentState!.validate()) {
@@ -119,7 +120,7 @@ class _PharmacyRegisterPageState extends State<PharmacyRegisterPage> {
                   content: Text("Email already in use. Please use another.")),
             );
           }
-        }else {
+        } else {
           // Insert the new user into the pharmacy_accounts table
           await conn.execute(
             'INSERT INTO pharmacy_accounts (username, email, password, salt) VALUES (:username, :email, :password, :salt)',
@@ -153,7 +154,8 @@ class _PharmacyRegisterPageState extends State<PharmacyRegisterPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const PharmacyLoginPage(title: "Login")),
+                  builder: (context) =>
+                      const PharmacyLoginPage(title: "Login")),
             );
           }
         }
@@ -352,10 +354,16 @@ class _PharmacyRegisterPageState extends State<PharmacyRegisterPage> {
                     children: <Widget>[
                       // Custom widget with gradient checkbox icon
                       CustomCheckbox(
-                        rememberUser: _rememberUser,
+                        checkboxValue: _rememberUser,
                         onChange: (value) {
                           _rememberUser = value;
                         },
+                        child: const Text(
+                          "Remember me",
+                          style: TextStyle(
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                       // Forgot password container
                       Padding(

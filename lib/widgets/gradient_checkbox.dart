@@ -4,12 +4,14 @@ import 'package:gradient_icon/gradient_icon.dart';
 // ignore: must_be_immutable
 class CustomCheckbox extends StatefulWidget {
   Function onChange;
-  bool rememberUser;
+  bool checkboxValue;
+  Widget child;
 
   CustomCheckbox({
     super.key,
     required this.onChange,
-    required this.rememberUser,
+    required this.checkboxValue,
+    required this.child,
   });
 
   @override
@@ -17,33 +19,34 @@ class CustomCheckbox extends StatefulWidget {
 }
 
 class _CustomCheckboxState extends State<CustomCheckbox> {
-  bool _rememberUser = false;
+  bool _checkboxValue = false;
 
   @override
   void initState() {
     super.initState();
-    _rememberUser = widget.rememberUser;
+    _checkboxValue = widget.checkboxValue;
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
         transform: Matrix4.translationValues(-5, 0, 0),
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 3, // Adjust the spacing between the widgets if needed
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // checkbox
             GestureDetector(
               onTap: () {
                 setState(() {
-                  _rememberUser = !_rememberUser;
-                  widget.onChange(_rememberUser);
+                  _checkboxValue = !_checkboxValue;
+                  widget.onChange(_checkboxValue);
                 });
               },
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: GradientIcon(
-                  icon: _rememberUser
+                  icon: _checkboxValue
                       ? Icons.check_box
                       : Icons.check_box_outline_blank,
                   gradient: const LinearGradient(
@@ -55,15 +58,14 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
                 ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(top: 18),
-              child: Text(
-                "Remember me",
-                style: TextStyle(
-                  fontSize: 16,
-                ),
+
+            // checkbox title/prompt
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 11, left: 2),
+                child: widget.child,
               ),
-            ),
+            )
           ],
         ));
   }
