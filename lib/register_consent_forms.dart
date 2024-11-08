@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import './widgets/custom_tabview.dart';
 
 class RegisterConsentForms extends StatefulWidget {
-  int page;
+  final int page;
 
-  RegisterConsentForms({
+  const RegisterConsentForms({
     super.key,
     required this.page,
   });

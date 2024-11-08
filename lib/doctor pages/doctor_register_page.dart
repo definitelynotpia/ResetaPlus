@@ -448,7 +448,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                RegisterConsentForms(page: 1)));
+                                                const RegisterConsentForms(page: 1)));
                                   },
                                   child: const Text(
                                     "Reseta+ Terms & Conditions",
@@ -494,7 +494,7 @@ class _DoctorRegisterPageState extends State<DoctorRegisterPage> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                RegisterConsentForms(page: 2)));
+                                                const RegisterConsentForms(page: 2)));
                                   },
                                   child: const Text(
                                     "Reseta+ Privacy Policy",

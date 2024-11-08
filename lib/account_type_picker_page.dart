@@ -124,6 +124,37 @@ class _RoleSelectionPage extends State<RoleSelectionPage> {
                         ),
 
                         // spacer
+                        const SizedBox(height: 5),
+
+                        // Pharmacy radio button
+                        CustomRadioWidget(
+                          title: RichText(
+                            text: const TextSpan(
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text: 'Pharmacy',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                    text:
+                                        ' – Become a trusted pharmaceutical partner of Reseta+'),
+                              ],
+                            ),
+                          ),
+                          value: "Pharmacy",
+                          groupValue: userType,
+                          onChanged: (String value) {
+                            setState(() {
+                              userType = value;
+                            });
+                          },
+                        ),
+
+                        // spacer
                         SizedBox(
                             height: MediaQuery.of(context).size.height / 20),
 
@@ -159,13 +190,23 @@ class _RoleSelectionPage extends State<RoleSelectionPage> {
                                                 const LoginPage(
                                                     title: "Login")),
                                       );
-                                    } else {
+                                    } else if (userType == "Doctor") {
                                       // Navigate to Doctor's login page
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
                                                 const DoctorLoginPage(
+                                                    title: "Login")),
+                                      );
+                                    } else {
+                                      _setUserType('Pharmacy');
+                                      // Navigate to Patient's page
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const PharmacyLoginPage(
                                                     title: "Login")),
                                       );
                                     }
@@ -204,18 +245,5 @@ class _RoleSelectionPage extends State<RoleSelectionPage> {
             ),
           ),
         ));
-  }
-}
-
-// Placeholder for Doctor's page
-class DoctorPage extends StatelessWidget {
-  const DoctorPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Doctor Page")),
-      body: const Center(child: Text("Welcome to the Doctor Page")),
-    );
   }
 }
