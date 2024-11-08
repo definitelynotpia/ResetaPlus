@@ -24,9 +24,8 @@ dependencies:
   dropdown_search: ^6.0.1
   searchfield: ^1.1.7
   qr_flutter: ^4.0.0 
-  pretty_qr_code: ^3.3.0
-  # qr_code_scanner: ^1.0.1
   path_provider: ^2.0.9  
+  permission_handler: ^10.2.0
   mobile_scanner: ^6.0.2
 
 dev_dependencies:

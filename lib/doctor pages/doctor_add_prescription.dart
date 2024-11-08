@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:searchfield/searchfield.dart';
@@ -251,8 +252,6 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
 // It then parses the data into a string
   String generateQRCodeData(){
     final qrData = {
-    'patient_id': selectedPatientId,
-    'medication_id': selectedMedicationId,
     'prescription_date': DateTime.now().toIso8601String().split('T').first,
     'prescription_end_date': DateTime.now()
         .add(Duration(days: int.parse(duration!)))
@@ -265,19 +264,19 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     'refills': refills,
     'status': status,
     'intake_instructions': intakeInstructions,
-    'doctor_id': doctorId
   };
 
   return qrData.toString();
   
 }
 
+
 // Saves data into a QR Code into your local Documents folder
   Future<String> saveQRCode(String qrData) async {
     final qrValidationResult = QrValidator.validate(
       data: qrData,
       version: QrVersions.auto,
-      errorCorrectionLevel: QrErrorCorrectLevel.L,
+      errorCorrectionLevel: QrErrorCorrectLevel.H,
     );
 
     if (qrValidationResult.status == QrValidationStatus.valid) {
@@ -285,18 +284,37 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
       final painter = QrPainter.withQr(
         qr: qrCode,
         gapless: true,
+        emptyColor: Colors.white,
       );
 
+      //For Mobile Devices
+      // Directory? downloadsDirectory;
+      // if (Platform.isAndroid) {
+      //   downloadsDirectory = Directory('/storage/emulated/0/Download');
+      // } else if (Platform.isIOS) {
+      //   downloadsDirectory = await getApplicationDocumentsDirectory();
+      // }
+      
+      // if (downloadsDirectory == null) {
+      //   throw 'Could not get downloads directory';
+      // }
+
+      // final qrFilePath = "${downloadsDirectory.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+      // For Desktop Directory
       // Get directory where the QR will be saved
-      // In this case, its using the local Documents folder
-      final directory = await getApplicationDocumentsDirectory();
-      final qrFilePath = "${directory.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      // In this case, its using the local Downloads folder folder
+      final directory = await getDownloadsDirectory();
+      final qrFilePath = "${directory?.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
 
       // Convert QR code to an image file
       final picData = await painter.toImageData(500);
       final bytes = picData!.buffer.asUint8List();
       final qrFile = File(qrFilePath);
       await qrFile.writeAsBytes(bytes);
+
+      // We need this to reload the gallery so image we save into the downloads folder can be viewed
+      // MediaScanner.loadMedia(path: "media_path");
 
       return qrFilePath; // Return the file path
 
@@ -305,6 +323,40 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
 
     }
   }
+
+// // Pretty QR implementation
+//   Future<String> saveQRCode(String qrData) async {
+//     // final qrCode = QrCode(
+//     //   8,
+//     //   QrErrorCorrectLevel.L,
+//     // )..addData(qrData);
+
+//     final qrCode = QrCode.fromData(
+//     data: qrData,
+//     errorCorrectLevel: QrErrorCorrectLevel.H,
+//     );
+
+
+
+//     final qrImage = QrImage(qrCode);
+//     final qrImageBytes = await qrImage.toImageAsBytes(
+//       size: 512,
+//       format: ImageByteFormat.png,
+//       decoration: const PrettyQrDecoration(),
+//     );
+
+//     final directory = await getApplicationDocumentsDirectory();
+//     final qrFilePath = "${directory.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.png";
+
+//       // Get directory where the QR will be saved
+//       // In this case, its using the local Documents folder
+
+
+
+//       return qrFilePath; // Return the file path
+
+//   }
+
 
   @override
   Widget build(BuildContext context) {
