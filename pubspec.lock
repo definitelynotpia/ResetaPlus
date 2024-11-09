@@ -13,10 +13,10 @@ packages:
     dependency: transitive
     description:
       name: asn1lib
-      sha256: "6b151826fcc95ff246cd219a0bf4c753ea14f4081ad71c61939becf3aba27f70"
+      sha256: "4bae5ae63e6d6dd17c4aac8086f3dec26c0236f6a0f03416c6c19d830c367cf5"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.5"
+    version: "1.5.8"
   async:
     dependency: transitive
     description:

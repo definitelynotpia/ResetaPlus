@@ -201,11 +201,12 @@ class HomePage extends StatefulWidget {
   State<StatefulWidget> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   double iconSize = 40;
 
-  late int currentTab;
-  late String currentPageTitle;
+  int currentTab = 0;
+  String currentPageTitle = "Dashboard";
 
   // Patient Navigation Page Keys
   final Key storePage = const PageStorageKey("storePage");
@@ -273,6 +274,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _initializeUserData() async {
     await _setusernameSession();
     await _getUserType();
+
     setState(() {
       if (_userType == 'Patient') {
         one = StorePage(
@@ -329,7 +331,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     // late List<BottomNavigationBarItem> navbarItems;
-    late List<BottomNavigationBarItem> navbarItems;
+    late List<BottomNavigationBarItem> navbarItems = _patientNavItems;
 
     if (_userType == 'Patient') {
       navbarItems = _patientNavItems;
@@ -468,7 +470,7 @@ class _HomePageState extends State<HomePage> {
 
       body: SafeArea(
         child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Column(
               children: [
                 const SizedBox(height: 15),
@@ -514,7 +516,7 @@ class _HomePageState extends State<HomePage> {
 
               // navbar index
               currentIndex: currentTab,
-              onTap: (int index) {
+              onTap: (int index) async {
                 setState(() {
                   currentTab = index;
                   currentPage = pages[index];

@@ -80,67 +80,64 @@ class _CustomTabBarState extends State<CustomTabBar>
     return DefaultTabController(
       initialIndex: widget.tabIndex,
       length: widget.tabs.length,
-      child: Scaffold(
-        backgroundColor: const Color(0xffF8F6F5),
-        body: Stack(
-          children: [
-            // tabbar + tabview container
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: const GradientBoxBorder(
-                  width: 1,
-                  gradient: LinearGradient(
-                      colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
-                ),
-                color: const Color(0x1a9881b5),
+      child: Stack(
+        children: [
+          // tabbar + tabview container
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: const GradientBoxBorder(
+                width: 1,
+                gradient: LinearGradient(
+                    colors: [Color(0xffa16ae8), Color(0xff94b9ff)]),
               ),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 35),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.white,
-                  ),
-                  child: Column(children: [getTabs(widget.tabs)]),
-                ),
-              ),
+              color: const Color(0xfff4f2f7),
             ),
-
-            // tabbar stacked on Container to prevent double border
-            SizedBox(
-              height: 35,
-              width: (MediaQuery.of(context).size.width - 20) + 4,
-              child: getTabBar(widget.tabNames),
-            ),
-
-            // cover bottom border of active tab indicator with white
-            Align(
-              alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 35),
               child: Container(
-                transform: Matrix4.translationValues(0, 33, 0),
-                height: 10,
-                width: (MediaQuery.of(context).size.width - 20) - 2,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
+                ),
+                child: Column(children: [getTabs(widget.tabs)]),
+              ),
+            ),
+          ),
+
+          // tabbar stacked on Container to prevent double border
+          SizedBox(
+            height: 35,
+            width: (MediaQuery.of(context).size.width - 20) + 4,
+            child: getTabBar(widget.tabNames),
+          ),
+
+          // cover bottom border of active tab indicator with white
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              transform: Matrix4.translationValues(0, 33, 0),
+              height: 10,
+              width: (MediaQuery.of(context).size.width - 20) - 2,
+              color: Colors.white,
+            ),
+          ),
+
+          // cover bottom border of active tab indicator with white
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              transform: Matrix4.translationValues(0, -1, 0),
+              height: 10,
+              width: (double.infinity - 30) - 2,
+              decoration: const BoxDecoration(
+                borderRadius:
+                    BorderRadius.vertical(bottom: Radius.circular(12)),
                 color: Colors.white,
               ),
             ),
-
-            // cover bottom border of active tab indicator with white
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                transform: Matrix4.translationValues(0, -1, 0),
-                height: 10,
-                width: (MediaQuery.of(context).size.width - 30) - 2,
-                decoration: const BoxDecoration(
-                  borderRadius:
-                      BorderRadius.vertical(bottom: Radius.circular(12)),
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

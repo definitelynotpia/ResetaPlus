@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:resetaplus/main.dart';
 
 import 'package:resetaplus/widgets/custom_progressbar.dart';
+import 'package:resetaplus/widgets/custom_tabview.dart';
 import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/intake_history_popup.dart';
 import 'package:resetaplus/widgets/intake_instuctions_popup.dart';
@@ -356,55 +357,68 @@ class _DashboardPageState extends State<DashboardPage> {
             // Outer container with gradient border
             decoration: BoxDecoration(
               border: GradientBoxBorder(
-                width: 2,
+                width: 1,
                 gradient: LinearGradient(colors: [
                   Color(0xffa16ae8),
                   Color(0xff94b9ff),
                 ]),
               ),
               borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
             ),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // TITLE - MEDICATION PROGRESS
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      // Sign up question prompt
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title - medication progress
                       const Text(
                         "MEDICATION PROGRESS",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF602E9E),
                         ),
                       ),
 
-                      // Sign Up button
-                      MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          // go to Sign Up form script
-                          onTap: () {
-                            // TODO: opens a Calendar widget that allows user to view
-                            // their previous and upcoming medication schedule
-                            // this will change the Weekday Carousel
-                          },
-                          child: Text(
-                            DateFormat('MMMM').format(_currentDate),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF602E9E),
+                      // date picker
+                      Container(
+                        transform: Matrix4.translationValues(10, 0, 0),
+                        child: MouseRegion(
+                          // make custom container clickable
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: () {
+                              // TODO: opens a Calendar widget that allows user to view
+                              // their previous and upcoming medication schedule
+                              // this will change the Weekday Carousel
+                            },
+                            // add background
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.horizontal(
+                                      left: Radius.circular(100)),
+                                  color: Colors.purple),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 4, horizontal: 10),
+                              // display current date (month and day)
+                              child: Text(
+                                DateFormat('MMM d')
+                                    .format(_currentDate)
+                                    .toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -413,28 +427,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
 
                   // spacer
-                  SizedBox(height: 10),
-
-                  // Prescription progress bar
-                  CustomProgressBar(
-                    value: (_currentProgress ?? 0),
-                    backgroundColor: Color(0xFFD9D9FF),
-                    gradientColors: [Color(0xffa16ae8), Color(0xff94b9ff)],
-                    height: 40,
-                    borderRadius: BorderRadius.circular(15),
-                    text:
-                        '${max((_medicationDuration ?? 0) - (_currentDay ?? 0), 0)} days Left',
-                  ),
-
-                  // date pointer
-                  Container(
-                    transform: Matrix4.translationValues(0, 10, 0),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.arrow_drop_down,
-                      size: 30,
-                    ),
-                  ),
+                  const SizedBox(height: 10),
 
                   // weekday carousel
                   CarouselSlider(
@@ -470,13 +463,21 @@ class _DashboardPageState extends State<DashboardPage> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                           child: Center(
-                            child: Text("${index + 1}"),
+                            child: Text(
+                              "${index + 1}",
+                              style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: (index >= (_currentDay ?? 0))
+                                      ? Color(0xffa16ae8)
+                                      : Colors.white),
+                            ),
                           ),
                         ),
                       );
                     }),
                     options: CarouselOptions(
-                      height: 60,
+                      height: 70,
                       aspectRatio: 1 / 1,
                       // TODO: set minimum width (so it's not too small)
                       viewportFraction: 0.2,
@@ -486,107 +487,55 @@ class _DashboardPageState extends State<DashboardPage> {
                       reverse: false,
                       autoPlay: false,
                       enlargeCenterPage: true,
-                      enlargeFactor: 0.25,
+                      enlargeFactor: 0.2,
                       // onPageChanged: callbackFunction,
                       scrollDirection: Axis.horizontal,
                     ),
                   ),
 
-                  // spacer
-                  SizedBox(height: 15),
-
-                  // next intake alarm
-                  Text(
-                    'Your next medicine intake is at: ',
-                    style: TextStyle(
-                      fontSize: 14,
+                  // date pointer
+                  Container(
+                    transform: Matrix4.translationValues(0, -14, 0),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.arrow_drop_up,
+                      color: Color.fromARGB(65, 0, 0, 0),
+                      size: 40,
                     ),
-                  ),
-                  Text(
-                    _nextIntakeTime ?? 'Loading...',
-                    style: TextStyle(
-                      fontSize: 54,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFA16AE8),
-                    ),
-                  ),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: InkWell(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return IntakeHistoryPopup(
-                                    patientID: _patientID ?? 0);
-                              },
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFA16AE8),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Text(
-                                'INTAKE HISTORY',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: InkWell(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return IntakeInstructionsPopup(
-                                    patientID: _patientID ?? 0);
-                              },
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFA16AE8),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Text(
-                                'INTAKE INSTRUCTIONS',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
             ),
           ),
 
-          SizedBox(height: 25),
+          Container(
+            transform: Matrix4.translationValues(0, -15, 0),
+            child: // tab view
+                ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height / 2),
+              child: CustomTabBar(
+                tabIndex: 1,
+                tabNames: const [
+                  "Intake Alarm",
+                  "Instructions",
+                  "Meds Calendar",
+                ],
+                tabs: const <Widget>[
+                  // Intake Alarm
+                  Text("test"),
+
+                  // Instructions
+                  Text("test"),
+
+                  // Meds Calendar
+                  Text("test"),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(height: 15),
 
           // TITLE - CURRENT PRESCRIPTIONS
           Column(
