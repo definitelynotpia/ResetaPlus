@@ -172,6 +172,8 @@ class _PharmacyLoginPageState extends State<PharmacyLoginPage> {
                 child: Form(
                   key: _formKey,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Email input field
                       TextFormField(

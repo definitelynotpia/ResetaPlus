@@ -232,6 +232,8 @@ class _PharmacyRegisterPageState extends State<PharmacyRegisterPage> {
               child: Form(
                 key: _formKey,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Username input field
                     TextFormField(
