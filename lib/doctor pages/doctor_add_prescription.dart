@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:searchfield/searchfield.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,6 +54,9 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   List<Map<String, String>> patients = [];
   List<Map<String, String>> medications = [];
   List<String> dosages = [];
+  bool dirExists = false;
+  dynamic downloadDirectory;
+  dynamic androidDownloadDirectory = '/storage/emulated/0/Download/ResetaPlus';
 
   @override
   void initState() {
@@ -59,6 +64,8 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     fetchPatients();
     fetchMedications();
     _getDoctorId();
+    mediaScan();
+    createFolder();
   }
 
 
@@ -274,6 +281,31 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   
 }
 
+  //Scans the device to refresh the gallery
+  mediaScan() {
+    if (Platform.isAndroid) {
+      try {
+        const channel = MethodChannel('com.example.resetaplus/fileScanner');
+        channel.invokeMethod('scanFile', {'path': androidDownloadDirectory, 'mimeType': 'image/png'});
+      } catch (e) {
+        debugPrint("Error triggering media scan: $e");
+      }
+    }
+  }
+
+  createFolder() async {
+
+    if (Platform.isAndroid){
+      downloadDirectory = androidDownloadDirectory;
+      dirExists = await Directory(downloadDirectory).exists();
+          
+      if(!dirExists){
+        await Directory(downloadDirectory).create(recursive: true);
+        dirExists = true;
+      } 
+    }
+  }
+
 // Saves data into a QR Code into your local Documents folder
   Future<String> saveQRCode(String qrData) async {
     final qrValidationResult = QrValidator.validate(
@@ -291,32 +323,29 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
       );
 
       // For Mobile Devices
-      Directory? downloadsDirectory;
-      if (Platform.isAndroid) {
-        downloadsDirectory = Directory('/storage/emulated/0/ResetaPlus');
-      } else if (Platform.isIOS) {
-        downloadsDirectory = await getApplicationDocumentsDirectory();
+      if (Platform.isIOS) {
+        downloadDirectory = await getApplicationDocumentsDirectory();
+      } else {
+        downloadDirectory = androidDownloadDirectory;
       }
       
-      if (downloadsDirectory == null) {
+      if (downloadDirectory == null) {
         throw 'Could not get downloads directory';
       }
 
-      final qrFilePath = "${downloadsDirectory.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      final qrFilePath = "$downloadDirectory/qr_code_${DateTime.now().millisecondsSinceEpoch}.png";
 
       // For Desktop Directory
       // Get directory where the QR will be saved
       // In this case, its using the local Downloads folder folder
-      // final downloadsDirectory = await getDownloadsDirectory();
-      // final qrFilePath = "${downloadsDirectory?.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      // final downloadDirectory = await getDownloadsDirectory();
+      // final qrFilePath = "${downloadDirectory?.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
 
       // Convert QR code to an image file
       final picData = await painter.toImageData(500);
       final bytes = picData!.buffer.asUint8List();
       final qrFile = File(qrFilePath);
       await qrFile.writeAsBytes(bytes);
-      // We need this to reload the gallery so image we save into the downloads folder can be viewed
-      // MediaScanner.loadMedia(path: "media_path");
 
       return qrFilePath; // Return the file path
 
@@ -325,40 +354,6 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
 
     }
   }
-
-// // Pretty QR implementation
-//   Future<String> saveQRCode(String qrData) async {
-//     // final qrCode = QrCode(
-//     //   8,
-//     //   QrErrorCorrectLevel.L,
-//     // )..addData(qrData);
-
-//     final qrCode = QrCode.fromData(
-//     data: qrData,
-//     errorCorrectLevel: QrErrorCorrectLevel.H,
-//     );
-
-
-
-//     final qrImage = QrImage(qrCode);
-//     final qrImageBytes = await qrImage.toImageAsBytes(
-//       size: 512,
-//       format: ImageByteFormat.png,
-//       decoration: const PrettyQrDecoration(),
-//     );
-
-//     final directory = await getApplicationDocumentsDirectory();
-//     final qrFilePath = "${directory.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.png";
-
-//       // Get directory where the QR will be saved
-//       // In this case, its using the local Documents folder
-
-
-
-//       return qrFilePath; // Return the file path
-
-//   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -585,5 +580,4 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     );
   }
 }
-
 

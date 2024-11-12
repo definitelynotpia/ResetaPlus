@@ -31,7 +31,7 @@ import 'pharmacy pages/pharmacy_profile_page.dart';
 final mediaStorePlugin = MediaStore();
 
 void main() async {
-  await dotenv.load(fileName: "assets/.env");
+  
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isAndroid) {
     await MediaStore.ensureInitialized();
@@ -41,11 +41,11 @@ void main() async {
     Permission.storage,
   ];
 
-    if ((await mediaStorePlugin.getPlatformSDKInt()) >= 33) {
-    permissions.add(Permission.photos);
-    permissions.add(Permission.audio);
-    permissions.add(Permission.videos);
-  }
+  //   if ((await mediaStorePlugin.getPlatformSDKInt()) >= 33) {
+  //   permissions.add(Permission.photos);
+  //   permissions.add(Permission.audio);
+  //   permissions.add(Permission.videos);
+  // }
 
   await permissions.request();
   // we are not checking the status as it is an example app. You should (must) check it in a production app
@@ -53,7 +53,7 @@ void main() async {
   // You have set this otherwise it throws AppFolderNotSetException
   MediaStore.appFolder = "ResetaPlus";
 
-
+  await dotenv.load(fileName: "assets/.env"); 
   runApp(const MainApp());
 }
 
@@ -81,9 +81,8 @@ String decryptPassword(String storedPasswordHash, String storedSalt,
 }
 
 bool verifyPassword(String enteredPassword, String storedPasswordHash,
-    String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv) {
-  final decryptedPasswordHash =
-      decryptPassword(storedPasswordHash, storedSalt, storedKey, storedIv);
+  String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv) {
+  final decryptedPasswordHash = decryptPassword(storedPasswordHash, storedSalt, storedKey, storedIv);
 
   // Hash the entered password using the stored salt to compare with the decrypted hash
   String hashedEnteredPassword = hashPassword(enteredPassword, storedSalt);
@@ -409,7 +408,7 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children:
-              (currentPage is ProfilePage || currentPage is DoctorProfilePage)
+              (currentPage is ProfilePage || currentPage is DoctorProfilePage || currentPage is PharmacyProfilePage)
                   // if on Profile Page
                   ? <Widget>[
                       // Page title

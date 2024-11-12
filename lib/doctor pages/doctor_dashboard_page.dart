@@ -15,7 +15,9 @@ import 'package:resetaplus/widgets/prescription_popup.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DoctorDashboardPage extends StatefulWidget {
-  const DoctorDashboardPage({super.key, required String title});
+  const DoctorDashboardPage({super.key, required this.title});
+
+  final String title;
 
   @override
   State<DoctorDashboardPage> createState() => _DoctorDashboardPageState();
