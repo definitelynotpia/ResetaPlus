@@ -9,6 +9,9 @@ import 'package:mysql_client/mysql_client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:resetaplus/account_type_picker_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:media_store_plus/media_store_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 
 import 'patient pages/dashboard_page.dart';
 import 'patient pages/store_page.dart';
@@ -24,8 +27,33 @@ import 'pharmacy pages/pharmacy_dashboard_page.dart';
 import 'pharmacy pages/pharmacy_scan_qr_page.dart';
 import 'pharmacy pages/pharmacy_profile_page.dart';
 
+
+final mediaStorePlugin = MediaStore();
+
 void main() async {
   await dotenv.load(fileName: "assets/.env");
+  WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isAndroid) {
+    await MediaStore.ensureInitialized();
+  }
+
+  List<Permission> permissions = [
+    Permission.storage,
+  ];
+
+    if ((await mediaStorePlugin.getPlatformSDKInt()) >= 33) {
+    permissions.add(Permission.photos);
+    permissions.add(Permission.audio);
+    permissions.add(Permission.videos);
+  }
+
+  await permissions.request();
+  // we are not checking the status as it is an example app. You should (must) check it in a production app
+
+  // You have set this otherwise it throws AppFolderNotSetException
+  MediaStore.appFolder = "ResetaPlus";
+
+
   runApp(const MainApp());
 }
 
@@ -228,8 +256,6 @@ class _HomePageState extends State<HomePage> {
   final Key pharmacyDashboardPage = const PageStorageKey("pharmacyDashboardPage");
   final Key pharmacyScanQRPage= const PageStorageKey("pharmacyScanQRPage");
   final Key pharmacyProfilePage = const PageStorageKey("pharmacyProfilePage");
-
-
 
   late StorePage one;
   late MapPage two;

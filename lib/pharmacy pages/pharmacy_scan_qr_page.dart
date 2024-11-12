@@ -6,23 +6,25 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 // import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class PharmacyScanQRPage extends StatefulWidget {
-  const PharmacyScanQRPage({super.key, required String title});
+  const PharmacyScanQRPage({super.key, required this.title});
+
+  final String title;
 
   @override
   State<PharmacyScanQRPage> createState() => _PharmacyScanQRPageState();
 }
 
-// void openQRScanner(BuildContext context) async {
-//   final scannedResult = await Navigator.push(
-//     context,
-//     MaterialPageRoute(builder: (context) => const PharmacyScanQRPage()),
-//   );
+void openQRScanner(BuildContext context) async {
+  final scannedResult = await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const PharmacyScanQRPage(title: 'QR Scan',)),
+  );
 
-//   if (scannedResult != null) {
-//     debugPrint('Scanned QR code data: $scannedResult');
-//     // Handle scanned data (e.g., fetch file path from database)
-//   }
-// }
+  if (scannedResult != null) {
+    debugPrint('Scanned QR code data: $scannedResult');
+    // Handle scanned data (e.g., fetch file path from database)
+  }
+}
 
 class _PharmacyScanQRPageState extends State<PharmacyScanQRPage> {
 

@@ -9,7 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resetaplus/main.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:media_scanner_scan_file/media_scanner_scan_file.dart';
+import 'package:media_store_plus/media_store_plus.dart';
+
 
 class SearchItem {
   final String name;
@@ -292,7 +293,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
       // For Mobile Devices
       Directory? downloadsDirectory;
       if (Platform.isAndroid) {
-        downloadsDirectory = Directory('/storage/emulated/0/Download');
+        downloadsDirectory = Directory('/storage/emulated/0/ResetaPlus');
       } else if (Platform.isIOS) {
         downloadsDirectory = await getApplicationDocumentsDirectory();
       }
@@ -314,8 +315,6 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
       final bytes = picData!.buffer.asUint8List();
       final qrFile = File(qrFilePath);
       await qrFile.writeAsBytes(bytes);
-      await MediaScannerScanFile.scanFile(qrFile.path);
-
       // We need this to reload the gallery so image we save into the downloads folder can be viewed
       // MediaScanner.loadMedia(path: "media_path");
 
