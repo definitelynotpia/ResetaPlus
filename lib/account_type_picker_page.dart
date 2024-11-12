@@ -200,7 +200,7 @@ class _RoleSelectionPage extends State<RoleSelectionPage> {
                                                     title: "Login")),
                                       );
                                     } else {
-                                      _setUserType('Pharmacy');
+                                      _setUserType("Pharmacy");
                                       // Navigate to Patient's page
                                       Navigator.push(
                                         context,

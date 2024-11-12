@@ -219,8 +219,7 @@ class _HomePageState extends State<HomePage> {
   final Key profilePage = const PageStorageKey("profilePage");
 
 // Doctor Navigation Page Keys
-  final Key doctorAddPrescriptionPage =
-      const PageStorageKey("doctorAddPrescriptionPage");
+  final Key doctorAddPrescriptionPage = const PageStorageKey("doctorAddPrescriptionPage");
   final Key doctorDashboardPage = const PageStorageKey("doctorDashboardPage");
   final Key doctorProfilePage = const PageStorageKey("doctorProfilePage");
 
@@ -354,6 +353,7 @@ class _HomePageState extends State<HomePage> {
 
         pages = [nine, ten, eleven];
 
+        currentTab = 1;
         currentPage = nine;
       }
     });

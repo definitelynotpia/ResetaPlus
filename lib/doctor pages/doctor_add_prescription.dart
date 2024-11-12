@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resetaplus/main.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:media_scanner_scan_file/media_scanner_scan_file.dart';
 
 class SearchItem {
   final String name;
@@ -34,6 +35,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   // generate global key, uniquely identify Form widget and allow form validation
   final _formKey = GlobalKey<FormState>();
 
+
   String? selectedPatient;
   String? selectedMedication;
   String? selectedDosage;
@@ -49,6 +51,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   List<Map<String, String>> patients = [];
   List<Map<String, String>> medications = [];
   List<String> dosages = [];
+
   @override
   void initState() {
     super.initState();
@@ -270,7 +273,6 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   
 }
 
-
 // Saves data into a QR Code into your local Documents folder
   Future<String> saveQRCode(String qrData) async {
     final qrValidationResult = QrValidator.validate(
@@ -287,31 +289,32 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
         emptyColor: Colors.white,
       );
 
-      //For Mobile Devices
-      // Directory? downloadsDirectory;
-      // if (Platform.isAndroid) {
-      //   downloadsDirectory = Directory('/storage/emulated/0/Download');
-      // } else if (Platform.isIOS) {
-      //   downloadsDirectory = await getApplicationDocumentsDirectory();
-      // }
+      // For Mobile Devices
+      Directory? downloadsDirectory;
+      if (Platform.isAndroid) {
+        downloadsDirectory = Directory('/storage/emulated/0/Download');
+      } else if (Platform.isIOS) {
+        downloadsDirectory = await getApplicationDocumentsDirectory();
+      }
       
-      // if (downloadsDirectory == null) {
-      //   throw 'Could not get downloads directory';
-      // }
+      if (downloadsDirectory == null) {
+        throw 'Could not get downloads directory';
+      }
 
-      // final qrFilePath = "${downloadsDirectory.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      final qrFilePath = "${downloadsDirectory.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
 
       // For Desktop Directory
       // Get directory where the QR will be saved
       // In this case, its using the local Downloads folder folder
-      final directory = await getDownloadsDirectory();
-      final qrFilePath = "${directory?.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      // final downloadsDirectory = await getDownloadsDirectory();
+      // final qrFilePath = "${downloadsDirectory?.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
 
       // Convert QR code to an image file
       final picData = await painter.toImageData(500);
       final bytes = picData!.buffer.asUint8List();
       final qrFile = File(qrFilePath);
       await qrFile.writeAsBytes(bytes);
+      await MediaScannerScanFile.scanFile(qrFile.path);
 
       // We need this to reload the gallery so image we save into the downloads folder can be viewed
       // MediaScanner.loadMedia(path: "media_path");
