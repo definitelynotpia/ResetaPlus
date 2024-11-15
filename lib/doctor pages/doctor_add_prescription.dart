@@ -65,13 +65,6 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     _getDoctorId();
   }
   
-  void _showErrorSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
-    }
-  }
-
   void fetchPatients() async {
     try {
       final conn = await createConnection();
@@ -185,7 +178,8 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
         ':refills,'
         ':status,'
         ':intake_instructions,'
-        ':doctor_id)',
+        ':doctor_id,'
+        ':qr_code_filepath)',
         {
           'patient_id': selectedPatientId,
           'medication_id': selectedMedicationId,
@@ -203,6 +197,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
           'status': status,
           'intake_instructions': intakeInstructions,
           'doctor_id': doctorId,
+          'qr_code_filepath': qrFilePath,
         },
       );
 
