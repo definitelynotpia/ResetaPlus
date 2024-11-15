@@ -50,6 +50,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   String? doctorId;
   String refills = '0';
   String status = 'active';
+  String qrFilePath = 'No QR Code';
   List<Map<String, String>> patients = [];
   List<Map<String, String>> medications = [];
   List<String> dosages = [];
@@ -65,6 +66,13 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     _getDoctorId();
   }
   
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
   void fetchPatients() async {
     try {
       final conn = await createConnection();
@@ -152,8 +160,6 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
 
   Future<void> insertPrescription() async {
     try {
-      final qrData = generateQRCodeData();
-      final qrFilePath = await saveQRCode(qrData);
       
       final conn = await createConnection();
       await conn.execute(
