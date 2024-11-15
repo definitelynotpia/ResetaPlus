@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 
 class PharmacyDashboardPage extends StatefulWidget {
-  const PharmacyDashboardPage({super.key, required String title});
+  const PharmacyDashboardPage({super.key, required  this.title});
+
+  final String title;
 
   @override
   State<PharmacyDashboardPage> createState() => _PharmacyDashboardPageState();

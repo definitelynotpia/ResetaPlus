@@ -1,5 +1,6 @@
 // ignore_for_file: use_super_parameters, prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -25,7 +26,10 @@ class PrescriptionCard extends StatefulWidget {
 
   @override
   State<PrescriptionCard> createState() => _CurrentPrescription();
+  
 }
+
+class _CurrentPrescription extends State<PrescriptionCard> {
 
   String? selectedPatient;
   String? selectedMedication;
@@ -36,14 +40,14 @@ class PrescriptionCard extends StatefulWidget {
   String? duration;
   String? intakeInstructions;
   String? doctorId;
+  int prescriptionId = 0;
   String refills = '0';
   String status = 'active';
+  String qrFilePath = 'No QR Code';
   bool dirExists = false;
   dynamic downloadDirectory;
   dynamic androidDownloadDirectory = '/storage/emulated/0/Download/ResetaPlus';
 
-
-// FIX
   Future<void> getPrescriptionData() async {
     try {
       final qrData = generateQRCodeData();
@@ -80,16 +84,48 @@ class PrescriptionCard extends StatefulWidget {
     }
   }
 
+  Future<int> _getPrescriptionId() async {
+    try {
+      final conn = await createConnection();
+      await conn.execute(
+      'SELECT prescription_id'
+      'FROM patient_prescriptions;',
+      {'prescription_id': prescriptionId},
+      );
+
+    } catch (e) {
+      debugPrint("Error fetching medications: $e");
+    }
+
+    return prescriptionId;
+  }
+
+  Future<void> updateQRCodeFilePath() async {
+
+    //prescriptionId = _getprescriotionId();
+    try {
+      final conn = await createConnection();
+      await conn.execute(
+        'UPDATE patient_prescriptions'
+        'SET (qr_code_filepath = :qrFilePath'
+        'WHERE patient_id = :_getPrescriptionId();'
+      );
+
+    } catch (e) {
+      debugPrint("$e");
+    }
+  }
+
 // Stores the inputs in the form fields into a Map
 // It then parses the data into a string
   String generateQRCodeData(){
     final qrData = {
-    'prescription_date': DateTime.now().toIso8601String().split('T').first,
-    'prescription_end_date': DateTime.now()
-        .add(Duration(days: int.parse(duration!)))
-        .toIso8601String()
-        .split('T')
-        .first,
+    // 'prescription_date': DateTime.now().toIso8601String().split('T').first,
+    // 'prescription_end_date': DateTime.now()
+    //     .add(Duration(days: int.parse(duration!)))
+    //     .toIso8601String()
+    //     .split('T')
+    //     .first,
     'frequency': frequency,
     'dosage': selectedDosage,
     'duration': duration,
@@ -163,21 +199,33 @@ class PrescriptionCard extends StatefulWidget {
       // final downloadDirectory = await getDownloadsDirectory();
       // final qrFilePath = "${downloadDirectory?.path}/qr_code_${DateTime.now().millisecondsSinceEpoch}.jpg";
 
+      createFolder();
+
       // Convert QR code to an image file
       final picData = await painter.toImageData(500);
       final bytes = picData!.buffer.asUint8List();
       final qrFile = File(qrFilePath);
       await qrFile.writeAsBytes(bytes);
 
-      return qrFilePath; // Return the file path
+      mediaScan();
 
+      _showSnackbarMessage("QR Code Successfully downloaded!");
+
+      return qrFilePath; // Return the file path
+      
     } else {
       throw Exception("Invalid QR data");
 
     }
   }
 
-class _CurrentPrescription extends State<PrescriptionCard> {
+  void _showSnackbarMessage(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return TicketWidget(
@@ -232,7 +280,8 @@ class _CurrentPrescription extends State<PrescriptionCard> {
           Center(
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Add functionality to get QR code
+                saveQRCode(generateQRCodeData());
+                
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFA16AE8),
