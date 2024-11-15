@@ -63,7 +63,6 @@ DROP TABLE IF EXISTS `medications`;
 CREATE TABLE `medications` (
   `medication_id` int NOT NULL AUTO_INCREMENT,
   `medication_name` varchar(255) NOT NULL,
-  `medication_dosage` varchar(255) NOT NULL,
   `medication_form` varchar(255) NOT NULL,
   `manufacturer` varchar(255) NOT NULL,
   `medication_info` varchar(255) NOT NULL,
@@ -163,7 +162,7 @@ CREATE TABLE `patient_prescriptions` (
   `status` varchar(255) NOT NULL,
   `intake_instructions` varchar(255) NOT NULL,
   `doctor_id` int NOT NULL,
-  `qr_code_filepath` varchar(255) NOT NULL,
+  `qr_code_filepath` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`prescription_id`),
   UNIQUE KEY `prescription_id_UNIQUE` (`prescription_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -219,6 +218,42 @@ CREATE TABLE `verified_license` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+INSERT INTO medications (medication_name, medication_form, manufacturer, medication_info, medication_description) VALUES
+('Amoxicillin', 'Capsule', 'PharmaCorp', 'Antibiotic', 'Used to treat bacterial infections.'),
+('Ibuprofen', 'Tablet', 'HealthCo', 'Nonsteroidal anti-inflammatory drug (NSAID)', 'Reduces fever and relieves pain or inflammation.'),
+('Lisinopril', 'Tablet', 'MediPharm', 'ACE inhibitor', 'Used to treat high blood pressure and heart failure.'),
+('Metformin', 'Tablet', 'DiabetesCare', 'Antidiabetic medication', 'Helps control blood sugar levels in type 2 diabetes.'),
+('Cetirizine', 'Tablet', 'AllergyRelief', 'Antihistamine', 'Used to relieve allergy symptoms such as runny nose and sneezing.'),
+('Amlodipine', 'Tablet', 'CardioMed', 'Calcium channel blocker', 'Used to treat high blood pressure and chest pain.'),
+('Simvastatin', 'Tablet', 'CholesterolCare', 'Statin', 'Used to lower cholesterol levels in the blood.'),
+('Omeprazole', 'Capsule', 'StomachHealth', 'Proton pump inhibitor', 'Reduces stomach acid and treats GERD.'),
+('Sertraline', 'Tablet', 'MoodStabilizers', 'SSRI', 'Used to treat depression and anxiety disorders.'),
+('Levothyroxine', 'Tablet', 'ThyroidMed', 'Thyroid hormone', 'Used to treat hypothyroidism.');
+
+INSERT INTO medications_dosage (medication_id, dosage) VALUES
+('1', '250mg'),
+('1', '500mg'),
+('2', '200mg'),
+('2', '400mg'),
+('3', '5mg'),
+('3', '10mg'),
+('4', '500mg'),
+('4', '1000mg'),
+('5', '10mg'),
+('5', '20mg'),
+('6', '5mg'),
+('6', '10mg'),
+('7', '20mg'),
+('7', '40mg'),
+('8', '20mg'),
+('8', '40mg'),
+('9', '50mg'),
+('9', '100mg'),
+('10', '25mg'),
+('10', '50mg');
+
+INSERT INTO verified_license (license_number) VALUES('1234');
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

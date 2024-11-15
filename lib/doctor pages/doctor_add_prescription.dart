@@ -1,18 +1,17 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui';
+// import 'dart:io';
+// import 'dart:typed_data';
+// import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
+// import 'package:permission_handler/permission_handler.dart';
 import 'package:searchfield/searchfield.dart';
-import 'package:gradient_borders/gradient_borders.dart';
+// import 'package:gradient_borders/gradient_borders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resetaplus/main.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:media_store_plus/media_store_plus.dart';
-
+// import 'package:path_provider/path_provider.dart';
+// import 'package:qr_flutter/qr_flutter.dart';
+// import 'package:media_store_plus/media_store_plus.dart';
 
 class SearchItem {
   final String name;
@@ -38,13 +37,13 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
   // generate global key, uniquely identify Form widget and allow form validation
   final _formKey = GlobalKey<FormState>();
 
-
   String? selectedPatient;
   String? selectedMedication;
   String? selectedDosage;
   String? selectedPatientId;
   String? selectedMedicationId;
   String? frequency;
+  String frequencyUnit = 'hours';
   String? duration;
   String? intakeInstructions;
   String? doctorId;
@@ -163,32 +162,30 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
       
       final conn = await createConnection();
       await conn.execute(
-        'INSERT INTO patient_prescriptions (' 
-          'patient_id,'
-          'medication_id,' 
-          'prescription_date,' 
-          'prescription_end_date,'
-          'frequency,'
-          'dosage,' 
-          'duration,' 
-          'refills,' 
-          'status,' 
-          'intake_instructions,'
-          'doctor_id,'
-          'qr_code_filepath)'
+        'INSERT INTO patient_prescriptions ('
+        'patient_id,'
+        'medication_id,'
+        'prescription_date,'
+        'prescription_end_date,'
+        'frequency,'
+        'dosage,'
+        'duration,'
+        'refills,'
+        'status,'
+        'intake_instructions,'
+        'doctor_id)'
         'VALUES ('
-          ':patient_id,' 
-          ':medication_id,' 
-          ':prescription_date,'
-          ':prescription_end_date,' 
-          ':frequency,' 
-          ':dosage,' 
-          ':duration,' 
-          ':refills,' 
-          ':status,'
-          ':intake_instructions,'
-          ':doctor_id,'
-          ':qr_code_filepath)',
+        ':patient_id,'
+        ':medication_id,'
+        ':prescription_date,'
+        ':prescription_end_date,'
+        ':frequency,'
+        ':dosage,'
+        ':duration,'
+        ':refills,'
+        ':status,'
+        ':intake_instructions,'
+        ':doctor_id)',
         {
           'patient_id': selectedPatientId,
           'medication_id': selectedMedicationId,
@@ -206,7 +203,6 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
           'status': status,
           'intake_instructions': intakeInstructions,
           'doctor_id': doctorId,
-          'qr_code_filepath': qrFilePath
         },
       );
 
@@ -221,262 +217,311 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     }
   }
 
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
   void _showPrescriptionSummary() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Prescription Summary'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Please ensure all the fields are correct'),
-            Text('Patient: ${selectedPatient ?? 'Unknown'}'),
-            Text('Medication: ${selectedMedication ?? 'Unknown'}'),
-            Text('Dosage: ${selectedDosage ?? 'Unknown'}'),
-            Text('Frequency: $frequency'),
-            Text('Duration: $duration'),
-            Text('Intake Instructions: $intakeInstructions'),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              insertPrescription();
-            },
-            child: const Text('Submit Prescription'),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Prescription Summary'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Please ensure all the fields are correct'),
+              Text('Patient: ${selectedPatient ?? 'Unknown'}'),
+              Text('Medication: ${selectedMedication ?? 'Unknown'}'),
+              Text('Dosage: ${selectedDosage ?? 'Unknown'}'),
+              Text('Frequency: $frequency'),
+              Text('Duration: $duration'),
+              Text('Intake Instructions: $intakeInstructions'),
+            ],
           ),
-        ],
-      );
-    },
-  );
-}
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                insertPrescription();
+              },
+              child: const Text('Submit Prescription'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('New Prescription'),
-      ),
-      body: Center(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: <Widget>[
-              Padding (
-                padding: const EdgeInsets.all(8.0),
-                child: SearchField<SearchItem>(
-                  hint: 'Search for Patient',
-                  searchInputDecoration: SearchInputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:BorderSide(color: Colors.blueGrey.shade200, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-
-                    focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        width: 2, color: Colors.blue.withOpacity(0.8)),
-                    borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-
-                  maxSuggestionsInViewPort: 6,
-                  itemHeight: 50,
-                  suggestionsDecoration: SuggestionDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-
-                  onSuggestionTap: (SearchFieldListItem<SearchItem> item) {
-                    setState(() {
-                      selectedPatient = item.item!.name;
-                      selectedPatientId = item.item!.id;
-                    });
-                  },
-
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      value = selectedPatient;
-                      return "Field cannot be empty.";
-                    }
-                    return null;
-                  },
-
-                  suggestions: patients
-                    .map((patient) => SearchFieldListItem<SearchItem>(
-                        patient['patient_username'] ?? "Unknown",
-                        item: SearchItem(
-                          name: patient['patient_username'] ?? "Unknown",
-                          id: patient['patient_id'] ?? "",
+        appBar: AppBar(
+          title: const Text('New Prescription'),
+        ),
+        body: Center(
+            child: Form(
+                key: _formKey,
+                child: ListView(children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SearchField<SearchItem>(
+                      hint: 'Search for Patient',
+                      searchInputDecoration: SearchInputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.blueGrey.shade200, width: 1),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      ))
-                    .toList(),
-                ),
-              ),
-              
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SearchField<SearchItem>(
-                  hint: 'Search for Medication',
-                  searchInputDecoration: SearchInputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Colors.blueGrey.shade200, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          width: 2, color: Colors.blue.withOpacity(0.8)),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  maxSuggestionsInViewPort: 6,
-                  itemHeight: 50,
-                  suggestionsDecoration: SuggestionDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  onSuggestionTap: (SearchFieldListItem<SearchItem> item) {
-                    setState(() {
-                      selectedMedication = item.item!.name;
-                      selectedMedicationId = item.item!.id;
-                      fetchDosages(selectedMedication!);
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      value = selectedDosage;
-                      return "Field cannot be empty.";
-                    }
-                    return null;
-                  },
-                  suggestions: medications
-                    .map((medication) => SearchFieldListItem<SearchItem>(
-                      medication['medication_name'] ?? "Unknown",
-                        item: SearchItem(
-                          name: medication['medication_name'] ?? "Unknown",
-                          id: medication['medication_id'] ?? "",
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              width: 2, color: Colors.blue.withOpacity(0.8)),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      ))
-                    .toList(),
-                ),
-              ),
-
-              // Dropdown for Dosage Selection
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                        BorderSide(color: Colors.blueGrey.shade200, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        width: 2, color: Colors.blue.withOpacity(0.8)),
-                      borderRadius: BorderRadius.circular(10),
+                      ),
+                      maxSuggestionsInViewPort: 6,
+                      itemHeight: 50,
+                      suggestionsDecoration: SuggestionDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      onSuggestionTap: (SearchFieldListItem<SearchItem> item) {
+                        setState(() {
+                          selectedPatient = item.item!.name;
+                          selectedPatientId = item.item!.id;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          value = selectedPatient;
+                          return "Field cannot be empty.";
+                        }
+                        return null;
+                      },
+                      suggestions: patients
+                          .map((patient) => SearchFieldListItem<SearchItem>(
+                                patient['patient_username'] ?? "Unknown",
+                                item: SearchItem(
+                                  name:
+                                      patient['patient_username'] ?? "Unknown",
+                                  id: patient['patient_id'] ?? "",
+                                ),
+                              ))
+                          .toList(),
                     ),
                   ),
 
-                  value: selectedDosage,
-                  hint: const Text('Select Dosage'),
-                  items: dosages.map((dosage) {
-                    return DropdownMenuItem(
-                      value: dosage,
-                      child: Text(dosage),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      selectedDosage = newValue;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      value = selectedDosage;
-                      return "Please select a dosage.";
-                    }
-                    return null;
-                  },
-                ),
-              ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SearchField<SearchItem>(
+                      hint: 'Search for Medication',
+                      searchInputDecoration: SearchInputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.blueGrey.shade200, width: 1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              width: 2, color: Colors.blue.withOpacity(0.8)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      maxSuggestionsInViewPort: 6,
+                      itemHeight: 50,
+                      suggestionsDecoration: SuggestionDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      onSuggestionTap: (SearchFieldListItem<SearchItem> item) {
+                        setState(() {
+                          selectedMedication = item.item!.name;
+                          selectedMedicationId = item.item!.id;
+                          fetchDosages(selectedMedication!);
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          value = selectedDosage;
+                          return "Field cannot be empty.";
+                        }
+                        return null;
+                      },
+                      suggestions: medications
+                          .map((medication) => SearchFieldListItem<SearchItem>(
+                                medication['medication_name'] ?? "Unknown",
+                                item: SearchItem(
+                                  name: medication['medication_name'] ??
+                                      "Unknown",
+                                  id: medication['medication_id'] ?? "",
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ),
 
-              // Frequency Text Field
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration:
-                    const InputDecoration(labelText: 'Frequency(times/day)'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    frequency = value;
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty || int.tryParse(value) == null) {
-                      // value = frequency;
-                      return "Frequency must be a valid number.";
-                    }
-                    return null;
-                  },
-                ),
-              ),
+                  // Dropdown for Dosage Selection
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.blueGrey.shade200, width: 1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              width: 2, color: Colors.blue.withOpacity(0.8)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      value: selectedDosage,
+                      hint: const Text('Select Dosage'),
+                      items: dosages.map((dosage) {
+                        return DropdownMenuItem(
+                          value: dosage,
+                          child: Text(dosage),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        setState(() {
+                          selectedDosage = newValue;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          value = selectedDosage;
+                          return "Please select a dosage.";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
 
-              // Duration Text Field
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Duration (in days)'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    duration = value;
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty || int.tryParse(value) == null) {
-                      return "Duration must be a valid number.";
-                    }
-                    return null;
-                  },
-                ),
-              ),
+                  // Frequency Text Field
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        // Frequency Input Field
+                        Expanded(
+                          child: TextFormField(
+                            decoration: const InputDecoration(
+                                labelText: 'Frequency (times per period)'),
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              setState(() {
+                                frequency = value.isNotEmpty
+                                    ? '$value $frequencyUnit'
+                                    : null;
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null ||
+                                  value.isEmpty ||
+                                  int.tryParse(value) == null) {
+                                return "Frequency must be a valid number.";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
 
-              // Intake Instructions Text Field
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Intake Instructions'),
-                  onChanged: (value) {
-                    intakeInstructions = value;
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Intake instructions cannot be empty.";
-                    }
-                    return null;
-                  },
-                ),
-              ),
+                        // Dropdown for "days" or "hours"
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Colors.blueGrey.shade200, width: 1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    width: 2,
+                                    color: Colors.blue.withOpacity(0.8)),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            value: frequencyUnit,
+                            hint: const Text('Select unit'),
+                            items: ['days', 'hours'].map((unit) {
+                              return DropdownMenuItem(
+                                value: unit,
+                                child: Text(unit),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                frequencyUnit = newValue!;
+                                frequency = frequency != null
+                                    ? '${frequency!.split(' ').first} $frequencyUnit'
+                                    : null;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
-              const SizedBox(height: 20),
+                  // Duration Text Field
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                          labelText: 'Duration (in days)'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        duration = value;
+                      },
+                      validator: (value) {
+                        if (value == null ||
+                            value.isEmpty ||
+                            int.tryParse(value) == null) {
+                          return "Duration must be a valid number.";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
 
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: (){
-                    if (_formKey.currentState!.validate()) {
-                      _showPrescriptionSummary();
-                    }
-                  }, 
-                  child: const Text('Submit')),
-                )
-            ]
-          )
-        )
-      )
-    );
+                  // Intake Instructions Text Field
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                          labelText: 'Intake Instructions'),
+                      onChanged: (value) {
+                        intakeInstructions = value;
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Intake instructions cannot be empty.";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _showPrescriptionSummary();
+                          }
+                        },
+                        child: const Text('Submit')),
+                  )
+                ]))));
   }
 }
-
