@@ -17,12 +17,14 @@ class PrescriptionCard extends StatefulWidget {
     required this.drugName,
     required this.drugInfo,
     required this.description,
+    required this.prescriptionId
   });
 
   final double borderRadiussSize = 10;
   final String drugName;
   final String drugInfo;
   final String description;
+  final String prescriptionId;
 
   @override
   State<PrescriptionCard> createState() => _CurrentPrescription();
@@ -40,7 +42,7 @@ class _CurrentPrescription extends State<PrescriptionCard> {
   String? duration;
   String? intakeInstructions;
   String? doctorId;
-  String? prescriptionId;
+  // String? prescriptionId;
   String refills = '0';
   String status = 'active';
   String qrFilePath = 'No QR Code';
@@ -52,7 +54,7 @@ class _CurrentPrescription extends State<PrescriptionCard> {
   @override
   void initState() {
     super.initState();
-    _getPrescriptionId();
+    getPrescriptionId(widget.prescriptionId);
     getPrescriptionData();
     
   }
@@ -126,17 +128,17 @@ class _CurrentPrescription extends State<PrescriptionCard> {
 
   Future<void> getPrescriptionData() async {
 
-    final prescriptionId = await _getPrescriptionId();
+    final prescriptionId = await getPrescriptionId(widget.prescriptionId);
 
     try {
       final conn = await createConnection();
       final queryResult =  await conn.execute(
         'SELECT * ' 
         'FROM patient_prescriptions '
-        'WHERE prescription_id = 1',
-        // {
-        //   'prescription_id': prescriptionId,
-        // },
+        'WHERE prescription_id = :fetchedPrescriptionId',
+        {
+          'fetchedPrescriptionId': prescriptionId,
+        },
       );
 
       List<Map<String, String>> patientPrescription = [];
@@ -174,14 +176,17 @@ class _CurrentPrescription extends State<PrescriptionCard> {
     }
   }
 
-  Future<String?> _getPrescriptionId() async {
+  Future<String?> getPrescriptionId(String prescriptionId) async {
     try {
       final conn = await createConnection();
       final queryResult = await conn.execute(
+        // Where are we getting the PrescriptionId?
+        // we're specifying a prescriptionId here
+        // however we're not getting it from anywhere
         'SELECT prescription_id '
         'FROM patient_prescriptions '
-        'WHERE prescription_id = :prescriptionId', 
-        {'prescriptionId': prescriptionId}
+        'WHERE prescription_id = :fetchedPrescriptionId', 
+        {'fetchedPrescriptionId': prescriptionId}
       );
 
       if (queryResult.rows.isNotEmpty) {
@@ -209,21 +214,21 @@ class _CurrentPrescription extends State<PrescriptionCard> {
       final qrData = generateQRCodeData(prescriptionData);
       final qrFilePath = await saveQRCode(qrData);
     
-      final prescriptionId = await _getPrescriptionId();
+      final prescriptionId = await getPrescriptionId(widget.prescriptionId);
 
-      // if (prescriptionId == null) {
-      //   debugPrint("Prescription ID not found");
-      //   _showSnackbarMessage("Prescription ID not found!");
-      //   return;
-      // }
+      if (prescriptionId == null) {
+        debugPrint("Prescription ID not found");
+        _showSnackbarMessage("Prescription ID not found!");
+        return;
+      }
 
       final conn = await createConnection();
       await conn.execute(
         'UPDATE patient_prescriptions '
         'SET qr_code_filepath = :new_qr_filepath '
-        'WHERE prescription_id = 1',
+        'WHERE prescription_id = :fetchedPrescriptionId',
         {
-          'prescriptionId': prescriptionId,
+          'fetchedPrescriptionId': prescriptionId,
           'new_qr_filepath': qrFilePath
         }
       );
@@ -316,6 +321,16 @@ class _CurrentPrescription extends State<PrescriptionCard> {
             ),
           ),
           SizedBox(height: 10),
+          // Prescription No.
+          Text(
+            widget.prescriptionId,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Color(0xFF602E9E),
+            ),
+          ),
+          SizedBox(height: 5),
           // Drug Name
           Text(
             widget.drugName,

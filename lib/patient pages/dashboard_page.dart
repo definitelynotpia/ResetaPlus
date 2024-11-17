@@ -12,6 +12,7 @@ import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/custom_prescription.dart';
 import 'package:resetaplus/widgets/intake_history_popup.dart';
 import 'package:resetaplus/widgets/intake_instuctions_popup.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:resetaplus/widgets/card_medication_progress.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -83,6 +84,8 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   // Function to get the information of the medication in the prescription
+  // This gets the prescription of patient who is currently logged in
+  // This uses the patient_id to determine which prescriptions to display
   Future<void> getCurrentPrescriptions(BuildContext context) async {
     try {
       final conn = await createConnection();
@@ -92,7 +95,8 @@ class _DashboardPageState extends State<DashboardPage> {
       SELECT 
           m.medication_name,
           m.medication_info,
-          m.medication_description
+          m.medication_description,
+          p.prescription_id
       FROM 
           reseta_plus.patient_prescriptions p
       JOIN 
@@ -111,6 +115,7 @@ class _DashboardPageState extends State<DashboardPage> {
         for (var row in activePrescriptionMedicationInfo.rows) {
           var assoc = row.assoc();
           activePrescriptionDetails.add({
+            'prescriptionId': assoc['prescription_id'] ?? '',
             'drugName': assoc['medication_name'] ?? '',
             'drugInfo': assoc['medication_info'] ?? '',
             'description': assoc['medication_description'] ?? '',
@@ -122,6 +127,7 @@ class _DashboardPageState extends State<DashboardPage> {
       setState(() {
         _currentPrescriptions = activePrescriptionDetails;
       });
+
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
@@ -635,6 +641,8 @@ class _DashboardPageState extends State<DashboardPage> {
           Column(
             children: (_currentPrescriptions?.map((prescription) {
                   return PrescriptionCard(
+                    prescriptionId: prescription['prescriptionId'] ?? 
+                        "Unknown Prescription No.",
                     drugName: prescription['drugName'] ??
                         "Unknown Drug", // Provide a default value if null
                     drugInfo: prescription['drugInfo'] ??
