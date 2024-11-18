@@ -2,6 +2,8 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -103,26 +105,19 @@ class _CurrentPrescription extends State<PrescriptionCard> {
   final firstEntry = qrData.first;
 
     final qrDataMap = {
-    'medication_id': firstEntry['medication_id'],
-
-    // This is causing issues with fetching data. It could be a parsing issue
-  
-    // 'prescription_date': DateTime.now().toIso8601String().split('T').first,
-    // 'prescription_end_date': DateTime.now()
-    //     .add(Duration(days: int.parse(duration!)))
-    //     .toIso8601String()
-    //     .split('T')
-    //     .first,
-    'frequency': firstEntry['frequency'],
-    'dosage': firstEntry['dosage'],
-    'duration': firstEntry['duration'],
-    'refills': firstEntry['refills'],
-    'status': firstEntry['status'],
-    'intake_instructions': firstEntry['intake_instructions'],
+    'Drug Name': widget.drugName,
+    'Patient Name': firstEntry['fetched_patient_name'],
+    'Start Date': firstEntry['fetched_prescription_date'],
+    'End Date': firstEntry['fetched_prescription_end_date'],
+    'Take every': firstEntry['fetched_frequency'],
+    'Dosage': firstEntry['fetched_dosage'],
+    'Duration': firstEntry['fetched_duration'],
+    'Refills': firstEntry['fetched_refills'],
+    'Medication Status': firstEntry['fetched_status'],
+    'Intake Instructions': firstEntry['fetched_intake_instructions'],
   };
 
   return qrDataMap.toString();
-  // return jsonEncode(qrDataMap);
   
 }
 
@@ -133,9 +128,31 @@ class _CurrentPrescription extends State<PrescriptionCard> {
     try {
       final conn = await createConnection();
       final queryResult =  await conn.execute(
-        'SELECT * ' 
-        'FROM patient_prescriptions '
-        'WHERE prescription_id = :fetchedPrescriptionId',
+
+        //TODO
+
+        // ADJUST QUERY TO FETCH THE FF:
+        // MEDICATION NAME 
+        // PATIENT NAME
+        // *USE JOIN FOR THIS
+        '''
+        SELECT 
+            u.username,
+            p.prescription_date,
+            p.prescription_end_date,
+            p.frequency,
+            p.dosage,
+            p.duration,
+            p.refills,
+            p.status,
+            p.intake_instructions
+        FROM
+          reseta_plus.patient_prescriptions p
+        JOIN
+          reseta_plus.patient_accounts u ON p.patient_id = u.patient_id
+        WHERE
+          p.prescription_id = :fetchedPrescriptionId;
+        ''',
         {
           'fetchedPrescriptionId': prescriptionId,
         },
@@ -147,19 +164,15 @@ class _CurrentPrescription extends State<PrescriptionCard> {
         var assoc = row.assoc();
         patientPrescription.add({
           // Specify which columns to get
-          'medication_id': assoc['medication_id'] ?? '',
-          // 'prescription_date': DateTime.now().toIso8601String().split('T').first,
-          // 'prescription_end_date': DateTime.now()
-          //     .add(Duration(days: int.parse(duration!)))
-          //     .toIso8601String()
-          //     .split('T')
-          //     .first,
-          'frequency': assoc['frequency'] ?? '',
-          'dosage': assoc['dosage'] ?? '',
-          'duration': assoc['duration'] ?? '',
-          'refills': assoc['refills'] ?? '',
-          'status': assoc['status'] ?? '',
-          'intake_instructions': assoc['intake_instructions'] ?? '',
+          'fetched_patient_name': assoc['username'] ?? '',
+          'fetched_prescription_date': assoc['prescription_date'] ?? '',
+          'fetched_prescription_end_date': assoc['prescription_end_date'] ?? '',
+          'fetched_frequency': assoc['frequency'] ?? '',
+          'fetched_dosage': assoc['dosage'] ?? '',
+          'fetched_duration': assoc['duration'] ?? '',
+          'fetched_refills': assoc['refills'] ?? '',
+          'fetched_status': assoc['status'] ?? '',
+          'fetched_intake_instructions': assoc['intake_instructions'] ?? '',
         });
       }
 
@@ -274,10 +287,19 @@ class _CurrentPrescription extends State<PrescriptionCard> {
       final qrFilePath = "$downloadDirectory/qr_code_${DateTime.now().millisecondsSinceEpoch}.png";
 
       // Convert QR code to an image file
+      const double padding = 50.0; // Adjust padding size
       final picData = await painter.toImageData(500);
       final bytes = picData!.buffer.asUint8List();
+      final codec = await instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+
+      final image = frame.image;
+
+      final paddedImage = await _addPadding(image, padding);
+
       final qrFile = File(qrFilePath);
-      await qrFile.writeAsBytes(bytes);
+      final paddedBytes = (await paddedImage.toByteData(format: ImageByteFormat.png))!.buffer.asUint8List();
+      await qrFile.writeAsBytes(paddedBytes);
 
       mediaScan();
 
@@ -292,6 +314,22 @@ class _CurrentPrescription extends State<PrescriptionCard> {
 
     }
   }
+
+  Future<ui.Image> _addPadding(ui.Image original, double padding) async {
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder);
+
+  final newWidth = original.width + (padding * 2).toInt();
+  final newHeight = original.height + (padding * 2).toInt();
+
+  final paint = Paint()..color = Colors.white; // Padding color
+  canvas.drawRect(Rect.fromLTWH(0, 0, newWidth.toDouble(), newHeight.toDouble()), paint);
+
+  canvas.drawImage(original, Offset(padding, padding), Paint());
+  final picture = recorder.endRecording();
+
+  return picture.toImage(newWidth, newHeight);
+}
 
   @override
   Widget build(BuildContext context) {
