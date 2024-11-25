@@ -64,7 +64,7 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
     fetchMedications();
     _getDoctorId();
   }
-  
+
   void fetchPatients() async {
     try {
       final conn = await createConnection();
@@ -152,7 +152,6 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
 
   Future<void> insertPrescription() async {
     try {
-      
       final conn = await createConnection();
       await conn.execute(
         'INSERT INTO patient_prescriptions ('
@@ -377,7 +376,9 @@ class _DoctorAddPrescriptionState extends State<DoctorAddPrescriptionPage> {
                         ),
                       ),
                       value: selectedDosage,
-                      hint: const Text('Select Dosage'),
+                      hint: Text(dosages.isEmpty
+                          ? 'No Dosage Available'
+                          : 'Select Dosage'),
                       items: dosages.map((dosage) {
                         return DropdownMenuItem(
                           value: dosage,

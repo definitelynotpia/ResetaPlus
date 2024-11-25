@@ -12,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-
 import 'patient pages/dashboard_page.dart';
 import 'patient pages/store_page.dart';
 import 'patient pages/history_page.dart';
@@ -26,12 +25,12 @@ import 'doctor pages/doctor_add_prescription.dart';
 import 'pharmacy pages/pharmacy_dashboard_page.dart';
 import 'pharmacy pages/pharmacy_scan_qr_page.dart';
 import 'pharmacy pages/pharmacy_profile_page.dart';
-
+import 'pharmacy pages/pharmacy_add_medications.dart';
+import 'pharmacy pages/pharmacy_medications_view.dart';
 
 final mediaStorePlugin = MediaStore();
 
 void main() async {
-  
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isAndroid) {
     await MediaStore.ensureInitialized();
@@ -53,7 +52,7 @@ void main() async {
   // You have set this otherwise it throws AppFolderNotSetException
   MediaStore.appFolder = "ResetaPlus";
 
-  await dotenv.load(fileName: "assets/.env"); 
+  await dotenv.load(fileName: "assets/.env");
   runApp(const MainApp());
 }
 
@@ -81,8 +80,9 @@ String decryptPassword(String storedPasswordHash, String storedSalt,
 }
 
 bool verifyPassword(String enteredPassword, String storedPasswordHash,
-  String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv) {
-  final decryptedPasswordHash = decryptPassword(storedPasswordHash, storedSalt, storedKey, storedIv);
+    String storedSalt, encrypt.Key storedKey, encrypt.IV storedIv) {
+  final decryptedPasswordHash =
+      decryptPassword(storedPasswordHash, storedSalt, storedKey, storedIv);
 
   // Hash the entered password using the stored salt to compare with the decrypted hash
   String hashedEnteredPassword = hashPassword(enteredPassword, storedSalt);
@@ -246,15 +246,21 @@ class _HomePageState extends State<HomePage> {
   final Key profilePage = const PageStorageKey("profilePage");
 
 // Doctor Navigation Page Keys
-  final Key doctorAddPrescriptionPage = const PageStorageKey("doctorAddPrescriptionPage");
+  final Key doctorAddPrescriptionPage =
+      const PageStorageKey("doctorAddPrescriptionPage");
   final Key doctorDashboardPage = const PageStorageKey("doctorDashboardPage");
   final Key doctorProfilePage = const PageStorageKey("doctorProfilePage");
 
 // Pharmacy Navigation Page Keys
 
-  final Key pharmacyDashboardPage = const PageStorageKey("pharmacyDashboardPage");
-  final Key pharmacyScanQRPage= const PageStorageKey("pharmacyScanQRPage");
+  final Key pharmacyDashboardPage =
+      const PageStorageKey("pharmacyDashboardPage");
+  final Key pharmacyScanQRPage = const PageStorageKey("pharmacyScanQRPage");
   final Key pharmacyProfilePage = const PageStorageKey("pharmacyProfilePage");
+  final Key pharmacyAddMedicationsPage =
+      const PageStorageKey("pharmacyAddMedicationsPage");
+  final Key pharmacyMedicationsPage =
+      const PageStorageKey("pharmacyMedicationsPage");
 
   late StorePage one;
   late MapPage two;
@@ -265,9 +271,12 @@ class _HomePageState extends State<HomePage> {
   late DoctorAddPrescriptionPage six;
   late DoctorDashboardPage seven;
   late DoctorProfilePage eight;
+
   late PharmacyDashboardPage nine;
   late PharmacyScanQRPage ten;
-  late PharmacyProfilePage eleven;
+  late PharmacyAddMedicationsPage eleven;
+  late PharmacyMedicationsPage twelve;
+  late PharmacyProfilePage thirteen;
 
   late List<Widget> pages;
   // Shows Loading Default page
@@ -359,24 +368,29 @@ class _HomePageState extends State<HomePage> {
 
         currentTab = 1;
         currentPage = seven;
-
       } else if (_userType == 'Pharmacy') {
-
-          nine = PharmacyDashboardPage(
+        nine = PharmacyDashboardPage(
           key: pharmacyDashboardPage,
           title: "Dashboard",
         );
 
-          ten = PharmacyScanQRPage(
+        ten = PharmacyScanQRPage(
           key: pharmacyScanQRPage,
           title: "Scan QR",
         );
-          eleven = PharmacyProfilePage(
+
+        eleven = PharmacyAddMedicationsPage(
+            key: pharmacyAddMedicationsPage, title: "Add Medications");
+
+        twelve = PharmacyMedicationsPage(
+            key: pharmacyMedicationsPage, title: "Medications View");
+
+        thirteen = PharmacyProfilePage(
           key: pharmacyProfilePage,
           title: "Profile",
         );
 
-        pages = [nine, ten, eleven];
+        pages = [nine, ten, eleven, twelve, thirteen];
 
         currentTab = 1;
         currentPage = nine;
@@ -393,7 +407,7 @@ class _HomePageState extends State<HomePage> {
       navbarItems = _patientNavItems;
     } else if (_userType == 'Doctor') {
       navbarItems = _doctorNavItems;
-    } else if (_userType == 'Pharmacy'){
+    } else if (_userType == 'Pharmacy') {
       navbarItems = _pharmacyNavItems;
     }
 
@@ -407,110 +421,111 @@ class _HomePageState extends State<HomePage> {
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children:
-              (currentPage is ProfilePage || currentPage is DoctorProfilePage || currentPage is PharmacyProfilePage)
-                  // if on Profile Page
-                  ? <Widget>[
-                      // Page title
-                      Text(
-                        _usernameSession,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
+          children: (currentPage is ProfilePage ||
+                  currentPage is DoctorProfilePage ||
+                  currentPage is PharmacyProfilePage)
+              // if on Profile Page
+              ? <Widget>[
+                  // Page title
+                  Text(
+                    _usernameSession,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
 
-                      const SizedBox(width: 10),
+                  const SizedBox(width: 10),
 
-                      Text(
-                        _userType,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
-                      ),
+                  Text(
+                    _userType,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
+                  ),
 
-                      const Spacer(),
+                  const Spacer(),
 
-                      // info button
-                      IconButton(
-                        visualDensity: const VisualDensity(horizontal: -2.0),
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.info_outline),
+                  // info button
+                  IconButton(
+                    visualDensity: const VisualDensity(horizontal: -2.0),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.info_outline),
+                    color: Colors.white,
+                    onPressed: () {},
+                  ),
+
+                  // settings button
+                  IconButton(
+                    visualDensity: const VisualDensity(horizontal: -2.0),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.settings),
+                    color: Colors.white,
+                    onPressed: () {},
+                  ),
+
+                  const SizedBox(width: 4),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      // Action to perform when the button is pressed
+                      _setLoggedInStatus(false);
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context, // Opens another instance of MainApp
+                          MaterialPageRoute(
+                              builder: (context) => const MainApp()));
+                    },
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Colors.white),
+                        )),
+                    child: const Text(
+                      "Logout",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
                         color: Colors.white,
-                        onPressed: () {},
+                        fontSize: 16,
                       ),
+                    ),
+                  ),
+                ]
+              : <Widget>[
+                  // Page title
+                  Text(
+                    currentPageTitle,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
+                  ),
 
-                      // settings button
-                      IconButton(
-                        visualDensity: const VisualDensity(horizontal: -2.0),
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.settings),
-                        color: Colors.white,
-                        onPressed: () {},
-                      ),
+                  const Spacer(),
 
-                      const SizedBox(width: 4),
+                  // info button
+                  IconButton(
+                    visualDensity: const VisualDensity(horizontal: -2.0),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.info_outline),
+                    color: Colors.white,
+                    onPressed: () {},
+                  ),
 
-                      ElevatedButton(
-                        onPressed: () {
-                          // Action to perform when the button is pressed
-                          _setLoggedInStatus(false);
-                          Navigator.pop(context);
-                          Navigator.push(
-                              context, // Opens another instance of MainApp
-                              MaterialPageRoute(
-                                  builder: (context) => const MainApp()));
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(color: Colors.white),
-                            )),
-                        child: const Text(
-                          "Logout",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ]
-                  : <Widget>[
-                      // Page title
-                      Text(
-                        currentPageTitle,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      // info button
-                      IconButton(
-                        visualDensity: const VisualDensity(horizontal: -2.0),
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.info_outline),
-                        color: Colors.white,
-                        onPressed: () {},
-                      ),
-
-                      // settings button
-                      IconButton(
-                        visualDensity: const VisualDensity(horizontal: -2.0),
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.settings),
-                        color: Colors.white,
-                        onPressed: () {},
-                      ),
-                    ],
+                  // settings button
+                  IconButton(
+                    visualDensity: const VisualDensity(horizontal: -2.0),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.settings),
+                    color: Colors.white,
+                    onPressed: () {},
+                  ),
+                ],
         ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -750,7 +765,27 @@ const List<BottomNavigationBarItem> _pharmacyNavItems = [
     label: "QR Code Scanner",
     tooltip: "QR Code Scanner",
   ),
-    // User Profile Page
+  // Add Medications
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.add,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
+    label: "Add Medications",
+    tooltip: "Add Medications",
+  ),
+  // Medications View
+  BottomNavigationBarItem(
+    icon: Icon(
+      Icons.medical_information,
+      color: Color(0xffF8F6F5),
+      size: 30,
+    ),
+    label: "Medications View",
+    tooltip: "Medications View",
+  ),
+  // User Profile Page
   BottomNavigationBarItem(
     icon: Icon(
       Icons.person,
@@ -760,5 +795,4 @@ const List<BottomNavigationBarItem> _pharmacyNavItems = [
     label: "Profile",
     tooltip: "Profile",
   )
-
 ];
