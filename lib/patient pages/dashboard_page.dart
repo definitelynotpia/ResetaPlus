@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 
 import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/custom_prescription.dart';
@@ -127,7 +127,6 @@ class _DashboardPageState extends State<DashboardPage> {
       setState(() {
         _currentPrescriptions = activePrescriptionDetails;
       });
-
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
@@ -641,7 +640,7 @@ class _DashboardPageState extends State<DashboardPage> {
           Column(
             children: (_currentPrescriptions?.map((prescription) {
                   return PrescriptionCard(
-                    prescriptionId: prescription['prescriptionId'] ?? 
+                    prescriptionId: prescription['prescriptionId'] ??
                         "Unknown Prescription No.",
                     drugName: prescription['drugName'] ??
                         "Unknown Drug", // Provide a default value if null

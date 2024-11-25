@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:mysql_client/mysql_client.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 
 class IntakeInstructionsPopup extends StatefulWidget {
   final int patientID; // Patient ID passed to the popup
 
-  const IntakeInstructionsPopup({super.key , required this.patientID});
+  const IntakeInstructionsPopup({super.key, required this.patientID});
 
   @override
-  State<IntakeInstructionsPopup> createState() => _IntakeInstructionsPopupState();
+  State<IntakeInstructionsPopup> createState() =>
+      _IntakeInstructionsPopupState();
 }
 
 class _IntakeInstructionsPopupState extends State<IntakeInstructionsPopup> {
@@ -23,8 +24,8 @@ class _IntakeInstructionsPopupState extends State<IntakeInstructionsPopup> {
   }
 
   // Asynchronous method to retrieve patient intake instructions from the database
-  Future<void> getPrescriptionIntakeInstructions(int patientID)async {
-    try{
+  Future<void> getPrescriptionIntakeInstructions(int patientID) async {
+    try {
       // Establish database connection
       final conn = await createConnection();
 
@@ -51,8 +52,6 @@ class _IntakeInstructionsPopupState extends State<IntakeInstructionsPopup> {
       setState(() {
         _patientIntakeInstructions = patientIntakeInstructionsData;
       });
-
-      
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
@@ -64,6 +63,7 @@ class _IntakeInstructionsPopupState extends State<IntakeInstructionsPopup> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -75,17 +75,20 @@ class _IntakeInstructionsPopupState extends State<IntakeInstructionsPopup> {
             List<Widget> intakeHistoryWidgets = [];
 
             // Check if _patientIntakeInstructions is not null and has rows
-            if (_patientIntakeInstructions != null && _patientIntakeInstructions!.rows.isNotEmpty) {
+            if (_patientIntakeInstructions != null &&
+                _patientIntakeInstructions!.rows.isNotEmpty) {
               // Iterate over the rows in the IResultSet
               for (var row in _patientIntakeInstructions!.rows) {
                 String medicationName = row.assoc()['medication_name'] ?? 'N/A';
                 String medicationForm = row.assoc()['medication_form'] ?? 'N/A';
                 String medicationInfo = row.assoc()['medication_info'] ?? 'N/A';
-                String medicationDescriptions = row.assoc()['medication_description'] ?? 'N/A';
+                String medicationDescriptions =
+                    row.assoc()['medication_description'] ?? 'N/A';
                 String frequency = row.assoc()['frequency'] ?? 'N/A';
                 String dosage = row.assoc()['dosage'] ?? 'N/A';
                 String duration = row.assoc()['duration'] ?? 'N/A';
-                String intakeInstructions = row.assoc()['intake_instructions'] ?? 'N/A';
+                String intakeInstructions =
+                    row.assoc()['intake_instructions'] ?? 'N/A';
 
                 intakeHistoryWidgets.add(
                   Column(
@@ -106,7 +109,8 @@ class _IntakeInstructionsPopupState extends State<IntakeInstructionsPopup> {
               }
             } else {
               // Add a message if no intake instructions are available
-              intakeHistoryWidgets.add(const Text('No intake instructions available.'));
+              intakeHistoryWidgets
+                  .add(const Text('No intake instructions available.'));
             }
 
             return intakeHistoryWidgets; // Return the list of widgets

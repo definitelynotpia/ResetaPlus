@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mysql_client/mysql_client.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 
 class IntakeHistoryPopup extends StatefulWidget {
   final int patientID; // Patient ID passed to the popup
 
-  const IntakeHistoryPopup({super.key , required this.patientID});
+  const IntakeHistoryPopup({super.key, required this.patientID});
 
   @override
   State<IntakeHistoryPopup> createState() => _IntakeHistoryPopupState();
@@ -23,8 +23,8 @@ class _IntakeHistoryPopupState extends State<IntakeHistoryPopup> {
   }
 
   // Asynchronous method to retrieve patient intake history from the database
-  Future<void> getPatientIntakeHistory(int patientID)async {
-    try{
+  Future<void> getPatientIntakeHistory(int patientID) async {
+    try {
       // Establish database connection
       final conn = await createConnection();
 
@@ -39,8 +39,6 @@ class _IntakeHistoryPopupState extends State<IntakeHistoryPopup> {
       setState(() {
         _patientIntakeHistory = patientIntakeHistoryData;
       });
-
-      
     } catch (e) {
       // Handle errors during data fetching
       debugPrint("Error: $e");
@@ -52,6 +50,7 @@ class _IntakeHistoryPopupState extends State<IntakeHistoryPopup> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -63,7 +62,8 @@ class _IntakeHistoryPopupState extends State<IntakeHistoryPopup> {
             List<Widget> intakeHistoryWidgets = [];
 
             // Check if _patientIntakeHistory is null or has no rows
-            if (_patientIntakeHistory != null && _patientIntakeHistory!.rows.isNotEmpty) {
+            if (_patientIntakeHistory != null &&
+                _patientIntakeHistory!.rows.isNotEmpty) {
               // Iterate over the rows in the IResultSet
               for (var row in _patientIntakeHistory!.rows) {
                 String intakeDate = row.assoc()['intake_date'] ?? 'N/A';
@@ -83,7 +83,8 @@ class _IntakeHistoryPopupState extends State<IntakeHistoryPopup> {
                     statusColor = Colors.red;
                     break;
                   default:
-                    statusColor = Colors.black; // Default color for unknown status
+                    statusColor =
+                        Colors.black; // Default color for unknown status
                 }
 
                 intakeHistoryWidgets.add(
@@ -104,7 +105,8 @@ class _IntakeHistoryPopupState extends State<IntakeHistoryPopup> {
               }
             } else {
               // Add a message if there's no intake history available
-              intakeHistoryWidgets.add(const Text('No intake history available.'));
+              intakeHistoryWidgets
+                  .add(const Text('No intake history available.'));
             }
 
             return intakeHistoryWidgets; // Return the list of widgets

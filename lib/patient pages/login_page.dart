@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 import '../widgets/gradient_checkbox.dart';
 import '../widgets/forgot_password_dialog.dart';
 

@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:searchfield/searchfield.dart';
 // import 'package:gradient_borders/gradient_borders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 // import 'package:path_provider/path_provider.dart';
 // import 'package:qr_flutter/qr_flutter.dart';
 // import 'package:media_store_plus/media_store_plus.dart';

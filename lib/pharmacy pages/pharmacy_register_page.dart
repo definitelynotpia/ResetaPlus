@@ -5,7 +5,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 import 'package:resetaplus/pharmacy%20pages/pharmacy_login_page.dart';
 import 'package:resetaplus/register_consent_forms.dart';
 import '../widgets/gradient_checkbox.dart';

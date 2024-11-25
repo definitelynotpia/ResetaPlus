@@ -6,7 +6,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 
 import 'package:resetaplus/widgets/custom_progressbar.dart';
 import 'package:resetaplus/widgets/intake_history_popup.dart';
@@ -367,10 +367,12 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => QrCodeDisplay(prescriptionId: prescriptionId), // Pass the prescription ID
+        builder: (context) => QrCodeDisplay(
+            prescriptionId: prescriptionId), // Pass the prescription ID
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -409,8 +411,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: (_activePatientMedicationProgressData
                       ?.map((patientData) {
-                    int patientID = 
-                        int.parse(patientData['patientID']);
+                    int patientID = int.parse(patientData['patientID']);
                     double currentProgress =
                         patientData['currentProgress'] ?? 0;
                     num medicationDuration =
@@ -586,7 +587,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                                     showDialog(
                                       context: context,
                                       builder: (BuildContext context) {
-                                        return IntakeHistoryPopup(patientID: patientID);
+                                        return IntakeHistoryPopup(
+                                            patientID: patientID);
                                       },
                                     );
                                   },
@@ -618,7 +620,8 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
                                     showDialog(
                                       context: context,
                                       builder: (BuildContext context) {
-                                        return IntakeInstructionsPopup(patientID: patientID);
+                                        return IntakeInstructionsPopup(
+                                            patientID: patientID);
                                       },
                                     );
                                   },
@@ -657,7 +660,7 @@ class _DoctorDashboardPageState extends State<DoctorDashboardPage> {
 
           ElevatedButton(
               onPressed: () {
-                // Change the number based on the prescription 
+                // Change the number based on the prescription
                 // that you want the QR code from
                 displayQRCode(context, 1);
               },

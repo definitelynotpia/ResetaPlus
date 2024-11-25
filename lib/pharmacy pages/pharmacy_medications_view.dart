@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 
 class PharmacyMedicationsPage extends StatefulWidget {
   const PharmacyMedicationsPage({super.key, required this.title});
@@ -102,6 +102,44 @@ class _PharmacyMedicationsPageState extends State<PharmacyMedicationsPage> {
     }
   }
 
+  void showDeleteConfirmation(
+      BuildContext context, String medicationName, VoidCallback onConfirm) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Medication'),
+          content: Text('Are you sure you want to delete "$medicationName"?'),
+          actions: [
+            // Cancel button
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            // Confirm button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                onConfirm(); // Call the callback to handle deletion
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+              ),
+              child: const Text(
+                'Delete',
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   void _showEditPopup(Map<String, dynamic> medication) {
     final _formKey = GlobalKey<FormState>();
     String name = medication['name'];
@@ -134,6 +172,8 @@ class _PharmacyMedicationsPageState extends State<PharmacyMedicationsPage> {
                       DropdownMenuItem(value: 'tablet', child: Text('Tablet')),
                     ],
                     onChanged: (value) => form = value!,
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Required' : null,
                     decoration: const InputDecoration(labelText: 'Form'),
                   ),
                   TextFormField(
@@ -141,16 +181,22 @@ class _PharmacyMedicationsPageState extends State<PharmacyMedicationsPage> {
                     decoration:
                         const InputDecoration(labelText: 'Manufacturer'),
                     onChanged: (value) => manufacturer = value,
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Required' : null,
                   ),
                   TextFormField(
                     initialValue: info,
                     decoration: const InputDecoration(labelText: 'Information'),
                     onChanged: (value) => info = value,
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Required' : null,
                   ),
                   TextFormField(
                     initialValue: description,
                     decoration: const InputDecoration(labelText: 'Description'),
                     onChanged: (value) => description = value,
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Required' : null,
                   ),
                 ],
               ),
@@ -212,8 +258,9 @@ class _PharmacyMedicationsPageState extends State<PharmacyMedicationsPage> {
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () {
-                      // Handle delete logic
-                      deleteMedication(medication['id']);
+                      showDeleteConfirmation(context, medication['name'], () {
+                        deleteMedication(medication['id']);
+                      });
                     },
                   ),
                 ],

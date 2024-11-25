@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:async';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 
 import 'package:flutter/material.dart';
 // For loading environment variables

@@ -5,7 +5,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/gradient_borders.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 import 'package:resetaplus/patient%20pages/login_page.dart';
 import '../register_consent_forms.dart';
 import '../widgets/gradient_checkbox.dart';
@@ -394,7 +394,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const RegisterConsentForms(page: 0)));
+                                              const RegisterConsentForms(
+                                                  page: 0)));
                                 },
                                 child: const Text(
                                   "Reseta+ Terms & Conditions",
@@ -440,7 +441,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const RegisterConsentForms(page: 1)));
+                                              const RegisterConsentForms(
+                                                  page: 1)));
                                 },
                                 child: const Text(
                                   "Reseta+ Privacy Policy",

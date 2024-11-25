@@ -10,17 +10,16 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 // import 'package:gradient_borders/gradient_borders.dart';
-import '../main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 import './custom_ticket_card.dart';
 
 class PrescriptionCard extends StatefulWidget {
-  const PrescriptionCard({
-    super.key,
-    required this.drugName,
-    required this.drugInfo,
-    required this.description,
-    required this.prescriptionId
-  });
+  const PrescriptionCard(
+      {super.key,
+      required this.drugName,
+      required this.drugInfo,
+      required this.description,
+      required this.prescriptionId});
 
   final double borderRadiussSize = 10;
   final String drugName;
@@ -30,11 +29,9 @@ class PrescriptionCard extends StatefulWidget {
 
   @override
   State<PrescriptionCard> createState() => _CurrentPrescription();
-  
 }
 
 class _CurrentPrescription extends State<PrescriptionCard> {
-
   String? selectedPatient;
   String? selectedMedication;
   String? selectedDosage;
@@ -52,21 +49,22 @@ class _CurrentPrescription extends State<PrescriptionCard> {
   List<Map<String, String>> prescriptionData = [];
   dynamic downloadDirectory;
   dynamic androidDownloadDirectory = '/storage/emulated/0/Download/ResetaPlus';
-  
+
   @override
   void initState() {
     super.initState();
     getPrescriptionId(widget.prescriptionId);
     getPrescriptionData();
-    
   }
+
   // Refreshes Media folders of the device
   // This ensures the that QR code we download shows up in the gallery
   mediaScan() {
     if (Platform.isAndroid) {
       try {
         const channel = MethodChannel('com.example.resetaplus/fileScanner');
-        channel.invokeMethod('scanFile', {'path': androidDownloadDirectory, 'mimeType': 'image/png'});
+        channel.invokeMethod('scanFile',
+            {'path': androidDownloadDirectory, 'mimeType': 'image/png'});
       } catch (e) {
         debugPrint("Error triggering media scan: $e");
       }
@@ -75,14 +73,14 @@ class _CurrentPrescription extends State<PrescriptionCard> {
 
   // Creates folder named ResetaPlus
   createFolder() async {
-    if (Platform.isAndroid){
+    if (Platform.isAndroid) {
       downloadDirectory = androidDownloadDirectory;
       dirExists = await Directory(downloadDirectory).exists();
-          
-      if(!dirExists){
+
+      if (!dirExists) {
         await Directory(downloadDirectory).create(recursive: true);
         dirExists = true;
-      } 
+      }
     }
   }
 
@@ -96,43 +94,39 @@ class _CurrentPrescription extends State<PrescriptionCard> {
   // Stores the inputs in the form fields into a Map
   // It then parses the data into a string
   String generateQRCodeData(List<Map<String, String>> qrData) {
+    if (qrData.isEmpty) {
+      debugPrint("Error: qrData is null or empty");
+      return '{}'; // Return an empty JSON object or handle it appropriately
+    }
 
-  if (qrData.isEmpty) {
-    debugPrint("Error: qrData is null or empty");
-    return '{}'; // Return an empty JSON object or handle it appropriately
-  }
-
-  final firstEntry = qrData.first;
+    final firstEntry = qrData.first;
 
     final qrDataMap = {
-    'Drug Name': widget.drugName,
-    'Patient Name': firstEntry['fetched_patient_name'],
-    'Start Date': firstEntry['fetched_prescription_date'],
-    'End Date': firstEntry['fetched_prescription_end_date'],
-    'Take every': firstEntry['fetched_frequency'],
-    'Dosage': firstEntry['fetched_dosage'],
-    'Duration': firstEntry['fetched_duration'],
-    'Refills': firstEntry['fetched_refills'],
-    'Medication Status': firstEntry['fetched_status'],
-    'Intake Instructions': firstEntry['fetched_intake_instructions'],
-  };
+      'Drug Name': widget.drugName,
+      'Patient Name': firstEntry['fetched_patient_name'],
+      'Start Date': firstEntry['fetched_prescription_date'],
+      'End Date': firstEntry['fetched_prescription_end_date'],
+      'Take every': firstEntry['fetched_frequency'],
+      'Dosage': firstEntry['fetched_dosage'],
+      'Duration': firstEntry['fetched_duration'],
+      'Refills': firstEntry['fetched_refills'],
+      'Medication Status': firstEntry['fetched_status'],
+      'Intake Instructions': firstEntry['fetched_intake_instructions'],
+    };
 
-  return qrDataMap.toString();
-  
-}
+    return qrDataMap.toString();
+  }
 
   Future<void> getPrescriptionData() async {
-
     final prescriptionId = await getPrescriptionId(widget.prescriptionId);
 
     try {
       final conn = await createConnection();
-      final queryResult =  await conn.execute(
-
+      final queryResult = await conn.execute(
         //TODO
 
         // ADJUST QUERY TO FETCH THE FF:
-        // MEDICATION NAME 
+        // MEDICATION NAME
         // PATIENT NAME
         // *USE JOIN FOR THIS
         '''
@@ -159,7 +153,7 @@ class _CurrentPrescription extends State<PrescriptionCard> {
       );
 
       List<Map<String, String>> patientPrescription = [];
-      
+
       for (var row in queryResult.rows) {
         var assoc = row.assoc();
         patientPrescription.add({
@@ -175,7 +169,6 @@ class _CurrentPrescription extends State<PrescriptionCard> {
           'fetched_intake_instructions': assoc['intake_instructions'] ?? '',
         });
       }
-
 
       setState(() {
         prescriptionData = patientPrescription;
@@ -193,20 +186,18 @@ class _CurrentPrescription extends State<PrescriptionCard> {
     try {
       final conn = await createConnection();
       final queryResult = await conn.execute(
-        // Where are we getting the PrescriptionId?
-        // we're specifying a prescriptionId here
-        // however we're not getting it from anywhere
-        'SELECT prescription_id '
-        'FROM patient_prescriptions '
-        'WHERE prescription_id = :fetchedPrescriptionId', 
-        {'fetchedPrescriptionId': prescriptionId}
-      );
+          // Where are we getting the PrescriptionId?
+          // we're specifying a prescriptionId here
+          // however we're not getting it from anywhere
+          'SELECT prescription_id '
+          'FROM patient_prescriptions '
+          'WHERE prescription_id = :fetchedPrescriptionId',
+          {'fetchedPrescriptionId': prescriptionId});
 
       if (queryResult.rows.isNotEmpty) {
         return queryResult.rows.first.colAt(0);
       }
-        return null;
-
+      return null;
     } catch (e) {
       debugPrint("Error fetching medications: $e");
       return null;
@@ -217,16 +208,15 @@ class _CurrentPrescription extends State<PrescriptionCard> {
 
   void updateQRCodeFilePath() async {
     try {
-
-    if (prescriptionData.isEmpty) {
-      debugPrint("Error: prescriptionData is null or empty");
-      _showSnackbarMessage("No prescription data available!");
-      return;
-    }
+      if (prescriptionData.isEmpty) {
+        debugPrint("Error: prescriptionData is null or empty");
+        _showSnackbarMessage("No prescription data available!");
+        return;
+      }
 
       final qrData = generateQRCodeData(prescriptionData);
       final qrFilePath = await saveQRCode(qrData);
-    
+
       final prescriptionId = await getPrescriptionId(widget.prescriptionId);
 
       if (prescriptionId == null) {
@@ -237,17 +227,15 @@ class _CurrentPrescription extends State<PrescriptionCard> {
 
       final conn = await createConnection();
       await conn.execute(
-        'UPDATE patient_prescriptions '
-        'SET qr_code_filepath = :new_qr_filepath '
-        'WHERE prescription_id = :fetchedPrescriptionId',
-        {
-          'fetchedPrescriptionId': prescriptionId,
-          'new_qr_filepath': qrFilePath
-        }
-      );
+          'UPDATE patient_prescriptions '
+          'SET qr_code_filepath = :new_qr_filepath '
+          'WHERE prescription_id = :fetchedPrescriptionId',
+          {
+            'fetchedPrescriptionId': prescriptionId,
+            'new_qr_filepath': qrFilePath
+          });
 
       await conn.close();
-
     } catch (e) {
       debugPrint("$e");
       _showSnackbarMessage("QR Code wasn't saved!");
@@ -276,15 +264,16 @@ class _CurrentPrescription extends State<PrescriptionCard> {
       if (Platform.isIOS) {
         downloadDirectory = await getApplicationDocumentsDirectory();
       } else {
-      // For Android Devices
+        // For Android Devices
         downloadDirectory = androidDownloadDirectory;
       }
-      
+
       if (downloadDirectory == null) {
         throw 'Could not get downloads directory';
       }
 
-      final qrFilePath = "$downloadDirectory/qr_code_${DateTime.now().millisecondsSinceEpoch}.png";
+      final qrFilePath =
+          "$downloadDirectory/qr_code_${DateTime.now().millisecondsSinceEpoch}.png";
 
       // Convert QR code to an image file
       const double padding = 50.0; // Adjust padding size
@@ -298,7 +287,10 @@ class _CurrentPrescription extends State<PrescriptionCard> {
       final paddedImage = await _addPadding(image, padding);
 
       final qrFile = File(qrFilePath);
-      final paddedBytes = (await paddedImage.toByteData(format: ImageByteFormat.png))!.buffer.asUint8List();
+      final paddedBytes =
+          (await paddedImage.toByteData(format: ImageByteFormat.png))!
+              .buffer
+              .asUint8List();
       await qrFile.writeAsBytes(paddedBytes);
 
       mediaScan();
@@ -306,30 +298,28 @@ class _CurrentPrescription extends State<PrescriptionCard> {
       _showSnackbarMessage("QR Code Successfully downloaded!");
 
       return qrFilePath; // Return the file path
-      
     } else {
-
       _showSnackbarMessage("QR Code wasn't downloaded!");
       throw Exception("Invalid QR data");
-
     }
   }
 
   Future<ui.Image> _addPadding(ui.Image original, double padding) async {
-  final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
 
-  final newWidth = original.width + (padding * 2).toInt();
-  final newHeight = original.height + (padding * 2).toInt();
+    final newWidth = original.width + (padding * 2).toInt();
+    final newHeight = original.height + (padding * 2).toInt();
 
-  final paint = Paint()..color = Colors.white; // Padding color
-  canvas.drawRect(Rect.fromLTWH(0, 0, newWidth.toDouble(), newHeight.toDouble()), paint);
+    final paint = Paint()..color = Colors.white; // Padding color
+    canvas.drawRect(
+        Rect.fromLTWH(0, 0, newWidth.toDouble(), newHeight.toDouble()), paint);
 
-  canvas.drawImage(original, Offset(padding, padding), Paint());
-  final picture = recorder.endRecording();
+    canvas.drawImage(original, Offset(padding, padding), Paint());
+    final picture = recorder.endRecording();
 
-  return picture.toImage(newWidth, newHeight);
-}
+    return picture.toImage(newWidth, newHeight);
+  }
 
   @override
   Widget build(BuildContext context) {

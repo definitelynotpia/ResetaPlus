@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 import 'package:searchfield/searchfield.dart';
 
 class SearchItem {
@@ -225,9 +225,9 @@ class _PharmacyAddMedicationsState extends State<PharmacyAddMedicationsPage> {
                         value: selectedMedicationForm,
                         items: const [
                           DropdownMenuItem(
-                              value: 'capsule', child: Text('Capsule')),
+                              value: 'Capsule', child: Text('Capsule')),
                           DropdownMenuItem(
-                              value: 'tablet', child: Text('Tablet')),
+                              value: 'Tablet', child: Text('Tablet')),
                         ],
                         onChanged: (value) {
                           setState(() {

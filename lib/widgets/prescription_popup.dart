@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:searchfield/searchfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:resetaplus/main.dart';
+import 'package:resetaplus/services/connection_service.dart';
 
 class SearchItem {
   final String name;
@@ -381,7 +381,7 @@ class _PrescriptionPopupFormState extends State<PrescriptionPopupForm> {
                     if (_formKey.currentState!.validate()) {
                       insertPrescription();
                       Navigator.of(context)
-                        .pop(); // Close the dialog after submitting
+                          .pop(); // Close the dialog after submitting
                     }
                   },
                   child: const Text('Submit Prescription'),
